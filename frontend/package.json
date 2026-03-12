@@ -1,0 +1,24 @@
+{
+  "name": "m3_mini_projeto",
+  "version": "1.0.0",
+  "description": "Gestão de utilizadores e tarefas",
+  "license": "ISC",
+  "author": "Danilson Sanches",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc && npm run copy:assets",
+    "copy:assets": "copyfiles -u 1 src/assets/* src/styles/* dist/src/",
+    "watch": "tsc -w",
+    "start": "npm run build && node dist/main.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ci": "vitest --run"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "copyfiles": "^2.4.1",
+    "jsdom": "^28.0.0",
+    "vitest": "^4.0.18"
+  }
+}

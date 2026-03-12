@@ -1,0 +1,1054 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial Black", Gadget, sans-serif;
+  list-style: none;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  color: #333;
+  min-height: 100vh;
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: transparent;
+  text-shadow: 0px 2px 3px rgba(255, 255, 255, 0.3);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+h1:hover,
+h2:hover,
+h3:hover,
+h4:hover,
+img:hover,
+#addTaskIconBtn:hover {
+  transform: scale(1.05);
+  transition:
+    color 0.3s,
+    transform 0.3s;
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+div > input[type="text"],
+div > input[type="email"],
+button {
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  width: 250px;
+}
+
+input[type="button"]:hover {
+  background-color: #0056b3;
+}
+
+img {
+  cursor: pointer;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 20px;
+  background: rgba(12, 10, 10, 0.2);
+  backdrop-filter: blur(10px);
+  position: fixed;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header > h1 > a {
+  color: inherit;
+}
+
+/* Navbar base */
+header nav ul {
+  display: flex;
+  gap: 20px;
+}
+
+header nav ul li a {
+  font-weight: bold;
+  transition: color 0.3s;
+  padding: 5px 10px;
+  font-size: 20px;
+  text-shadow: 0px 2px 3px rgba(255, 255, 255, 0.3);
+}
+
+header nav ul li:hover,
+header nav ul li a:active,
+.menu-actived {
+  transform: scale(1.05);
+  transition:
+    color 0.3s,
+    transform 0.3s;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+main {
+  padding: 80px 20px 60px 20px;
+  min-height: calc(100vh - 160px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.icon-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  color: #333333;
+  background: #dddddd;
+  border: none;
+  outline: none;
+  border-radius: 50%;
+}
+
+.icon-button:hover {
+  cursor: pointer;
+}
+
+.icon-button:active {
+  background: #cccccc;
+}
+
+.icon-button-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff0000;
+  color: #ffffff;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.users-counters,
+.tasks-counters,
+#taskCounters,
+#userCountersTask {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+}
+
+.statistics {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.statistics figcaption {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.counters-img {
+  width: 45px;
+  height: 45px;
+}
+
+#totalUsers,
+#ativeUsers,
+#unableUsers,
+#ativeUserPercentage,
+#totalTasks,
+#pendingTasks,
+#completedTasks,
+#totalTasksUser,
+#pendingUserTasks,
+#completedUserTasks {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+}
+
+#ativeUsersCounter,
+#unableUsersCounter,
+#ativeUsersPercentageCounter {
+  font-size: 16px;
+}
+
+.search-add-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 820px;
+}
+
+#searchUser,
+#searchTask,
+#searchTaskUser {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.button-group button {
+  flex: 1;
+  width: auto;
+}
+
+#usersContainer,
+#taskContainer,
+#usersTaskContainer {
+  position: relative;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#usersContainer {
+  flex-wrap: wrap;
+}
+
+#taskContainer,
+.dash-container {
+  position: relative;
+  width: 1150px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  margin: 50px auto;
+  padding: 40px;
+  border: none;
+  width: 90%;
+  max-width: 550px;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+  position: relative;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content h2 {
+  margin-bottom: 25px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.close {
+  color: #666;
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 32px;
+  font-weight: 300;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+#modalTaskForm .modal-content,
+#modalUserForm .modal-content {
+  max-width: 420px;
+  width: 80%;
+  padding: 30px;
+  margin: 40px auto;
+}
+
+#modalEditTask .modal-content {
+  max-width: 900px;        /* reduce overall modal width */
+  width: 900px;            /* fixed width */
+  padding: 16px 18px;
+  margin: 20px auto;
+  max-height: 85vh;
+  overflow-y: auto;
+  height: auto;
+  box-sizing: border-box;
+}
+
+/* new layout classes for edit modal */
+#modalEditTask .modal-content .edit-task-main {
+  display: flex;
+  gap: 0;
+}
+
+#modalEditTask .modal-content .edit-task-left,
+#modalEditTask .modal-content .edit-task-right {
+  flex: 1;
+}
+
+#modalEditTask .modal-content .edit-task-divider {
+  width: 1px;
+  background-color: #ccc;
+  margin: 0;
+}
+
+#modalEditTask .modal-content .edit-task-right {
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+
+#modalEditTask .modal-content .comment-item {
+  margin-bottom: 1rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  padding: 0.75rem;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#modalEditTask .modal-content .comment-item strong {
+  display: block;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+#modalEditTask .modal-content .comment-item p {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+#modalEditTask .modal-content .comment-list {
+  height: 300px;
+  overflow-y: auto;
+  flex-shrink: 0;             /* prevent shrinking */
+  background-color: #f9f9f9;  /* light gray background */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+
+#modalEditTask .form-group {
+  gap: 12px;
+}
+
+/* ensure inputs/selects in edit modal take full width */
+#modalEditTask .form-group input,
+#modalEditTask .form-group textarea,
+#modalEditTask .form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* prevent user from resizing the whole form or textarea growth */
+#modalEditTask .modal-content form {
+  width: 100%;
+  resize: none;
+}
+
+#modalEditTask .modal-content textarea {
+  resize: none;
+  overflow-y: auto;
+  max-height: 120px;     /* keep textarea from expanding beyond this */
+}
+
+#modalEditTask .modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* left and right columns padding */
+#modalEditTask .modal-content .edit-task-left {
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+#modalEditTask .modal-content .edit-task-right {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* style comment textarea and send button */
+#modalEditTask .modal-content textarea#newCommentText {
+  resize: none;
+  min-height: 60px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+#modalEditTask .modal-content #buttonSendComment {
+  align-self: flex-end;
+  margin-top: 4px;
+}
+
+/* error banner visible styling */
+#modalEditTask .error-banner {
+  color: #b22222;
+  padding: 8px;
+  margin-bottom: 10px;
+  background: #ffe6e6;
+  border: 1px solid #ffb3b3;
+  border-radius: 4px;
+}
+
+#modalEditTask.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#modalAssignUser.modal,
+#modalUserAssignTask.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#formUser,
+#formTask {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+#modalUserForm .modal-content > div {
+  display: flex;
+  gap: 1rem;             /* space shown in screenshot */
+}
+
+#modalUserForm .modal-content > div .form-group {
+  flex: 1;
+}
+
+/* make the select boxes stretch to the width of their flex item */
+#modalUserForm .modal-content > div .form-group select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+#removeAllCompletedTaskBtn,
+#removeCompletedUserTaskBtn {
+  background-color: #dc3545;
+}
+
+label {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+  font-family: inherit;
+  min-width: auto;
+  margin: 0;
+  width: 100%;
+}
+
+input[type="text"],
+input[type="email"],
+select {
+  flex: 1;
+  min-width: auto;
+  width: 100%;
+  padding: 12px 15px;
+  margin: 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+select::placeholder {
+  color: #666;
+}
+
+button[type="submit"] {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 12px 20px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+button:hover,
+input[type="text"]:hover,
+input[type="email"]:hover,
+button[type="submit"]:hover,
+select:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+}
+
+button:active,
+input[type="text"]:active,
+input[type="email"]:active,
+button[type="submit"]:active,
+select:active {
+  transform: translateY(0);
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 0;
+  width: 100%;
+}
+
+#banner.error-banner,
+#banner.info-banner {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  border-radius: 5px;
+  padding: 10px 18px;
+  margin-bottom: 15px;
+  display: inline-block; 
+  font-size: 14px;
+  width: auto; 
+  max-width: calc(100% - 40px);
+  box-sizing: border-box;
+  white-space: normal; 
+  overflow-wrap: anywhere; 
+  text-align: left;
+}
+
+#banner.error-banner {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+#banner.info-banner {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.user-details {
+  padding: 20px;
+}
+
+.user-details h3 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.user-details p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.user-tasks-details {
+  margin-top: 20px;
+  line-height: 180%;
+}
+
+.user-tasks-details .detailTasksTitle {
+  text-align: center;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: rgba(12, 10, 10, 0.2);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #333;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.container > .icon-button {
+  position: fixed;
+  top: 78px;
+  right: 20px;
+  z-index: 1001;
+  border: none;
+  outline: none;
+  border-radius: 50%;
+  padding: 6px;
+  width: 60px;
+  height: 60px;
+  background: #dddddd;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.container > .icon-button:hover {
+  cursor: pointer;
+}
+
+.container > .icon-button:active {
+  background: #cccccc;
+}
+
+.container > .icon-button i {
+  font-size: 1.6rem;
+  color: #333;
+}
+
+.container > .icon-button .icon-button-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
+  line-height: 30px;
+}
+
+.fa-shake-once {
+  animation-iteration-count: 1 !important;
+}
+
+.dash-column {
+  flex: 0 0 200px;
+  min-width: 160px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  padding: 15px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+}
+
+.column-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.column-count {
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 220px;
+  padding: 12px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
+}
+
+.tasks-container[data-status="CREATED"] {
+  background: #fff9c4;
+}
+
+.tasks-container[data-status="ASSIGNED"] {
+  background: #b3e5fc;
+}
+
+.tasks-container[data-status="BLOCKED"] {
+  background: #ffcccc;
+}
+
+.tasks-container[data-status="IN_PROGRESS"] {
+  background: #e1bee7;
+}
+
+.tasks-container[data-status="COMPLETED"] {
+  background: #c8e6c9;
+}
+
+.tasks-container[data-status="ARCHIVED"] {
+  background: #d3d3d3;
+}
+
+.task-card {
+  background-color: white;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.task-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.task-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.task-user {
+  font-size: 12px;
+  background-color: #e8f0f7;
+  color: #2d5aa3;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.task-status {
+  font-size: 11px;
+  background-color: #f0e8f7;
+  color: #7d5aa3;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* profile card styling */
+
+
+.cardContainer{
+     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    margin: 10px;
+}
+
+.cardContainer .card{
+    position: relative;
+  
+}
+
+.cardContainer .card .face{
+    width: 300px;
+    height: 200px;
+    transition: 0.5s;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.cardContainer .card .face.face1{
+    position: relative;
+    background: #333;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    transform: translateY(100px);
+}
+
+.cardContainer .card:hover .face.face1{
+    transform: translateY(0);
+}
+
+.cardContainer .card .face.face1 .content{
+    opacity: 1;
+    transition: 0.5s;
+}
+
+.container .card .face.face1 .content img{
+    max-width: 100px;
+}
+
+.cardContainer .card .face.face1 .content h3{
+    margin: 10px 0 0;
+    padding: 0;
+    color: #fff !important;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.cardContainer .card .face.face2{
+    position: relative;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    transform: translateY(-100px);
+}
+
+.cardContainer .card:hover .face.face2{
+    transform: translateY(0);
+}
+
+.cardContainer .card .face.face2 .content{
+    /* center all items vertically and horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.cardContainer .card .face.face2 .content p{
+    margin: 0;
+    padding: 0;
+}
+
+.cardContainer .card .face.face2 .content a{
+    margin: 15px 0 0;
+    display:  inline-block;
+    text-decoration: none;
+    font-weight: 900;
+    color: #333;
+    padding: 5px;
+    border: 1px solid #333;
+}
+
+.cardContainer .card .face.face2 .content a:hover{
+    background: #333;
+    color: #fff;
+}
+
+/* profile card details styling */
+.cardContainer .card .face.face2 .content .number{
+    display: block;
+    margin-bottom: 5px;
+}
+.cardContainer .card .face.face2 .content .name{
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+.cardContainer .card .face.face2 .content .email{
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 8px;
+}
+.cardContainer .card .face.face2 .content .status{
+    display: block;
+    color: green;
+    margin-bottom: 5px;
+    text-transform: lowercase;
+}
+.cardContainer .card .face.face2 .content .tasks{
+    display: block;
+    margin-bottom: 10px;
+}
+.cardContainer .card .face.face2 .content .actions{
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+.cardContainer .card .face.face2 .content .btn{
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+.cardContainer .card .face.face2 .content .btn.delete{
+    color: red;
+}
+.cardContainer .card .face.face2 .content .btn.view{
+    color: #555;
+}
+
+#usersContainer {
+    transition: all 0.5s ease;
+}
+
+#usersContainer:hover .card:not(:hover) {
+    filter: blur(20px);
+    transform: scale(0.9);
+    opacity: 0.5;
+}
+
+/* individual card still grows when hovered */
+.cardContainer .card:hover {
+    filter: blur(0px);
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.view-task{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+
+ .card .btnGroup {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  width: 90%;
+  justify-content: space-between;
+}
+
+ .card .btnGroup button {
+  border-radius: 40px;
+  background: #000;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+}
