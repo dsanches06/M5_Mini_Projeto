@@ -2,7 +2,7 @@ import { ITask, BugTask, FeatureTask, Task } from "../../tasks/index.js";
 import { TaskCategory } from "../../tasks/TaskCategory.js";
 import { IUser } from "../../models/index.js";
 import { GlobalValidators, IdGenerator } from "../../utils/index.js";
-import { renderDashboard, showTasksCounters } from "../tasks/index.js";
+import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 import { TaskService } from "../../services/index.js";
 
 import {
@@ -94,7 +94,7 @@ function setupTaskFormLogic(
         if (user) {
           user.createTask(newTask);
           TaskService.addTask(newTask);
-          renderDashboard(TaskService.getAllTasks(), user);
+          renderDashboard(user.getTasks(), user);
           showInfoBanner(
             `INFO: A tarefa ${newTask.getTitle()} foi criado ao utilizador ${user.getName()} com sucesso.`,
             "info-banner",

@@ -1,9 +1,6 @@
 import { IUser } from "../../models/index.js";
 import { ITask } from "../../tasks/index.js";
-import {
-  createHeadingTitle,
-  createSection,
-} from "../dom/index.js";
+import { createHeadingTitle, createSection } from "../dom/index.js";
 import { renderEditTaskLeftPanel } from "./index.js";
 import { renderEditTaskRightPanel } from "./index.js";
 
@@ -36,7 +33,7 @@ export function renderModalEditTask(task: ITask, user?: IUser): void {
   divider.className = "edit-task-divider";
   divider.style.width = "1px";
   divider.style.backgroundColor = "#ccc";
-  
+
   mainContainer.append(leftPanel.leftContainer, divider, rightPanel);
 
   content.append(closeBtn, titleHeading, mainContainer);

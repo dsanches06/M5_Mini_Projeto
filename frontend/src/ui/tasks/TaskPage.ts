@@ -18,8 +18,8 @@ import {
   clearContainer,
 } from "../dom/index.js";
 import { TaskService } from "../../services/taskService.js";
-import { TaskDashboardUI } from "./index.js";
 import { createNotificationsUI } from "../notifications/notificationsUI.js";
+import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 
 /* Lista de tarefas  */
 export function loadTasksPage(user?: IUser): void {
@@ -199,24 +199,4 @@ function showSearchTaskContainer(): HTMLElement {
   );
   searchTaskContainer.classList.add("search-add-container");
   return searchTaskContainer;
-}
-
-/* */
-function showTaskDashboardUI(tasks: ITask[], user?: IUser): void {
-  const existing = document.querySelector("#dashBoardContainer");
-  const dashboard = new TaskDashboardUI(tasks, user);
-  const rendered = dashboard.render();
-  if (!existing) {
-    addElementInContainer("#containerSection", rendered);
-  }
-}
-
-/* Renderiza o dashboard de tarefas */
-export function renderDashboard(
-  tasks: ITask[],
-  user?: IUser,
-  type?: string,
-): void {
-  showTasksCounters(tasks, type);
-  showTaskDashboardUI(tasks, user);
 }

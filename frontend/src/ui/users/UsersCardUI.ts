@@ -2,7 +2,7 @@ import { UserService } from "../../services/index.js";
 import { UserClass } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 import { renderUsers, showUsersCounters } from "./index.js";
-import { createSection, createHeadingTitle } from "../dom/index.js";
+import { createSection } from "../dom/index.js";
 import { removeUserByID, toggleUserState } from "../gestUserTask/index.js";
 import { loadTasksPage } from "../tasks/index.js";
 import { showUserDetails } from "../modal/index.js";
@@ -26,7 +26,7 @@ export function createUserCard(user: UserClass): HTMLElement {
   const randomValue = Math.floor(Math.random() * 4) + 1;
   const imageFolder = user.getGender() === "Masculino" ? "man" : "woman";
   const img = document.createElement("img") as HTMLImageElement;
-  img.src = `/src/assets/${imageFolder}-${randomValue}.png`;
+  img.src = `./src/assets/${imageFolder}-${randomValue}.png`;
   img.alt = "User Avatar";
 
   const h3 = document.createElement("h3") as HTMLElement;

@@ -13,7 +13,7 @@ import {
   createSection,
 } from "../dom/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
-import { renderDashboard } from "../tasks/index.js";
+import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 import { IUser } from "../../models/index.js";
 
 function setupEditTaskFormLogic(

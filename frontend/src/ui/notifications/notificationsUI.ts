@@ -1,8 +1,14 @@
+import { toggleNotifications } from "./notificationBoxUI.js";
+
 export function createNotificationsUI(): HTMLButtonElement {
   const btnNotifications = document.createElement(
     "button",
   ) as HTMLButtonElement;
   btnNotifications.className = "icon-button";
+  btnNotifications.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleNotifications();
+  });
 
   const spanIcone = document.createElement("span");
   const icone = document.createElement("i");

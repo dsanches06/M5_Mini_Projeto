@@ -344,8 +344,8 @@ main {
 }
 
 #modalEditTask .modal-content {
-  max-width: 900px;        /* reduce overall modal width */
-  width: 900px;            /* fixed width */
+  max-width: 900px; /* reduce overall modal width */
+  width: 900px; /* fixed width */
   padding: 16px 18px;
   margin: 20px auto;
   max-height: 85vh;
@@ -379,7 +379,6 @@ main {
   overflow-y: auto;
 }
 
-
 #modalEditTask .modal-content .comment-item {
   margin-bottom: 1rem;
   word-break: break-word;
@@ -387,7 +386,7 @@ main {
   padding: 0.75rem;
   background-color: #ffffff;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #modalEditTask .modal-content .comment-item strong {
@@ -410,8 +409,8 @@ main {
 #modalEditTask .modal-content .comment-list {
   height: 300px;
   overflow-y: auto;
-  flex-shrink: 0;             /* prevent shrinking */
-  background-color: #f9f9f9;  /* light gray background */
+  flex-shrink: 0; /* prevent shrinking */
+  background-color: #f9f9f9; /* light gray background */
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 0.75rem;
@@ -442,7 +441,7 @@ main {
 #modalEditTask .modal-content textarea {
   resize: none;
   overflow-y: auto;
-  max-height: 120px;     /* keep textarea from expanding beyond this */
+  max-height: 120px; /* keep textarea from expanding beyond this */
 }
 
 #modalEditTask .modal-content form {
@@ -504,10 +503,9 @@ main {
   gap: 20px;
 }
 
-
 #modalUserForm .modal-content > div {
   display: flex;
-  gap: 1rem;             /* space shown in screenshot */
+  gap: 1rem; /* space shown in screenshot */
 }
 
 #modalUserForm .modal-content > div .form-group {
@@ -632,13 +630,13 @@ select:active {
   border-radius: 5px;
   padding: 10px 18px;
   margin-bottom: 15px;
-  display: inline-block; 
+  display: inline-block;
   font-size: 14px;
-  width: auto; 
+  width: auto;
   max-width: calc(100% - 40px);
   box-sizing: border-box;
-  white-space: normal; 
-  overflow-wrap: anywhere; 
+  white-space: normal;
+  overflow-wrap: anywhere;
   text-align: left;
 }
 
@@ -864,168 +862,166 @@ footer p {
 
 /* profile card styling */
 
-
-.cardContainer{
-     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    width: auto;
-    margin: 10px;
+.cardContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  margin: 10px;
 }
 
-.cardContainer .card{
-    position: relative;
-  
+.cardContainer .card {
+  position: relative;
 }
 
-.cardContainer .card .face{
-    width: 300px;
-    height: 200px;
-    transition: 0.5s;
-    border-radius: 10px;
-    overflow: hidden;
+.cardContainer .card .face {
+  width: 300px;
+  height: 200px;
+  transition: 0.5s;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.cardContainer .card .face.face1{
-    position: relative;
-    background: #333;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-    transform: translateY(100px);
+.cardContainer .card .face.face1 {
+  position: relative;
+  background: #333;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transform: translateY(100px);
 }
 
-.cardContainer .card:hover .face.face1{
-    transform: translateY(0);
+.cardContainer .card:hover .face.face1 {
+  transform: translateY(0);
 }
 
-.cardContainer .card .face.face1 .content{
-    opacity: 1;
-    transition: 0.5s;
+.cardContainer .card .face.face1 .content {
+  opacity: 1;
+  transition: 0.5s;
 }
 
-.container .card .face.face1 .content img{
-    max-width: 100px;
+.container .card .face.face1 .content img {
+  max-width: 100px;
 }
 
-.cardContainer .card .face.face1 .content h3{
-    margin: 10px 0 0;
-    padding: 0;
-    color: #fff !important;
-    text-align: center;
-    font-size: 1.5em;
+.cardContainer .card .face.face1 .content h3 {
+  margin: 10px 0 0;
+  padding: 0;
+  color: #fff !important;
+  text-align: center;
+  font-size: 1.5em;
 }
 
-.cardContainer .card .face.face2{
-    position: relative;
-    background: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-    transform: translateY(-100px);
+.cardContainer .card .face.face2 {
+  position: relative;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  transform: translateY(-100px);
 }
 
-.cardContainer .card:hover .face.face2{
-    transform: translateY(0);
+.cardContainer .card:hover .face.face2 {
+  transform: translateY(0);
 }
 
-.cardContainer .card .face.face2 .content{
-    /* center all items vertically and horizontally */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+.cardContainer .card .face.face2 .content {
+  /* center all items vertically and horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.cardContainer .card .face.face2 .content p{
-    margin: 0;
-    padding: 0;
+.cardContainer .card .face.face2 .content p {
+  margin: 0;
+  padding: 0;
 }
 
-.cardContainer .card .face.face2 .content a{
-    margin: 15px 0 0;
-    display:  inline-block;
-    text-decoration: none;
-    font-weight: 900;
-    color: #333;
-    padding: 5px;
-    border: 1px solid #333;
+.cardContainer .card .face.face2 .content a {
+  margin: 15px 0 0;
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 900;
+  color: #333;
+  padding: 5px;
+  border: 1px solid #333;
 }
 
-.cardContainer .card .face.face2 .content a:hover{
-    background: #333;
-    color: #fff;
+.cardContainer .card .face.face2 .content a:hover {
+  background: #333;
+  color: #fff;
 }
 
 /* profile card details styling */
-.cardContainer .card .face.face2 .content .number{
-    display: block;
-    margin-bottom: 5px;
+.cardContainer .card .face.face2 .content .number {
+  display: block;
+  margin-bottom: 5px;
 }
-.cardContainer .card .face.face2 .content .name{
-    display: block;
-    font-weight: bold;
-    margin-bottom: 3px;
+.cardContainer .card .face.face2 .content .name {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 3px;
 }
-.cardContainer .card .face.face2 .content .email{
-    display: block;
-    font-size: 0.9em;
-    color: #666;
-    margin-bottom: 8px;
+.cardContainer .card .face.face2 .content .email {
+  display: block;
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 8px;
 }
-.cardContainer .card .face.face2 .content .status{
-    display: block;
-    color: green;
-    margin-bottom: 5px;
-    text-transform: lowercase;
+.cardContainer .card .face.face2 .content .status {
+  display: block;
+  color: green;
+  margin-bottom: 5px;
+  text-transform: lowercase;
 }
-.cardContainer .card .face.face2 .content .tasks{
-    display: block;
-    margin-bottom: 10px;
+.cardContainer .card .face.face2 .content .tasks {
+  display: block;
+  margin-bottom: 10px;
 }
-.cardContainer .card .face.face2 .content .actions{
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
+.cardContainer .card .face.face2 .content .actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
 }
-.cardContainer .card .face.face2 .content .btn{
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2em;
+.cardContainer .card .face.face2 .content .btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
 }
-.cardContainer .card .face.face2 .content .btn.delete{
-    color: red;
+.cardContainer .card .face.face2 .content .btn.delete {
+  color: red;
 }
-.cardContainer .card .face.face2 .content .btn.view{
-    color: #555;
+.cardContainer .card .face.face2 .content .btn.view {
+  color: #555;
 }
 
 #usersContainer {
-    transition: all 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 #usersContainer:hover .card:not(:hover) {
-    filter: blur(20px);
-    transform: scale(0.9);
-    opacity: 0.5;
+  filter: blur(20px);
+  transform: scale(0.9);
+  opacity: 0.5;
 }
 
 /* individual card still grows when hovered */
 .cardContainer .card:hover {
-    filter: blur(0px);
-    transform: scale(1.1);
-    opacity: 1;
+  filter: blur(0px);
+  transform: scale(1.1);
+  opacity: 1;
 }
 
-.view-task{
+.view-task {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -1033,8 +1029,7 @@ footer p {
   gap: 8px;
 }
 
-
- .card .btnGroup {
+.card .btnGroup {
   position: absolute;
   bottom: 20px;
   left: 50%;
@@ -1044,11 +1039,131 @@ footer p {
   justify-content: space-between;
 }
 
- .card .btnGroup button {
+.card .btnGroup button {
   border-radius: 40px;
   background: #000;
   color: #fff;
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
+}
+
+/*** Notification box styling */
+.notifi-box {
+  width: 380px;
+  max-height: 0px;
+  opacity: 0;
+  position: absolute;
+  top: 63px;
+  right: 35px;
+  transition: opacity 350ms ease, max-height 350ms ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  border: 1px solid #e8e8e8;
+  pointer-events: none;
+}
+
+.notifi-box.open {
+  max-height: 600px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.notifi-box.bottom {
+  top: auto;
+  bottom: 63px;
+}
+.notifi-box h2 {
+  font-size: 15px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  font-weight: 600;
+  margin: 0;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+.notifi-box h2 span {
+  color: #ef5350;
+  margin-left: 4px;
+}
+
+/* Container para scroll das notificações */
+.notifi-box > div:not(h2) {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 480px;
+}
+
+/* Scrollbar customizado */
+.notifi-box > div:not(h2)::-webkit-scrollbar {
+  width: 6px;
+}
+.notifi-box > div:not(h2)::-webkit-scrollbar-track {
+  background: transparent;
+}
+.notifi-box > div:not(h2)::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+.notifi-box > div:not(h2)::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+
+.notifi-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition:
+    background-color 250ms ease,
+    transform 150ms ease;
+}
+.notifi-item:last-child {
+  border-bottom: none;
+}
+.notifi-item:hover {
+  background-color: #f9f9f9;
+  transform: translateX(4px);
+}
+.notifi-item:active {
+  background-color: #f0f0f0;
+}
+.notifi-item img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin-right: 14px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #e8e8e8;
+}
+.notifi-item .text {
+  flex: 1;
+  min-width: 0;
+}
+.notifi-item .text h4 {
+  color: #2c3e50;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notifi-item .text p {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

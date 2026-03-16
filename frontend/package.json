@@ -10,7 +10,7 @@
     "build": "tsc && npm run copy:assets",
     "copy:assets": "copyfiles -u 1 src/assets/* src/styles/* dist/src/",
     "watch": "tsc -w",
-    "start": "npm run build && node dist/main.js",
+    "start": "npm run build",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:ci": "vitest --run"
