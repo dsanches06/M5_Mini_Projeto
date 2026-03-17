@@ -9,4 +9,14 @@ router.post("/", taskController.createTask);
 router.put("/:id", taskController.updateTask);
 router.delete("/:id", taskController.deleteTask);
 
+// Tags routes
+router.post("/:id/tags", taskController.addTagToTask);
+router.delete("/:id/tags", taskController.removeTagFromTask);
+router.get("/:id/tags", taskController.getTaskTags);
+
+// Comments routes
+router.post("/:id/comments", taskController.createComment);
+router.get("/:id/comments", taskController.getComments);
+router.delete("/:id/comments/:id", taskController.deleteComment);
+
 export default router;

@@ -1,8 +1,14 @@
 let users = [
   {
     id: 1,
-    name: "John Doe",
-    email: "john.doe@example.com",
+    name: "João Silva",
+    email: "joao@example.com",
+    active: true,
+  },
+  {
+    id: 2,
+    name: "Maria Oliveira",
+    email: "maria@example.com",
     active: true,
   },
 ];
@@ -10,7 +16,6 @@ let users = [
 export const getAllUsers = (search, sort) => {
   let result = [...users];
 
-  // Apply search filter if provided
   if (search) {
     result = result.filter(
       (u) =>
@@ -19,7 +24,6 @@ export const getAllUsers = (search, sort) => {
     );
   }
 
-  // Apply sorting if provided
   if (sort && (sort === "asc" || sort === "desc")) {
     result.sort((a, b) => {
       const nameA = a.name.toLowerCase();
@@ -43,16 +47,6 @@ export const createUser = (data) => {
     email: data.email,
     active: true,
   };
-  // validar email com regex para validar o formato do email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(user.email)) {
-    throw new Error("Invalid email format");
-  }
-  // se email já existir, lançar erro
-  if (users.some((u) => u.email === user.email)) {
-    throw new Error("Email already exists");
-  }
-
   users.push(user);
   return user;
 };
@@ -81,6 +75,10 @@ export const toggleUserActive = (userId) => {
 
 export const deleteUser = (userId) => {
   users = users.filter((u) => u.id !== userId);
+};
+
+export const getUserById = (userId) => {
+  return users.find((u) => u.id === userId);
 };
 
 export const getUserStats = () => {
