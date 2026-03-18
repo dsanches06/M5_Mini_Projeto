@@ -1,5 +1,6 @@
 import { db } from "../db.js";
 
+<<<<<<< HEAD
 /* Função para buscar todas as notificações */
 export const getAllNotifications = async () => {
   const [notifications] = await db.query("SELECT * FROM notificacao");
@@ -40,4 +41,43 @@ export const deleteNotification = async (notificationId) => {
     notificationId,
   ]);
   return result;
+=======
+/* Função para  */
+export const getAllNotifications = () => {
+  return notifications;
+};
+
+/* Função para  */
+export const getNotificationsByUserId = (userId) => {
+  return notifications.filter((n) => n.userId === userId);
+};
+
+/* Função para  */
+export const createNotification = (data) => {
+  const notification = {
+    userId: data.userId,
+    message: data.message,
+    date: data.date,
+  };
+  notifications.push(notification);
+  return notification;
+};
+
+/* Função para  */
+export const updateNotification = (notificationId, data) => {
+  const notification = notifications.find((n) => n.id === notificationId);
+  if (!notification) {
+    throw new Error("Notification not found");
+  }
+
+  notification.message = data.message ?? notification.message;
+  notification.date = data.date ?? notification.date;
+
+  return notification;
+};
+
+/* Função para  */
+export const deleteNotification = (notificationId) => {
+  notifications = notifications.filter((n) => n.id !== notificationId);
+>>>>>>> f5eb555feb17f2186133b8756f7bc377f7e517c0
 };
