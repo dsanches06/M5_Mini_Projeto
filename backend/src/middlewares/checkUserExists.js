@@ -1,5 +1,6 @@
 import * as userService from "../services/userService.js";
 
+/*  */
 export const checkUserExists = (req, res, next) => {
   // Se não houver ID nos parâmetros, continua sem validar
   if (!req.params.id) {

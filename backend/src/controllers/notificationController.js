@@ -1,21 +1,44 @@
 import * as notificationService from "../services/notificationService.js";
 
+/* */
 export const getNotifications = (req, res) => {
-  const notifications = notificationService.getAllNotifications();
-  res.json(notifications);
+  try {
+    const notifications = notificationService.getAllNotifications();
+    res.json(notifications);
+  } catch (error) {
+    res.json({ message: `${error}` });
+  }
 };
 
+/* */
 export const createNotification = (req, res) => {
-  const notification = notificationService.createNotification(req.body);
-  res.status(201).json(notification);
+  try {
+    const notification = notificationService.createNotification(req.body);
+    res.status(201).json(notification);
+  } catch (error) {
+    res.json({ message: `${error}` });
+  }
 };
 
+/* */
 export const updateNotification = (req, res) => {
-  const notification = notificationService.updateNotification(Number(req.params.id), req.body);
-  res.json(notification);
+  try {
+    const notification = notificationService.updateNotification(
+      Number(req.params.id),
+      req.body,
+    );
+    res.json(notification);
+  } catch (error) {
+    res.json({ message: `${error}` });
+  }
 };
 
+/* */
 export const deleteNotification = (req, res) => {
-  notificationService.deleteNotification(Number(req.params.id));
-  res.json({ message: "Notification deleted successfully" });
+  try {
+    notificationService.deleteNotification(Number(req.params.id));
+    res.json({ message: `Notification deleted successfully` });
+  } catch (error) {
+    res.json({ message: `${error}` });
+  }
 };

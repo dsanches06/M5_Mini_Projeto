@@ -3,6 +3,7 @@ import * as projectController from "../controllers/projectController.js";
 
 const router = express.Router();
 
+//Projects routes
 router.get("/", projectController.getProjects);
 router.post("/", projectController.createProject);
 router.put("/:id", projectController.updateProject);

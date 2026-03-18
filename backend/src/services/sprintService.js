@@ -1,13 +1,13 @@
-let sprints = [];
-let id = 0;
+import { db } from "../db.js";
 
+/* Função para  */
 export const getAllSprints = () => {
   return sprints;
 };
 
+/* Função para  */
 export const createSprint = (data) => {
   const sprint = {
-    id: id++,
     name: data.name,
     startDate: data.startDate,
     endDate: data.endDate,
@@ -16,6 +16,7 @@ export const createSprint = (data) => {
   return sprint;
 };
 
+/* Função para  */
 export const updateSprint = (sprintId, data) => {
   const sprint = sprints.find((s) => s.id === sprintId);
   if (!sprint) {
@@ -29,6 +30,7 @@ export const updateSprint = (sprintId, data) => {
   return sprint;
 };
 
+/* Função para  */
 export const deleteSprint = (sprintId) => {
   sprints = sprints.filter((s) => s.id !== sprintId);
 };

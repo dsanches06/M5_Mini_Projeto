@@ -1,18 +1,6 @@
-let users = [
-  {
-    id: 1,
-    name: "João Silva",
-    email: "joao@example.com",
-    active: true,
-  },
-  {
-    id: 2,
-    name: "Maria Oliveira",
-    email: "maria@example.com",
-    active: true,
-  },
-];
+import { db } from "../db.js";
 
+/* Função para  */
 export const getAllUsers = (search, sort) => {
   let result = [...users];
 
@@ -40,6 +28,7 @@ export const getAllUsers = (search, sort) => {
   return result;
 };
 
+/* Função para  */
 export const createUser = (data) => {
   const user = {
     id: users.length + 1,
@@ -51,6 +40,7 @@ export const createUser = (data) => {
   return user;
 };
 
+/* Função para  */
 export const updateUser = (userId, data) => {
   const user = users.find((u) => u.id === userId);
   if (!user) {
@@ -64,6 +54,7 @@ export const updateUser = (userId, data) => {
   return user;
 };
 
+/* Função para  */
 export const toggleUserActive = (userId) => {
   const user = users.find((u) => u.id === userId);
   if (!user) {
@@ -73,14 +64,17 @@ export const toggleUserActive = (userId) => {
   return user;
 };
 
+/* Função para  */
 export const deleteUser = (userId) => {
   users = users.filter((u) => u.id !== userId);
 };
 
+/* Função para  */
 export const getUserById = (userId) => {
   return users.find((u) => u.id === userId);
 };
 
+/* Função para  */
 export const getUserStats = () => {
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.active).length;

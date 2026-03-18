@@ -3,6 +3,7 @@ import * as taskController from "../controllers/taskController.js";
 
 const router = express.Router();
 
+//Taks routes
 router.get("/", taskController.getTasks);
 router.get("/stats", taskController.getStats);
 router.post("/", taskController.createTask);

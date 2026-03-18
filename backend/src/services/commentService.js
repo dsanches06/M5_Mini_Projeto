@@ -1,15 +1,15 @@
 import * as taskService from "./taskService.js";
 import * as userService from "./userService.js";
+import { db } from "../db.js";
 
-let comments = [];
-let id = 1;
-
+/* Função para  */
 export const getCommentsByTaskId = (taskId) => {
   return comments
     .filter((c) => c.taskId === taskId)
     .sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
 };
 
+/* Função para  */
 export const createComment = (taskId, data) => {
   const task = taskService.getTaskById(taskId);
   if (!task) {
@@ -22,7 +22,6 @@ export const createComment = (taskId, data) => {
   }
 
   const comment = {
-    id: id++,
     taskId: taskId,
     userId: data.userId,
     conteudo: data.conteudo.trim(),
@@ -33,9 +32,7 @@ export const createComment = (taskId, data) => {
   return comment;
 };
 
-
-
-
+/* Função para  */
 export const deleteComment = (commentId) => {
   const comment = comments.find((c) => c.id === commentId);
   if (!comment) {

@@ -3,6 +3,7 @@ import * as sprintController from "../controllers/sprintController.js";
 
 const router = express.Router();
 
+//Sprints routes
 router.get("/", sprintController.getSprints);
 router.post("/", sprintController.createSprint);
 router.put("/:id", sprintController.updateSprint);

@@ -1,31 +1,7 @@
-let tasks = [
-  {
-    id: 1,
-    title: "Criar protótipo",
-    category: "Design",
-    responsavel: "Alice",
-    completed: false,
-    dataConclusao: undefined,
-  },
-  {
-    id: 2,
-    title: "Implementar API",
-    category: "Backend",
-    responsavel: "Bruno",
-    completed: false,
-    dataConclusao: undefined,
-  },
-  {
-    id: 3,
-    title: "Testar funcionalidades",
-    category: "QA",
-    responsavel: "Carla",
-    completed: false,
-    dataConclusao: undefined,
-  },
-];
+import { db } from "../db.js";
 let taskTags = [];
 
+/* Função para  */
 export const getAllTasks = (search, sort) => {
   let result = [...tasks];
 
@@ -54,9 +30,9 @@ export const getAllTasks = (search, sort) => {
   return result;
 };
 
+/* Função para  */
 export const createTask = (data) => {
   const task = {
-    id: tasks.length + 1,
     title: data.titulo,
     category: data.categoria,
     responsavel: data.responsavel,
@@ -68,6 +44,7 @@ export const createTask = (data) => {
   return task;
 };
 
+/* Função para  */
 export const updateTask = (taskId, data) => {
   const task = tasks.find((t) => t.id === taskId);
   if (!task) {
@@ -87,15 +64,18 @@ export const updateTask = (taskId, data) => {
   return task;
 };
 
+/* Função para  */
 export const deleteTask = (taskId) => {
   tasks = tasks.filter((t) => t.id !== taskId);
   taskTags = taskTags.filter((tt) => tt.taskId !== taskId);
 };
 
+/* Função para  */
 export const getTaskById = (taskId) => {
   return tasks.find((t) => t.id === taskId);
 };
 
+/* Função para  */
 export const addTagToTask = (taskId, tagId) => {
   const task = tasks.find((t) => t.id === taskId);
   if (!task) {
@@ -119,6 +99,7 @@ export const addTagToTask = (taskId, tagId) => {
   return relation;
 };
 
+/* Função para  */
 export const removeTagFromTask = (taskId, tagId) => {
   const relationIndex = taskTags.findIndex(
     (tt) => tt.taskId === taskId && tt.tagId === tagId
@@ -133,14 +114,17 @@ export const removeTagFromTask = (taskId, tagId) => {
   return relation;
 };
 
+/* Função para  */
 export const getTagsByTaskId = (taskId) => {
   return taskTags.filter((tt) => tt.taskId === taskId);
 };
 
+/* Função para  */
 export const removeTagFromAllTasks = (tagId) => {
   taskTags = taskTags.filter((tt) => tt.tagId !== tagId);
 };
 
+/* Função para  */
 export const getTaskStats = () => {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed).length;

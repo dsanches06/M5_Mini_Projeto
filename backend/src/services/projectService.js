@@ -1,13 +1,13 @@
-let projects = [];
-let id = 0;
+import { db } from "../db.js";
 
+/* Função para  */
 export const getAllProjects = () => {
   return projects;
 };
 
+/* Função para  */
 export const createProject = (data) => {
   const project = {
-    id: id++,
     name: data.name,
     startDate: data.startDate,
     endDate: data.endDate,
@@ -16,6 +16,7 @@ export const createProject = (data) => {
   return project;
 };
 
+/* Função para  */
 export const updateProject = (projectId, data) => {
   const project = projects.find((p) => p.id === projectId);
   if (!project) {
@@ -29,6 +30,7 @@ export const updateProject = (projectId, data) => {
   return project;
 };
 
+/* Função para  */
 export const deleteProject = (projectId) => {
   projects = projects.filter((p) => p.id !== projectId);
 };
