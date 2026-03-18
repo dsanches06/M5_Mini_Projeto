@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon src/app.js"
+    "start": "nodemon --env-file=src/.env src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +14,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "mysql": "^2.18.1"
+    "mysql2": "^3.20.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

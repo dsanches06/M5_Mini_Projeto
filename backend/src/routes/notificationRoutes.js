@@ -3,6 +3,7 @@ import * as notificationController from "../controllers/notificationController.j
 
 const router = express.Router();
 
+//Notifications routes
 router.get("/", notificationController.getNotifications);
 router.post("/", notificationController.createNotification);
 router.put("/:id", notificationController.updateNotification);

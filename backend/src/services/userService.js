@@ -1,29 +1,21 @@
-let users = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    active: true,
-  },
-];
+import { db } from "../db.js";
 
-export const getAllUsers = (search, sort) => {
-  let result = [...users];
+/* Função para buscar todos os usuários */
+export const getAllUsers = async (search, sort) => {
+  let [users] = await db.query("SELECT * FROM utilizador");
 
-  // Apply search filter if provided
   if (search) {
-    result = result.filter(
+    users = users.filter(
       (u) =>
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
+        u.nome.toLowerCase().includes(search.toLowerCase()) ||
         u.email.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
-  // Apply sorting if provided
   if (sort && (sort === "asc" || sort === "desc")) {
-    result.sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+    users.sort((a, b) => {
+      const nameA = a.nome.toLowerCase();
+      const nameB = b.nome.toLowerCase();
 
       if (sort === "asc") {
         return nameA.localeCompare(nameB);
@@ -33,59 +25,56 @@ export const getAllUsers = (search, sort) => {
     });
   }
 
+  return users;
+};
+
+/* Função para criar usuário */
+export const createUser = async (data) => {
+  const [result] = await db.query(
+    "INSERT INTO utilizador (nome, email, telefone) VALUES (?, ?, ?)",
+    [data.nome, data.email, data.telefone],
+  );
+  return { id: result.insertId, ...data };
+};
+
+/* Função para buscar usuário por ID */
+export const getUserById = async (userId) => {
+  const [users] = await db.query("SELECT * FROM utilizador WHERE id = ?", [
+    userId,
+  ]);
+  return users[0];
+};
+
+/* Função para atualizar usuário */
+export const updateUser = async (userId, data) => {
+  const { nome, email, telefone } = data;
+  const [result] = await db.query(
+    "UPDATE utilizador SET nome=?, email=?, telefone=? WHERE id=?",
+    [nome, email, telefone, userId],
+  );
   return result;
 };
 
-export const createUser = (data) => {
-  const user = {
-    id: users.length + 1,
-    name: data.name,
-    email: data.email,
-    active: true,
-  };
-  // validar email com regex para validar o formato do email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(user.email)) {
-    throw new Error("Invalid email format");
-  }
-  // se email já existir, lançar erro
-  if (users.some((u) => u.email === user.email)) {
-    throw new Error("Email already exists");
-  }
-
-  users.push(user);
-  return user;
+/* Função para alternar status ativo/inativo do usuário */
+export const toggleUserActive = async (userId, data) => {
+  const [result] = await db.query(
+    "UPDATE utilizador SET activo = ? WHERE id = ?",
+    [data.activo, userId],
+  );
+  return result;
 };
 
-export const updateUser = (userId, data) => {
-  const user = users.find((u) => u.id === userId);
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  user.name = data.name ?? user.name;
-  user.email = data.email ?? user.email;
-  user.active = data.active ?? user.active;
-
-  return user;
+/* Função para deletar usuário */
+export const deleteUser = async (userId) => {
+  const [result] = await db.query("DELETE FROM utilizador WHERE id=?", [userId]);
+  return result;
 };
 
-export const toggleUserActive = (userId) => {
-  const user = users.find((u) => u.id === userId);
-  if (!user) {
-    throw new Error("User not found");
-  }
-  user.active = !user.active;
-  return user;
-};
-
-export const deleteUser = (userId) => {
-  users = users.filter((u) => u.id !== userId);
-};
-
-export const getUserStats = () => {
+/* Função para buscar estatísticas dos usuários */
+export const getUserStats = async () => {
+  const users = await getAllUsers();
   const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.active).length;
+  const activeUsers = users.filter((u) => u.activo).length;
   const inactiveUsers = totalUsers - activeUsers;
   const activePercentage =
     totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;

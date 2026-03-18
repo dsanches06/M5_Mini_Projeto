@@ -1,34 +1,52 @@
-let sprints = [];
-let id = 0;
+import { db } from "../db.js";
 
-export const getAllSprints = () => {
+/* Função para buscar todas as sprints */
+export const getAllSprints = async (search, sort) => {
+  let [sprints] = await db.query("SELECT * FROM sprint");
+
+  if (search) {
+    sprints = sprints.filter(
+      (s) => s.nome.toLowerCase().includes(search.toLowerCase()),
+    );
+  }
+
+  if (sort && (sort === "asc" || sort === "desc")) {
+    sprints.sort((a, b) => {
+      const nameA = a.nome.toLowerCase();
+      const nameB = b.nome.toLowerCase();
+
+      if (sort === "asc") {
+        return nameA.localeCompare(nameB);
+      } else {
+        return nameB.localeCompare(nameA);
+      }
+    });
+  }
+
   return sprints;
 };
 
-export const createSprint = (data) => {
-  const sprint = {
-    id: id++,
-    name: data.name,
-    startDate: data.startDate,
-    endDate: data.endDate,
-  };
-  sprints.push(sprint);
-  return sprint;
+/* Função para criar sprint */
+export const createSprint = async (data) => {
+  const [result] = await db.query(
+    "INSERT INTO sprint (nome, dataInicio, dataFim) VALUES (?, ?, ?)",
+    [data.nome, data.dataInicio, data.dataFim],
+  );
+  return { id: result.insertId, ...data };
 };
 
-export const updateSprint = (sprintId, data) => {
-  const sprint = sprints.find((s) => s.id === sprintId);
-  if (!sprint) {
-    throw new Error("Sprint not found");
-  }
-
-  sprint.name = data.name ?? sprint.name;
-  sprint.startDate = data.startDate ?? sprint.startDate;
-  sprint.endDate = data.endDate ?? sprint.endDate;
-
-  return sprint;
+/* Função para atualizar sprint */
+export const updateSprint = async (sprintId, data) => {
+  const { nome, dataInicio, dataFim } = data;
+  const [result] = await db.query(
+    "UPDATE sprint SET nome=?, dataInicio=?, dataFim=? WHERE id=?",
+    [nome, dataInicio, dataFim, sprintId],
+  );
+  return result;
 };
 
-export const deleteSprint = (sprintId) => {
-  sprints = sprints.filter((s) => s.id !== sprintId);
+/* Função para deletar sprint */
+export const deleteSprint = async (sprintId) => {
+  const [result] = await db.query("DELETE FROM sprint WHERE id=?", [sprintId]);
+  return result;
 };
