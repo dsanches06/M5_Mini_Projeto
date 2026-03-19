@@ -198,3 +198,29 @@ export const deleteComment = async (req, res) => {
       .json({ error: `Erro ao deletar comentário: ${error.message}` });
   }
 };
+
+/* Função para marcar comentário como resolvido */
+export const resolveComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { resolved } = req.body;
+
+    if (!commentId) {
+      return res.status(400).json({ error: "O ID do comentário é obrigatório" });
+    }
+
+    if (typeof resolved !== "boolean") {
+      return res.status(400).json({ error: "O campo 'resolved' deve ser um booleano" });
+    }
+
+    const comment = await commentService.resolveComment(Number(commentId), resolved);
+    res.json({ 
+      message: `Comentário marcado como ${resolved ? "resolvido" : "não resolvido"}`, 
+      comment 
+    });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ error: `Erro ao resolver comentário: ${error.message}` });
+  }
+};

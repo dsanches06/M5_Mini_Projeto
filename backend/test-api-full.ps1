@@ -198,7 +198,7 @@ $testsTotal++
 try {
     $body = @{
         userId = 1
-        conteudo = "Comentário de teste $($timestamp)"
+        content = "Comentário de teste $($timestamp)"
     } | ConvertTo-Json
     
     $response = Invoke-WebRequest -Uri "http://localhost:3000/tasks/2/comments" `
@@ -236,15 +236,54 @@ if ($null -ne $commentId) {
 
 Write-Host ""
 
-# TEST 12: POST /tasks/:id/tags
+# TEST 12: PUT /tasks/:id/comments/:commentId (Marcar como resolvido)
+Write-Host "TEST 12: PUT /tasks/:id/comments/:commentId (Marcar como resolvido)" -ForegroundColor Yellow
+$testsTotal++
+try {
+    # Primeiro cria um comentário
+    $body = @{
+        userId = 1
+        content = "Comentário para teste de resolução $($timestamp)"
+    } | ConvertTo-Json
+    
+    $response = Invoke-WebRequest -Uri "http://localhost:3000/tasks/3/comments" `
+        -Method POST `
+        -Headers @{"Content-Type"="application/json"} `
+        -Body $body `
+        -ErrorAction Stop
+    
+    $commentForResolve = $response.Content | ConvertFrom-Json
+    
+    # Agora marca como resolvido
+    $bodyResolve = @{
+        resolved = $true
+    } | ConvertTo-Json
+    
+    $response = Invoke-WebRequest -Uri "http://localhost:3000/tasks/3/comments/$($commentForResolve.id)" `
+        -Method PUT `
+        -Headers @{"Content-Type"="application/json"} `
+        -Body $bodyResolve `
+        -ErrorAction Stop
+    Write-Host "✓ Status: $($response.StatusCode)" -ForegroundColor Green
+    Write-Host "  Comentário marcado como resolvido" -ForegroundColor Cyan
+    $testsPassed++
+} catch {
+    Write-Host "✗ Erro: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+Write-Host ""
+
+# TEST 13: POST /tasks/:id/tags
 Write-Host "TEST 12: POST /tasks/:id/tags (Adicionar Tag)" -ForegroundColor Yellow
 $testsTotal++
 try {
+    $randomTag = Get-Random -Minimum 1 -Maximum 6
+    $randomTask = Get-Random -Minimum 6 -Maximum 16
     $body = @{
-        tagId = 5
+        tagId = $randomTag
     } | ConvertTo-Json
     
-    $response = Invoke-WebRequest -Uri "http://localhost:3000/tasks/4/tags" `
+    $response = Invoke-WebRequest -Uri "http://localhost:3000/tasks/$randomTask/tags" `
         -Method POST `
         -Headers @{"Content-Type"="application/json"} `
         -Body $body `
@@ -257,8 +296,8 @@ try {
 
 Write-Host ""
 
-# TEST 13: GET /tasks/:id/tags
-Write-Host "TEST 13: GET /tasks/:id/tags" -ForegroundColor Yellow
+# TEST 14: GET /tasks/:id/tags
+Write-Host "TEST 14: GET /tasks/:id/tags" -ForegroundColor Yellow
 $testsTotal++
 try {
     $response = Invoke-WebRequest -Uri "http://localhost:3000/tasks/3/tags" -Method GET
@@ -272,8 +311,8 @@ try {
 
 Write-Host ""
 
-# TEST 14: GET /tags
-Write-Host "TEST 14: GET /tags" -ForegroundColor Yellow
+# TEST 15: GET /tags
+Write-Host "TEST 15: GET /tags" -ForegroundColor Yellow
 $testsTotal++
 try {
     $response = Invoke-WebRequest -Uri "http://localhost:3000/tags" -Method GET
@@ -287,14 +326,58 @@ try {
 
 Write-Host ""
 
+# TEST 16: POST /tags (Criar Tag)
+Write-Host "TEST 16: POST /tags (Criar Tag)" -ForegroundColor Yellow
+$testsTotal++
+try {
+    $body = @{
+        nome = "Tag Teste $((Get-Random))"
+    } | ConvertTo-Json
+    
+    $response = Invoke-WebRequest -Uri "http://localhost:3000/tags" `
+        -Method POST `
+        -Headers @{"Content-Type"="application/json"} `
+        -Body $body `
+        -ErrorAction Stop
+    Write-Host "✓ Status: $($response.StatusCode)" -ForegroundColor Green
+    $tag = $response.Content | ConvertFrom-Json
+    Write-Host "  ID: $($tag.id)" -ForegroundColor Cyan
+    $testsPassed++
+    $newTagId = $tag.id
+} catch {
+    Write-Host "✗ Erro: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+Write-Host ""
+
+# TEST 17: DELETE /tags/:id (Remover Tag)
+Write-Host "TEST 17: DELETE /tags/:id (Remover Tag)" -ForegroundColor Yellow
+$testsTotal++
+if ($null -ne $newTagId) {
+    try {
+        $response = Invoke-WebRequest -Uri "http://localhost:3000/tags/$newTagId" `
+            -Method DELETE `
+            -ErrorAction Stop
+        Write-Host "✓ Status: $($response.StatusCode)" -ForegroundColor Green
+        Write-Host "  Tag deletada com sucesso" -ForegroundColor Cyan
+        $testsPassed++
+    } catch {
+        Write-Host "✗ Erro: $($_.Exception.Message)" -ForegroundColor Red
+    }
+} else {
+    Write-Host "⊘ Pulado (tag não foi criada)" -ForegroundColor Gray
+}
+
+Write-Host ""
+
 # ==================== SEÇÃO 4: NOTIFICAÇÕES ====================
 Write-Host "╔════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║      4. TESTES DE NOTIFICAÇÕES        ║" -ForegroundColor Cyan
 Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
-# TEST 15: GET /notifications
-Write-Host "TEST 15: GET /notifications" -ForegroundColor Yellow
+# TEST 18: GET /notifications
+Write-Host "TEST 18: GET /notifications" -ForegroundColor Yellow
 $testsTotal++
 try {
     $response = Invoke-WebRequest -Uri "http://localhost:3000/notifications" -Method GET
@@ -308,8 +391,8 @@ try {
 
 Write-Host ""
 
-# TEST 16: POST /notifications
-Write-Host "TEST 16: POST /notifications (Criar)" -ForegroundColor Yellow
+# TEST 19: POST /notifications
+Write-Host "TEST 19: POST /notifications (Criar)" -ForegroundColor Yellow
 $testsTotal++
 try {
     $body = @{
@@ -333,8 +416,8 @@ try {
 
 Write-Host ""
 
-# TEST 17: PUT /notifications/:id
-Write-Host "TEST 17: PUT /notifications/:id (Atualizar)" -ForegroundColor Yellow
+# TEST 20: PUT /notifications/:id
+Write-Host "TEST 20: PUT /notifications/:id (Atualizar)" -ForegroundColor Yellow
 $testsTotal++
 if ($null -ne $notifId) {
     try {
@@ -358,8 +441,8 @@ if ($null -ne $notifId) {
 
 Write-Host ""
 
-# TEST 18: DELETE /notifications/:id
-Write-Host "TEST 18: DELETE /notifications/:id" -ForegroundColor Yellow
+# TEST 21: DELETE /notifications/:id
+Write-Host "TEST 21: DELETE /notifications/:id" -ForegroundColor Yellow
 $testsTotal++
 if ($null -ne $notifId) {
     try {
@@ -383,8 +466,8 @@ Write-Host "║         5. TESTES DE PROJETOS          ║" -ForegroundColor Cya
 Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
-# TEST 19: GET /projects
-Write-Host "TEST 19: GET /projects" -ForegroundColor Yellow
+# TEST 22: GET /projects
+Write-Host "TEST 22: GET /projects" -ForegroundColor Yellow
 $testsTotal++
 try {
     $response = Invoke-WebRequest -Uri "http://localhost:3000/projects" -Method GET
@@ -398,13 +481,15 @@ try {
 
 Write-Host ""
 
-# TEST 20: POST /projects
-Write-Host "TEST 20: POST /projects (Criar)" -ForegroundColor Yellow
+# TEST 23: POST /projects
+Write-Host "TEST 23: POST /projects (Criar)" -ForegroundColor Yellow
 $testsTotal++
 try {
     $body = @{
         nome = "Projeto Teste $((Get-Random))"
         descricao = "Projeto de teste automático"
+        dataInicio = (Get-Date -Format "yyyy-MM-dd")
+        dataFim = (Get-Date).AddDays(30).ToString("yyyy-MM-dd")
     } | ConvertTo-Json
     
     $response = Invoke-WebRequest -Uri "http://localhost:3000/projects" `
@@ -423,8 +508,8 @@ try {
 
 Write-Host ""
 
-# TEST 21: PUT /projects/:id
-Write-Host "TEST 21: PUT /projects/:id (Atualizar)" -ForegroundColor Yellow
+# TEST 24: PUT /projects/:id
+Write-Host "TEST 24: PUT /projects/:id (Atualizar)" -ForegroundColor Yellow
 $testsTotal++
 if ($null -ne $projectId) {
     try {
@@ -455,8 +540,8 @@ Write-Host "║          6. TESTES DE SPRINTS          ║" -ForegroundColor Cya
 Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
-# TEST 22: GET /sprints
-Write-Host "TEST 22: GET /sprints" -ForegroundColor Yellow
+# TEST 25: GET /sprints
+Write-Host "TEST 25: GET /sprints" -ForegroundColor Yellow
 $testsTotal++
 try {
     $response = Invoke-WebRequest -Uri "http://localhost:3000/sprints" -Method GET
@@ -470,14 +555,14 @@ try {
 
 Write-Host ""
 
-# TEST 23: POST /sprints
-Write-Host "TEST 23: POST /sprints (Criar)" -ForegroundColor Yellow
+# TEST 26: POST /sprints
+Write-Host "TEST 26: POST /sprints (Criar)" -ForegroundColor Yellow
 $testsTotal++
 try {
     $body = @{
         nome = "Sprint Teste $((Get-Random))"
-        dataInicio = (Get-Date -Format "yyyy-MM-dd")
-        dataFim = (Get-Date).AddDays(14).ToString("yyyy-MM-dd")
+        data_inicio = (Get-Date -Format "yyyy-MM-dd")
+        data_fim = (Get-Date).AddDays(14).ToString("yyyy-MM-dd")
     } | ConvertTo-Json
     
     $response = Invoke-WebRequest -Uri "http://localhost:3000/sprints" `
@@ -496,8 +581,8 @@ try {
 
 Write-Host ""
 
-# TEST 24: PUT /sprints/:id
-Write-Host "TEST 24: PUT /sprints/:id (Atualizar)" -ForegroundColor Yellow
+# TEST 27: PUT /sprints/:id
+Write-Host "TEST 27: PUT /sprints/:id (Atualizar)" -ForegroundColor Yellow
 $testsTotal++
 if ($null -ne $sprintId) {
     try {

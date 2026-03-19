@@ -19,5 +19,6 @@ router.get("/:id/tags", taskController.getTaskTags);
 router.post("/:id/comments", taskController.createComment);
 router.get("/:id/comments", taskController.getComments);
 router.delete("/:id/comments/:commentId", taskController.deleteComment);
+router.put("/:id/comments/:commentId", taskController.resolveComment);
 
 export default router;

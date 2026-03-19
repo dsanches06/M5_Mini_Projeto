@@ -106,6 +106,7 @@ CREATE TABLE comentario (
     id_utilizador INT NOT NULL,
     data_comentario DATETIME DEFAULT CURRENT_TIMESTAMP,
     editado_em DATETIME,
+    resolvido BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_tarefa) REFERENCES tarefa (id),
     FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
 );

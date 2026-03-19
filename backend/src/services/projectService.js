@@ -31,7 +31,7 @@ export const getAllProjects = async (search, sort) => {
 /* Função para criar novo projeto */
 export const createProject = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO projeto (nome, descricao, dataInicio, dataFim) VALUES (?, ?, ?, ?)",
+    "INSERT INTO projeto (nome, descricao, data_inicio, data_fim_prevista) VALUES (?, ?, ?, ?)",
     [data.nome, data.descricao, data.dataInicio, data.dataFim],
   );
   return { id: result.insertId, ...data };
@@ -41,7 +41,7 @@ export const createProject = async (data) => {
 export const updateProject = async (projectId, data) => {
   const { nome, descricao, dataInicio, dataFim } = data;
   const [result] = await db.query(
-    "UPDATE projeto SET nome=?, descricao=?, dataInicio=?, dataFim=? WHERE id=?",
+    "UPDATE projeto SET nome=?, descricao=?, data_inicio=?, data_fim_prevista=? WHERE id=?",
     [nome, descricao, dataInicio, dataFim, projectId],
   );
   return result;

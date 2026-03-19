@@ -47,3 +47,22 @@ export const deleteComment = async (commentId) => {
   ]);
   return result;
 };
+
+/* Função para marcar comentário como resolvido */
+export const resolveComment = async (commentId, resolved) => {
+  const [result] = await db.query(
+    "UPDATE comentario SET resolvido = ? WHERE id = ?",
+    [resolved ? 1 : 0, commentId],
+  );
+  
+  if (result.affectedRows === 0) {
+    throw new Error("Comentário não encontrado");
+  }
+
+  const [updated] = await db.query(
+    "SELECT * FROM comentario WHERE id = ?",
+    [commentId],
+  );
+  
+  return updated[0];
+};
