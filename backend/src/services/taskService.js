@@ -7,16 +7,16 @@ export const getAllTasks = async (search, sort) => {
   if (search) {
     tasks = tasks.filter(
       (t) =>
-        t.titulo.toLowerCase().includes(search.toLowerCase()) ||
-        t.responsavel.toLowerCase().includes(search.toLowerCase()) ||
-        t.categoria.toLowerCase().includes(search.toLowerCase()),
+        t.title.toLowerCase().includes(search.toLowerCase()) ||
+        t.userId.toLowerCase().includes(search.toLowerCase()) ||
+        t.category.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
     tasks.sort((a, b) => {
-      const titleA = a.titulo.toLowerCase();
-      const titleB = b.titulo.toLowerCase();
+      const titleA = a.title.toLowerCase();
+      const titleB = b.title.toLowerCase();
 
       if (sort === "asc") {
         return titleA.localeCompare(titleB);
@@ -33,17 +33,17 @@ export const getAllTasks = async (search, sort) => {
 export const createTask = async (data) => {
   const [result] = await db.query(
     "INSERT INTO tarefa (titulo, categoria, responsavel, concluida) VALUES (?, ?, ?, ?)",
-    [data.titulo, data.categoria, data.responsavel, 0],
+    [data.title, data.category, data.userId, 0],
   );
-  return { id: result.insertId, ...data, concluida: 0 };
+  return { id: result.insertId, ...data, completed: 0 };
 };
 
 /* Função para atualizar tarefa */
 export const updateTask = async (taskId, data) => {
-  const { titulo, categoria, responsavel, concluida } = data;
+  const { title, category, userId, completed } = data;
   const [result] = await db.query(
     "UPDATE tarefa SET titulo=?, categoria=?, responsavel=?, concluida=? WHERE id=?",
-    [titulo, categoria, responsavel, concluida, taskId],
+    [title, category, userId, completed, taskId],
   );
   return result;
 };
@@ -82,7 +82,7 @@ export const addTagToTask = async (taskId, tagId) => {
     [taskId, tagId],
   );
 
-  return { id_tarefa: taskId, id_etiqueta: tagId };
+  return { taskId, tagId };
 };
 
 /* Função para remover etiqueta da tarefa */

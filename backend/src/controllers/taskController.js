@@ -16,18 +16,18 @@ export const getTasks = async (req, res) => {
 /* Função para criar tarefa */
 export const createTask = async (req, res) => {
   try {
-    const { titulo, responsavel } = req.body;
+    const { title, userId } = req.body;
 
-    if (!titulo || titulo.length <= 3) {
+    if (!title || title.length <= 3) {
       return res
         .status(400)
         .json({ error: "O título deve ter mais de 3 caracteres" });
     }
 
-    if (!responsavel) {
+    if (!userId) {
       return res
         .status(400)
-        .json({ error: "O nome do responsável não pode estar vazio" });
+        .json({ error: "O ID do usuário não pode estar vazio" });
     }
 
     const task = await taskService.createTask(req.body);
@@ -40,18 +40,18 @@ export const createTask = async (req, res) => {
 /* Função para atualizar tarefa */
 export const updateTask = async (req, res) => {
   try {
-    const { titulo, responsavel } = req.body;
+    const { title, userId } = req.body;
 
-    if (titulo !== undefined && titulo.length <= 3) {
+    if (title !== undefined && title.length <= 3) {
       return res
         .status(400)
         .json({ error: "O título deve ter mais de 3 caracteres" });
     }
 
-    if (responsavel !== undefined && !responsavel) {
+    if (userId !== undefined && !userId) {
       return res
         .status(400)
-        .json({ error: "O nome do responsável não pode estar vazio" });
+        .json({ error: "O ID do usuário não pode estar vazio" });
     }
 
     const task = await taskService.updateTask(Number(req.params.id), req.body);
@@ -152,7 +152,7 @@ export const createComment = async (req, res) => {
   try {
     const taskId = Number(req.params.id);
 
-    if (!req.body.conteudo || req.body.conteudo.trim().length === 0) {
+    if (!req.body.content || req.body.content.trim().length === 0) {
       return res
         .status(400)
         .json({ error: "O conteúdo do comentário não pode estar vazio" });

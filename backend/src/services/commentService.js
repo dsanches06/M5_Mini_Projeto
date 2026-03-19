@@ -28,15 +28,15 @@ export const createComment = async (taskId, data) => {
 
   const [result] = await db.query(
     "INSERT INTO comentario (id_tarefa, id_utilizador, texto, data_comentario) VALUES (?, ?, ?, ?)",
-    [taskId, data.userId, data.conteudo.trim(), mysqlDateTime],
+    [taskId, data.userId, data.content.trim(), mysqlDateTime],
   );
 
   return {
     id: result.insertId,
-    id_tarefa: taskId,
-    id_utilizador: data.userId,
-    texto: data.conteudo.trim(),
-    data_comentario: mysqlDateTime,
+    taskId: taskId,
+    userId: data.userId,
+    content: data.content.trim(),
+    date: mysqlDateTime,
   };
 };
 
