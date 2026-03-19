@@ -40,10 +40,10 @@ export const createTask = async (data) => {
 
 /* Função para atualizar tarefa */
 export const updateTask = async (taskId, data) => {
-  const { title, category, userId, completed } = data;
+  const { title, category, userId, completed, completedDate } = data;
   const [result] = await db.query(
-    "UPDATE tarefa SET titulo=?, categoria=?, responsavel=?, concluida=? WHERE id=?",
-    [title, category, userId, completed, taskId],
+    "UPDATE tarefa SET titulo=?, categoria=?, responsavel=?, concluida=?, data_conclusao=? WHERE id=?",
+    [title, category, userId, completed, completedDate, taskId],
   );
   return result;
 };

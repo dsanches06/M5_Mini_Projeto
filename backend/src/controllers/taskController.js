@@ -40,7 +40,7 @@ export const createTask = async (req, res) => {
 /* Função para atualizar tarefa */
 export const updateTask = async (req, res) => {
   try {
-    const { title, userId } = req.body;
+    const { title, userId, completed } = req.body;
 
     if (title !== undefined && title.length <= 3) {
       return res
@@ -53,6 +53,8 @@ export const updateTask = async (req, res) => {
         .status(400)
         .json({ error: "O ID do usuário não pode estar vazio" });
     }
+
+    req.body.completedDate = completed === true ? new Date().toISOString() : undefined;
 
     const task = await taskService.updateTask(Number(req.params.id), req.body);
     res.json(task);
@@ -79,7 +81,9 @@ export const getStats = async (req, res) => {
     const stats = await taskService.getTaskStats();
     res.json(stats);
   } catch (error) {
-    res.status(500).json({ error: `Erro ao buscar estatísticas: ${error.message}` });
+    res
+      .status(500)
+      .json({ error: `Erro ao buscar estatísticas: ${error.message}` });
   }
 };
 
@@ -135,9 +139,7 @@ export const getTaskTags = async (req, res) => {
     const tags = await taskService.getTagsByTaskId(taskId);
 
     const tagDetails = await Promise.all(
-      tags.map((relation) =>
-        tagService.getTagById(relation.id_etiqueta),
-      ),
+      tags.map((relation) => tagService.getTagById(relation.id_etiqueta)),
     );
     res.json(tagDetails);
   } catch (error) {
@@ -159,9 +161,7 @@ export const createComment = async (req, res) => {
     }
 
     if (!req.body.userId) {
-      return res
-        .status(400)
-        .json({ error: "userId é obrigatório" });
+      return res.status(400).json({ error: "userId é obrigatório" });
     }
 
     const comment = await commentService.createComment(taskId, req.body);
@@ -203,20 +203,38 @@ export const deleteComment = async (req, res) => {
 export const resolveComment = async (req, res) => {
   try {
     const { commentId } = req.params;
-    const { resolved } = req.body;
+    let { resolved } = req.body;
 
     if (!commentId) {
-      return res.status(400).json({ error: "O ID do comentário é obrigatório" });
+      return res
+        .status(400)
+        .json({ error: "O ID do comentário é obrigatório" });
     }
 
-    if (typeof resolved !== "boolean") {
-      return res.status(400).json({ error: "O campo 'resolved' deve ser um booleano" });
+    if (resolved === undefined || resolved === null) {
+      return res
+        .status(400)
+        .json({ error: "O campo 'resolved' é obrigatório" });
     }
 
-    const comment = await commentService.resolveComment(Number(commentId), resolved);
-    res.json({ 
-      message: `Comentário marcado como ${resolved ? "resolvido" : "não resolvido"}`, 
-      comment 
+    // Convert various formats to boolean
+    if (typeof resolved === "string") {
+      resolved = resolved.toLowerCase() === "true" || resolved === "1";
+    } else if (typeof resolved === "number") {
+      resolved = Boolean(resolved);
+    } else if (typeof resolved !== "boolean") {
+      return res
+        .status(400)
+        .json({ error: "O campo 'resolved' deve ser um booleano válido" });
+    }
+
+    const comment = await commentService.resolveComment(
+      Number(commentId),
+      resolved,
+    );
+    res.json({
+      message: `Comentário marcado como ${resolved ? "resolvido" : "não resolvido"}`,
+      comment,
     });
   } catch (error) {
     res
