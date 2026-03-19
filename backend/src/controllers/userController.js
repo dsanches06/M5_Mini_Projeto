@@ -3,12 +3,15 @@ import * as notificationService from "../services/notificationService.js";
 
 /* Função para buscar usuários */
 export const getUsers = async (req, res) => {
-  const { sort, search } = req.query;
-  const users = await userService.getAllUsers(search, sort);
-  res.json(users);
+  try {
+    const { sort, search } = req.query;
+    const users = await userService.getAllUsers(search, sort);
+    res.json(users);
+  } catch (error) {
+    res.status(400).json({ error: `Erro ao buscar usuários: ${error.message}` });
+  }
 };
 
-<<<<<<< HEAD
 /* Função para criar usuário */
 export const createUser = async (req, res) => {
   try {
@@ -53,51 +56,6 @@ export const updateUser = async (req, res) => {
     res.json({ message: "Dados do usuário atualizado com sucesso" });
   } catch (error) {
     res.status(400).json({ error: `Erro ao atualizar usuário: ${error.message}` });
-=======
-export const createUser = (req, res) => {
-  try {
-    const { name, email } = req.body;
-
-    if (!name || name.length < 3) {
-      return res.status(400).json({
-        error: `O nome ${name} tem que ter 3 caracteres no minimo!`,
-      });
-    }
-
-    if (!email || !email.includes("@")) {
-      return res.status(400).json({
-        error: `O email ${email} é inválido!`,
-      });
-    }
-
-    const user = userService.createUser(req.body);
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-export const updateUser = (req, res) => {
-  try {
-    const { name, email } = req.body;
-
-    if (name !== undefined && name.length < 3) {
-      return res.status(400).json({
-        error: `O nome ${name} tem que ter 3 caracteres no minimo!`,
-      });
-    }
-
-    if (email !== undefined && !email.includes("@")) {
-      return res.status(400).json({
-        error: `O email ${email} é inválido!`,
-      });
-    }
-
-    const user = userService.updateUser(Number(req.params.id), req.body);
-    res.json(user);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
->>>>>>> f5eb555feb17f2186133b8756f7bc377f7e517c0
   }
 };
 
@@ -118,7 +76,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 /* Função para alternar status ativo/inativo do usuário */
 export const toggleUserActive = async (req, res) => {
   try {
@@ -155,33 +112,11 @@ export const getNotifications = async (req, res) => {
       return res.status(400).json({ error: "ID de usuário inválido" });
     }
 
-    const notifications = await userService.getNotificationsByUserId(userId);
+    const notifications = await notificationService.getNotificationsByUserId(userId);
     
-    if (!notifications || notifications.length === 0) {
-      return res.status(404).json({ error: "Nenhuma notificação encontrada para este usuário" });
-    }
-
-    res.json(notifications);
+    res.json(notifications || []);
   } catch (error) {
     res.status(500).json({ error: `Erro ao buscar notificações: ${error.message}` });
-=======
-export const toggleUserActive = (req, res) => {
-  const user = userService.toggleUserActive(Number(req.params.id));
-  res.json(user);
-};
-
-export const getStats = (req, res) => {
-  const stats = userService.getUserStats();
-  res.json(stats);
-};
-
-export const getNotifications = (req, res) => {
-  try {
-    const userId = Number(req.params.id);
-    const notifications = notificationService.getNotificationsByUserId(userId);
-    res.json(notifications);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
->>>>>>> f5eb555feb17f2186133b8756f7bc377f7e517c0
   }
 };
+

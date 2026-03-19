@@ -1,14 +1,8 @@
 import { db } from "../db.js";
 
-<<<<<<< HEAD
 /* Função para buscar todos os usuários */
 export const getAllUsers = async (search, sort) => {
   let [users] = await db.query("SELECT * FROM utilizador");
-=======
-/* Função para  */
-export const getAllUsers = (search, sort) => {
-  let result = [...users];
->>>>>>> f5eb555feb17f2186133b8756f7bc377f7e517c0
 
   if (search) {
     users = users.filter(
@@ -61,7 +55,6 @@ export const updateUser = async (userId, data) => {
   return result;
 };
 
-<<<<<<< HEAD
 /* Função para alternar status ativo/inativo do usuário */
 export const toggleUserActive = async (userId, data) => {
   const [result] = await db.query(
@@ -80,56 +73,6 @@ export const deleteUser = async (userId) => {
 /* Função para buscar estatísticas dos usuários */
 export const getUserStats = async () => {
   const users = await getAllUsers();
-=======
-/* Função para  */
-export const createUser = (data) => {
-  const user = {
-    id: users.length + 1,
-    name: data.name,
-    email: data.email,
-    active: true,
-  };
-  users.push(user);
-  return user;
-};
-
-/* Função para  */
-export const updateUser = (userId, data) => {
-  const user = users.find((u) => u.id === userId);
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  user.name = data.name ?? user.name;
-  user.email = data.email ?? user.email;
-  user.active = data.active ?? user.active;
-
-  return user;
-};
-
-/* Função para  */
-export const toggleUserActive = (userId) => {
-  const user = users.find((u) => u.id === userId);
-  if (!user) {
-    throw new Error("User not found");
-  }
-  user.active = !user.active;
-  return user;
-};
-
-/* Função para  */
-export const deleteUser = (userId) => {
-  users = users.filter((u) => u.id !== userId);
-};
-
-/* Função para  */
-export const getUserById = (userId) => {
-  return users.find((u) => u.id === userId);
-};
-
-/* Função para  */
-export const getUserStats = () => {
->>>>>>> f5eb555feb17f2186133b8756f7bc377f7e517c0
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.activo).length;
   const inactiveUsers = totalUsers - activeUsers;

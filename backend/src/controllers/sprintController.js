@@ -1,10 +1,10 @@
 import * as sprintService from "../services/sprintService.js";
 
 /* Função para obter todas as sprints */
-export const getSprints = (req, res) => {
+export const getSprints = async (req, res) => {
   try {
     const { sort, search } = req.query;
-    const sprints = sprintService.getAllSprints(search, sort);
+    const sprints = await sprintService.getAllSprints(search, sort);
     res.json(sprints);
   } catch (error) {
     res.status(500).json({ error: `Erro ao buscar sprints: ${error.message}` });
@@ -12,9 +12,9 @@ export const getSprints = (req, res) => {
 };
 
 /* Função para criar sprint */
-export const createSprint = (req, res) => {
+export const createSprint = async (req, res) => {
   try {
-    const { nome, dataInicio, dataFim } = req.body;
+    const { nome, data_inicio, data_fim } = req.body;
 
     if (!nome || nome.trim().length === 0) {
       return res.status(400).json({ error: "O nome da sprint não pode estar vazio" });
@@ -24,15 +24,15 @@ export const createSprint = (req, res) => {
       return res.status(400).json({ error: "O nome da sprint deve ter no mínimo 3 caracteres" });
     }
 
-    if (!dataInicio) {
+    if (!data_inicio) {
       return res.status(400).json({ error: "Data de início é obrigatória" });
     }
 
-    if (!dataFim) {
+    if (!data_fim) {
       return res.status(400).json({ error: "Data de fim é obrigatória" });
     }
 
-    const sprint = sprintService.createSprint(req.body);
+    const sprint = await sprintService.createSprint(req.body);
     res.status(201).json(sprint);
   } catch (error) {
     res.status(400).json({ error: `Erro ao criar sprint: ${error.message}` });
@@ -40,9 +40,9 @@ export const createSprint = (req, res) => {
 };
 
 /* Função para atualizar sprint */
-export const updateSprint = (req, res) => {
+export const updateSprint = async (req, res) => {
   try {
-    const { nome, dataInicio, dataFim } = req.body;
+    const { nome } = req.body;
 
     if (nome !== undefined && nome.trim().length === 0) {
       return res.status(400).json({ error: "O nome da sprint não pode estar vazio" });
@@ -52,7 +52,7 @@ export const updateSprint = (req, res) => {
       return res.status(400).json({ error: "O nome da sprint deve ter no mínimo 3 caracteres" });
     }
 
-    const sprint = sprintService.updateSprint(Number(req.params.id), req.body);
+    const sprint = await sprintService.updateSprint(Number(req.params.id), req.body);
     res.json(sprint);
   } catch (error) {
     res.status(400).json({ error: `Erro ao atualizar sprint: ${error.message}` });
@@ -60,9 +60,9 @@ export const updateSprint = (req, res) => {
 };
 
 /* Função para deletar sprint */
-export const deleteSprint = (req, res) => {
+export const deleteSprint = async (req, res) => {
   try {
-    sprintService.deleteSprint(Number(req.params.id));
+    await sprintService.deleteSprint(Number(req.params.id));
     res.status(200).json({ message: "Sprint deletada com sucesso" });
   } catch (error) {
     res.status(404).json({ error: `Erro ao deletar sprint: ${error.message}` });

@@ -1,9 +1,8 @@
 import { db } from "../db.js";
-<<<<<<< HEAD
 
 /* Função para buscar todas as sprints */
 export const getAllSprints = async (search, sort) => {
-  let [sprints] = await db.query("SELECT * FROM sprint");
+  let [sprints] = await db.query("SELECT * FROM sprints");
 
   if (search) {
     sprints = sprints.filter(
@@ -30,7 +29,7 @@ export const getAllSprints = async (search, sort) => {
 /* Função para criar sprint */
 export const createSprint = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO sprint (nome, dataInicio, dataFim) VALUES (?, ?, ?)",
+    "INSERT INTO sprints (nome, data_inicio, data_fim) VALUES (?, ?, ?)",
     [data.nome, data.dataInicio, data.dataFim],
   );
   return { id: result.insertId, ...data };
@@ -40,7 +39,7 @@ export const createSprint = async (data) => {
 export const updateSprint = async (sprintId, data) => {
   const { nome, dataInicio, dataFim } = data;
   const [result] = await db.query(
-    "UPDATE sprint SET nome=?, dataInicio=?, dataFim=? WHERE id=?",
+    "UPDATE sprints SET nome=?, data_inicio=?, data_fim=? WHERE id=?",
     [nome, dataInicio, dataFim, sprintId],
   );
   return result;
@@ -48,42 +47,6 @@ export const updateSprint = async (sprintId, data) => {
 
 /* Função para deletar sprint */
 export const deleteSprint = async (sprintId) => {
-  const [result] = await db.query("DELETE FROM sprint WHERE id=?", [sprintId]);
+  const [result] = await db.query("DELETE FROM sprints WHERE id=?", [sprintId]);
   return result;
-=======
-
-/* Função para  */
-export const getAllSprints = () => {
-  return sprints;
-};
-
-/* Função para  */
-export const createSprint = (data) => {
-  const sprint = {
-    name: data.name,
-    startDate: data.startDate,
-    endDate: data.endDate,
-  };
-  sprints.push(sprint);
-  return sprint;
-};
-
-/* Função para  */
-export const updateSprint = (sprintId, data) => {
-  const sprint = sprints.find((s) => s.id === sprintId);
-  if (!sprint) {
-    throw new Error("Sprint not found");
-  }
-
-  sprint.name = data.name ?? sprint.name;
-  sprint.startDate = data.startDate ?? sprint.startDate;
-  sprint.endDate = data.endDate ?? sprint.endDate;
-
-  return sprint;
-};
-
-/* Função para  */
-export const deleteSprint = (sprintId) => {
-  sprints = sprints.filter((s) => s.id !== sprintId);
->>>>>>> f5eb555feb17f2186133b8756f7bc377f7e517c0
 };
