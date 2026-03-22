@@ -2,27 +2,43 @@ import { db } from "../db.js";
 
 /* Função para buscar todas as etiquetas */
 export const getAllTags = async () => {
-  const [tags] = await db.query("SELECT * FROM etiquetas");
-  return tags;
+  try {
+    const [tags] = await db.query("SELECT * FROM etiquetas");
+    return tags;
+  } catch (error) {
+    throw error;
+  }
 };
 
 /* Função para criar etiqueta */
 export const createTag = async (data) => {
-  const [result] = await db.query(
-    "INSERT INTO etiquetas (nome) VALUES (?)",
-    [data.nome.trim()],
-  );
-  return { id: result.insertId, nome: data.nome.trim() };
+  try {
+    const [result] = await db.query(
+      "INSERT INTO etiquetas (nome) VALUES (?)",
+      [data.nome.trim()],
+    );
+    return { id: result.insertId, nome: data.nome.trim() };
+  } catch (error) {
+    throw error;
+  }
 };
 
 /* Função para buscar etiqueta por ID */
 export const getTagById = async (tagId) => {
-  const [tags] = await db.query("SELECT * FROM etiquetas WHERE id = ?", [tagId]);
-  return tags[0];
+  try {
+    const [tags] = await db.query("SELECT * FROM etiquetas WHERE id = ?", [tagId]);
+    return tags[0];
+  } catch (error) {
+    throw error;
+  }
 };
 
 /* Função para deletar etiqueta */
 export const deleteTag = async (tagId) => {
-  const [result] = await db.query("DELETE FROM etiquetas WHERE id=?", [tagId]);
-  return result;
+  try {
+    const [result] = await db.query("DELETE FROM etiquetas WHERE id=?", [tagId]);
+    return result.affectedRows;
+  } catch (error) {
+    throw error;
+  }
 };

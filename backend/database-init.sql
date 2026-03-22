@@ -8,7 +8,7 @@ USE clickup_db;
 CREATE TABLE utilizador (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(200) NOT NULL,
-    email VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     telefone INT,
     activo BOOLEAN DEFAULT TRUE,
     data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -78,7 +78,7 @@ CREATE TABLE tarefa_responsavel (
     id_utilizador INT NOT NULL,
     data_atribuicao DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_tarefa , id_utilizador),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id),
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
     FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
 );
 
@@ -94,7 +94,7 @@ CREATE TABLE etiqueta_tarefa (
     id_tarefa INT,
     id_etiqueta INT,
     PRIMARY KEY (id_tarefa , id_etiqueta),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id),
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
     FOREIGN KEY (id_etiqueta) REFERENCES etiquetas (id)
 );
 
@@ -107,7 +107,7 @@ CREATE TABLE comentario (
     data_comentario DATETIME DEFAULT CURRENT_TIMESTAMP,
     editado_em DATETIME,
     resolvido BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id),
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
     FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE anexos_tarefas (
     tipo VARCHAR(50) NOT NULL,
     tamanho_kb INT,
     data_upload DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id)
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
 );
 
 /* Tabela Notificações */
@@ -130,7 +130,7 @@ CREATE TABLE notificacao (
     mensagem TEXT NOT NULL,
     lida BOOLEAN DEFAULT FALSE,
     data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador(id)
+    FOREIGN KEY (id_utilizador) REFERENCES utilizador(id) ON DELETE CASCADE
 );
 
 /* Tabela Equipas*/
@@ -158,7 +158,7 @@ CREATE TABLE votos_tarefas (
     id_utilizador INT NOT NULL,
     data_voto DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_tarefa , id_utilizador),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id),
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
     FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
 );
 
@@ -169,7 +169,7 @@ CREATE TABLE historico_estado (
     id_estado_anterior INT NOT NULL,
     id_estado_novo INT NOT NULL,
     data_mudanca TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_tarefa)  REFERENCES tarefa(id),
+    FOREIGN KEY (id_tarefa)  REFERENCES tarefa(id) ON DELETE CASCADE,
     FOREIGN KEY (id_estado_anterior) REFERENCES estados_tarefa(id),
 	FOREIGN KEY (id_estado_novo)  REFERENCES estados_tarefa(id)
 );
@@ -200,7 +200,7 @@ CREATE TABLE subtarefas (
   titulo VARCHAR(200),
   id_estado INT,
   data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_tarefa_pai) REFERENCES tarefa (id),
+  FOREIGN KEY (id_tarefa_pai) REFERENCES tarefa (id) ON DELETE CASCADE,
   FOREIGN KEY (id_estado) REFERENCES estados_tarefa (id)
 );
 
@@ -216,8 +216,8 @@ CREATE TABLE dependencias_tarefas (
   id_tarefa_dependente INT,
   tipo VARCHAR(30),   -- bloqueia / depende
   PRIMARY KEY (id_tarefa, id_tarefa_dependente),
-  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id),
-  FOREIGN KEY (id_tarefa_dependente) REFERENCES tarefa (id)
+  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
+  FOREIGN KEY (id_tarefa_dependente) REFERENCES tarefa (id) ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -230,7 +230,7 @@ CREATE TABLE tarefas_favoritas (
   data_marcacao DATETIME,
   PRIMARY KEY (id_utilizador, id_tarefa),
   FOREIGN KEY (id_utilizador) REFERENCES utilizador (id),
-  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id)
+  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -246,7 +246,7 @@ CREATE TABLE lembretes (
   data_lembrete DATETIME,
   enviado BOOLEAN,
   FOREIGN KEY (id_utilizador) REFERENCES utilizador (id),
-  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id)
+  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -268,7 +268,7 @@ CREATE TABLE sprint_tarefas (
     id_tarefa INT,
     PRIMARY KEY (id_sprint , id_tarefa),
     FOREIGN KEY (id_sprint) REFERENCES sprints (id),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id)
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -294,7 +294,7 @@ CREATE TABLE registos_tempo (
     descricao TEXT NOT NULL,
     data_conclusao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_utilizador) REFERENCES utilizador (id),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id)
+    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -388,15 +388,15 @@ VALUES
 	(9,5,'2026-02-10 10:00:00'),
 	(10,6,'2026-02-11 10:00:00');
 
-INSERT INTO comentario (texto, id_tarefa, id_utilizador, data_comentario, editado_em)
+INSERT INTO comentario (texto, id_tarefa, id_utilizador, data_comentario, editado_em, resolvido)
 VALUES 
-('Comentário tarefa 1',1,1,'2026-02-02 03:00:00',NULL),
-('Comentário tarefa 2',2,1,'2026-02-03 03:00:00',NULL),
-('Comentário tarefa 3',3,1,'2026-02-04 03:00:00',NULL),
-('Comentário tarefa 4',4,1,'2026-02-05 03:00:00',NULL),
-('Comentário tarefa 5',5,1,'2026-02-06 03:00:00',NULL),
-('Comentário tarefa 6',6,1,'2026-02-07 03:00:00',NULL),
-('Comentário tarefa 7',7,1,'2026-02-08 03:00:00',NULL);
+('Comentário tarefa 1',1,1,'2026-02-02 03:00:00',NULL, FALSE),
+('Comentário tarefa 2',2,1,'2026-02-03 03:00:00',NULL, FALSE),
+('Comentário tarefa 3',3,1,'2026-02-04 03:00:00',NULL, FALSE),
+('Comentário tarefa 4',4,1,'2026-02-05 03:00:00',NULL, FALSE),
+('Comentário tarefa 5',5,1,'2026-02-06 03:00:00',NULL, FALSE),
+('Comentário tarefa 6',6,1,'2026-02-07 03:00:00',NULL, FALSE),
+('Comentário tarefa 7',7,1,'2026-02-08 03:00:00',NULL, FALSE);
 
 INSERT INTO etiquetas (nome, cor) 
 VALUES

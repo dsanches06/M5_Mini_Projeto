@@ -7,7 +7,7 @@ export const getTags = async (req, res) => {
     const tags = await tagService.getAllTags();
     res.json(tags);
   } catch (error) {
-    res.status(500).json({ error: `Erro ao buscar etiquetas: ${error.message}` });
+    res.status(500).json({ message: `Erro ao buscar etiquetas: ${error.message}` });
   }
 };
 
@@ -17,17 +17,17 @@ export const createTag = async (req, res) => {
     const { nome } = req.body;
 
     if (!nome || nome.trim().length === 0) {
-      return res.status(400).json({ error: "O nome da etiqueta não pode estar vazio" });
+      return res.status(400).json({ message: "O nome da etiqueta não pode estar vazio" });
     }
 
     if (nome.length < 2) {
-      return res.status(400).json({ error: "O nome da etiqueta deve ter no mínimo 2 caracteres" });
+      return res.status(400).json({ message: "O nome da etiqueta deve ter no mínimo 2 caracteres" });
     }
 
     const tag = await tagService.createTag(req.body);
     res.status(201).json(tag);
   } catch (error) {
-    res.status(400).json({ error: `Erro ao criar etiqueta: ${error.message}` });
+    res.status(400).json({ message: `Erro ao criar etiqueta: ${error.message}` });
   }
 };
 
@@ -38,7 +38,7 @@ export const deleteTag = async (req, res) => {
     await taskService.removeTagFromAllTasks(Number(req.params.id));
     res.status(200).json({ message: "Etiqueta deletada com sucesso", tag });
   } catch (error) {
-    res.status(404).json({ error: `Erro ao deletar etiqueta: ${error.message}` });
+    res.status(404).json({ message: `Erro ao deletar etiqueta: ${error.message}` });
   }
 };
 
@@ -61,6 +61,6 @@ export const getTagTasks = async (req, res) => {
 
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ error: `Erro ao buscar tarefas da tag: ${error.message}` });
+    res.status(500).json({ message: `Erro ao buscar tarefas da tag: ${error.message}` });
   }
 };

@@ -1,5 +1,4 @@
-import * as userService from "../services/userService.js";
-import * as notificationService from "../services/notificationService.js";
+import * as userService from "./backend/src/services/userService.js";
 
 /* Função para buscar usuários */
 export const getUsers = async (req, res) => {
@@ -128,58 +127,5 @@ export const getStats = async (req, res) => {
     res.json(stats);
   } catch (error) {
     res.status(400).json({ message: `Erro ao buscar estatísticas: ${error.message}` });
-  }
-};
-
-/* Função para buscar notificações de um utilizador */
-export const getNotificationsByUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    if (!id) {
-      return res.status(400).json({ error: "ID do utilizador é obrigatório" });
-    }
-    
-    const notifications = await notificationService.getNotificationsByUser(Number(id));
-    res.json(notifications);
-  } catch (error) {
-    res.status(400).json({ message: `Erro ao buscar notificações: ${error.message}` });
-  }
-};
-
-/* Função para buscar notificações não lidas de um utilizador */
-export const getUnreadNotifications = async (req, res) => {
-  try {
-     const userId = req.params.id || req.user?.id;
-
-    if (!userId) {
-      return res.status(400).json({ error: "ID do utilizador é obrigatório" });
-    }
-    
-    const notifications = await notificationService.getUnreadNotifications(Number(userId));
-    res.json(notifications);
-  } catch (error) {
-    res.status(400).json({ message: `Erro ao buscar notificações não lidas: ${error.message}` });
-  }
-};
-
-/* Função para marcar notificação como lida */
-export const markAsRead = async (req, res) => {
-  try {
-    const userId = req.params.id || req.user?.id;
-    const notificationId = req.params.notificationId;
-    
-    if (!userId || !notificationId) {
-      return res.status(400).json({ error: "ID do utilizador e notificação são obrigatórios" });
-    }
-    
-    const result = await notificationService.toggleReadStatus(Number(notificationId), true);
-    if (result === 0) {
-      return res.status(404).json({ error: "Notificação não encontrada ou já marcada como lida" });
-    }
-    
-    res.json({ message: "Notificação marcada como lida" });
-  } catch (error) {
-    res.status(400).json({ message: `Erro ao marcar notificação como lida: ${error.message}` });
   }
 };

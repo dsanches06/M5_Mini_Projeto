@@ -15,7 +15,9 @@ router.put("/:id", userController.updateUser);
 router.patch("/:id", userController.toggleUserActive);
 router.delete("/:id", userController.deleteUser);
 
-//Notifications route for user
-router.get("/:id/notifications", userController.getNotifications);
+//notifications routes under users
+router.get("/:id/notifications/unread", userController.getUnreadNotifications);
+router.get("/:id/notifications", userController.getNotificationsByUser);
+router.patch("/:id/notifications/:notificationId", userController.markAsRead);
 
 export default router;
