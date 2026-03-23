@@ -1,176 +1,317 @@
-# M5 Mini Projeto - Gestão de utilizadores e tarefas ✅
+# Projeto 2 - API Completa com Banco de Dados
 
-## 📌 Descrição
+Uma API RESTful completa desenvolvida com Node.js, Express e MySQL para gerenciar tarefas, utilizadores, tags e comentários.
 
-Projeto exemplar de gestão de utilizadores e tarefas, implementado em **TypeScript**. Inclui operações básicas (CRUD), associação de tarefas a utilizadores, e um conjunto de utilitários genéricos com testes unitários.
+## 📋 Tecnologias Utilizadas
 
-## 🔧 Funcionalidades principais
+- **Node.js** - Runtime JavaScript
+- **Express** - Framework web
+- **MySQL** - Banco de dados relacional
+- **Nodemon** - Monitor de desenvolvimento
+- **Dotenv** - Variáveis de ambiente
 
-- Gestão de utilizadores (CRUD)
-- Gestão de tarefas (CRUD)
-- Associação de tarefas a utilizadores
-- Utilitários genéricos (cache, favoritos, tags, paginação, etc.)
-- Testes unitários com **Vitest**
+## 🚀 Como Iniciar
 
-## 🧰 Tecnologias
-
-- TypeScript
-- Javascript
-- Node JS
-- Mysql Database
-- Vitest (testes)
-
-## 📁 Estrutura do projeto (resumo)
-
-### Frontend (`frontend/`)
-
-- `main.ts` — ponto de entrada
-- `index.html` — template HTML
-- `src/` — código fonte
-  - `assets/` — imagens e recursos (incl. favicon)
-  - `styles/` — arquivos CSS
-  - `models/` — entidades (User, Task, etc.)
-  - `tasks/` — implementações de tarefas (BugTask, FeatureTask, Task)
-  - `utils/` — utilitários genéricos (EntityList, SimpleCache, Paginator...)
-  - `services/` — serviços da aplicação
-  - `ui/` — componentes e interface do utilizador
-  - `logs/`, `notifications/`, `security/`, etc.
-- `testes/` — testes unitários (Vitest)
-- `tsconfig.json` — configuração TypeScript
-- `vitest.config.ts` — configuração de testes
-- `dist/` — build compilado (gerado com `npm run build`)
-
-### Backend (`backend/`)
-
-- `server.js` — servidor Node.js/Express
-- `package.json` — dependências
-- `routes/` — rotas da API
-  - `users.js`
-  - `tasks.js`
-  - `projects.js`
-  - `sprints.js`
-  - `comments.js`
-  - `notifications.js`
-- `connectionsDB/` — configuração de base de dados
-  - `connectionDatabase.js`
-  - `connectionOptions.json`
-
----
-
-## 🚀 Como usar
-
-### Setup Inicial
+### 1. Instalar Dependências
 
 ```bash
-git clone https://github.com/dsanches06/M5_Mini_Projeto.git
-cd M5_Mini_Projeto
-```
-
----
-
-## 🎨 Frontend
-
-### 1) Instalar dependências
-
-```bash
-cd frontend
 npm install
 ```
 
-### 2) Compilar TypeScript + copiar assets/styles
+Instala todas as dependências necessárias listadas em `package.json`.
+
+### 2. Configurar Banco de Dados
+
+Execute o script de inicialização do banco:
 
 ```bash
-npm run build
+mysql -u seu_usuario < database-init.sql
 ```
 
-Isto irá:
-- Compilar o TypeScript com `tsc`
-- Copiar automaticamente `src/assets/` e `src/styles/` para `dist/src/`
+Ou importe o arquivo `database-init.sql` no seu cliente MySQL.
 
----
+### 3. Configurar Variáveis de Ambiente
 
-## 🖥️ Backend
+Crie o arquivo `.env` em `src/`:
 
-### 1) Instalar dependências
+```env
+DB_HOST=localhost
+DB_USER=seu_usuario
+DB_PASSWORD=sua_senha
+DB_NAME=database
+PORT=3000
+```
+
+### 4. Iniciar o Servidor
 
 ```bash
-cd backend
-npm install
+npm start
 ```
 
-### 2) Configurar conexão MySQL
+O servidor rodará em: `http://localhost:3000`
 
-Edite o arquivo `backend/connectionsDB/connectionOptions.json` com as credenciais da sua base de dados:
+**Nota:** O servidor reinicia automaticamente ao salvar arquivos (nodemon ativado).
 
-```json
-{
-  "host": "localhost",
-  "port": 3306,
-  "user": "seu_usuario",
-  "password": "sua_senha",
-  "database": "nome_da_database"
-}
+### 5. Parar o Servidor
+
+Pressione `Ctrl+C` no terminal.
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── app.js                 # Aplicação Express principal
+├── db.js                  # Configuração do banco de dados
+├── controllers/           # Controladores das rotas
+│   ├── taskController.js
+│   ├── tagController.js
+│   └── userController.js
+├── middlewares/           # Middlewares personalizados
+│   ├── checkUserExists.js
+│   └── loggerMiddleware.js
+├── routes/                # Definição das rotas
+│   ├── taskRoutes.js
+│   ├── tagRoutes.js
+│   └── userRoutes.js
+└── services/              # Lógica de negócio
+    ├── taskService.js
+    ├── tagService.js
+    ├── userService.js
+    └── commentService.js
 ```
 
-O servidor conectará automaticamente à base de dados ao iniciar.
+## 📡 Documentação das Rotas
 
-### 3) Iniciar servidor
+### Tarefas (Tasks)
 
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/tasks` | Buscar todas as tarefas |
+| POST | `/tasks` | Criar nova tarefa |
+| PUT | `/tasks/:id` | Atualizar tarefa |
+| DELETE | `/tasks/:id` | Deletar tarefa |
+| GET | `/tasks/stats` | Buscar estatísticas |
+
+**Exemplo - Criar tarefa:**
 ```bash
-npm run start
+curl -X POST http://localhost:3000/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Nova Tarefa","responsavel":"João","categoria":"Backend"}'
 ```
 
-O servidor será iniciado em `http://localhost:3000` (ou a porta configurada) e a base de dados conectada automaticamente.
+### Tags
 
----
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/tags` | Buscar todas as tags |
+| POST | `/tags` | Criar nova tag |
+| DELETE | `/tags/:id` | Deletar tag |
+| GET | `/tags/:id/tasks` | Buscar tarefas por tag |
 
-## 📡 API e Rotas
+**Exemplo - Criar tag:**
+```bash
+curl -X POST http://localhost:3000/tags \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"nova-tag"}'
+```
 
-O backend expõe as seguintes rotas (endpoints) para gerir utilizadores, tarefas, projetos e notificações:
+### Utilizadores (Users)
 
-### Rotas de Utilizadores (`routes/users.js`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/users` | Buscar todos os utilizadores |
+| POST | `/users` | Criar novo utilizador |
+| PUT | `/users/:id` | Atualizar utilizador |
+| DELETE | `/users/:id` | Deletar utilizador |
+| PATCH | `/users/:id` | Alternar status (ativo/inativo) |
+| GET | `/users/stats` | Buscar estatísticas |
 
-- `GET /api/users` — listar todos os utilizadores
-- `GET /api/users/:id` — obter um utilizador específico
-- `POST /api/users` — criar novo utilizador
-- `PUT /api/users/:id` — atualizar utilizador
-- `DELETE /api/users/:id` — eliminar utilizador
+**Exemplo - Criar utilizador:**
+```bash
+curl -X POST http://localhost:3000/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"João Silva","email":"joao@example.com"}'
+```
 
-### Rotas de Tarefas (`routes/tasks.js`)
+### Comentários (em Tarefas)
 
-- `GET /api/tasks` — listar todas as tarefas
-- `GET /api/tasks/:id` — obter uma tarefa específica
-- `POST /api/tasks` — criar nova tarefa
-- `PUT /api/tasks/:id` — atualizar tarefa
-- `DELETE /api/tasks/:id` — eliminar tarefa
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/tasks/:id/comments` | Criar comentário |
+| GET | `/tasks/:id/comments` | Buscar comentários |
+| DELETE | `/tasks/:id/comments/:commentId` | Deletar comentário |
 
-### Rotas de Projetos (`routes/projects.js`)
+**Exemplo - Criar comentário:**
+```bash
+curl -X POST http://localhost:3000/tasks/1/comments \
+  -H "Content-Type: application/json" \
+  -d '{"userId":1,"conteudo":"Esse é um comentário de teste"}'
+```
 
-- `GET /api/projects` — listar todos os projetos
-- `POST /api/projects` — criar novo projeto
-- `PUT /api/projects/:id` — atualizar projeto
-- `DELETE /api/projects/:id` — eliminar projeto
+### Tags em Tarefas
 
-### Rotas de Sprints (`routes/sprints.js`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/tasks/:id/tags` | Adicionar tag à tarefa |
+| GET | `/tasks/:id/tags` | Buscar tags da tarefa |
+| DELETE | `/tasks/:id/tags` | Remover tag da tarefa |
 
-- `GET /api/sprints` — listar todos os sprints
-- `POST /api/sprints` — criar novo sprint
-- `PUT /api/sprints/:id` — atualizar sprint
+**Exemplo - Adicionar tag:**
+```bash
+curl -X POST http://localhost:3000/tasks/1/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tagId":1}'
+```
 
-### Rotas de Comentários (`routes/comments.js`)
+### Busca e Ordenação
 
-- `GET /api/comments` — listar comentários
-- `POST /api/comments` — criar comentário
-- `DELETE /api/comments/:id` — eliminar comentário
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/tasks?search=termo&sort=asc` | Buscar tarefas com filtro |
+| GET | `/users?search=termo&sort=asc` | Buscar utilizadores com filtro |
 
-### Rotas de Notificações (`routes/notifications.js`)
+**Parâmetros de query:**
+- `search` - Termo de busca (opcional)
+- `sort` - Ordenação: `asc` (crescente) ou `desc` (decrescente)
 
-- `GET /api/notifications` — listar notificações
-- `POST /api/notifications` — criar notificação
-- `PUT /api/notifications/:id` — marcar como lida
+**Exemplo - Buscar tarefas com filtro:**
+```bash
+curl "http://localhost:3000/tasks?search=API&sort=asc"
+```
 
----
+### Projetos
 
-## 👤 Autor
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/projects` | Buscar todos os projetos |
+| POST | `/projects` | Criar novo projeto |
+| PUT | `/projects/:id` | Atualizar projeto |
+| DELETE | `/projects/:id` | Deletar projeto |
 
-**Danilson Sanches** — @upskill217
+**Exemplo - Criar projeto:**
+```bash
+curl -X POST http://localhost:3000/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Novo Projeto","descricao":"Descrição do projeto"}'
+```
+
+### Sprints
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/sprints` | Buscar todos os sprints |
+| POST | `/sprints` | Criar novo sprint |
+| PUT | `/sprints/:id` | Atualizar sprint |
+| DELETE | `/sprints/:id` | Deletar sprint |
+
+**Exemplo - Criar sprint:**
+```bash
+curl -X POST http://localhost:3000/sprints \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"Sprint 1","dataInicio":"2024-01-01","dataFim":"2024-01-14"}'
+```
+
+### Notificações
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/notifications` | Buscar todas as notificações |
+| POST | `/notifications` | Criar nova notificação |
+| PUT | `/notifications/:id` | Marcar notificação como lida |
+| DELETE | `/notifications/:id` | Deletar notificação |
+
+**Exemplo - Criar notificação:**
+```bash
+curl -X POST http://localhost:3000/notifications \
+  -H "Content-Type: application/json" \
+  -d '{"userId":1,"mensagem":"Você foi atribuído a uma tarefa"}'
+```
+
+## 🧪 Testando a API
+
+### Com cURL
+
+Use os exemplos fornecidos em cada seção de rotas. Você pode executá-los diretamente no terminal ou PowerShell.
+
+### Com PowerShell (Recomendado)
+
+Execute o script de testes automatizados que testa todos os endpoints:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File test-api-full.ps1
+```
+
+Este script realiza 23 testes completos cobrindo todas as operações CRUD e endpoints principais da API.
+
+### Com Postman ou Insomnia
+
+Importe as URLs das rotas listadas na seção "📡 Documentação das Rotas" e faça as requisições manualmente.
+
+## 🔍 Status HTTP
+
+| Status | Significado |
+|--------|-------------|
+| 200 | OK - Operação bem-sucedida |
+| 201 | Created - Recurso criado |
+| 400 | Bad Request - Erro de validação |
+| 404 | Not Found - Recurso não encontrado |
+| 500 | Internal Server Error - Erro no servidor |
+
+## ✅ Testes Realizados
+
+### Tarefas (Tasks)
+- ✅ GET /tasks - Buscar todas as tarefas (200)
+- ✅ POST /tasks - Criar nova tarefa (201)
+- ✅ PUT /tasks/:id - Atualizar tarefa (200)
+- ✅ DELETE /tasks/:id - Deletar tarefa (200)
+- ✅ GET /tasks/stats - Buscar estatísticas (200)
+
+### Tags
+- ✅ GET /tags - Buscar todas as tags (200)
+- ✅ POST /tags - Criar nova tag (201)
+- ✅ DELETE /tags/:id - Deletar tag (200)
+- ✅ GET /tags/:id/tasks - Buscar tarefas por tag (200)
+
+### Tags em Tarefas
+- ✅ POST /tasks/1/tags - Adicionar tag à tarefa (201)
+- ✅ GET /tasks/1/tags - Buscar tags da tarefa (200)
+- ✅ DELETE /tasks/1/tags - Remover tag da tarefa (200)
+
+### Utilizadores (Users)
+- ✅ GET /users - Buscar todos os utilizadores (200)
+- ✅ POST /users - Criar novo utilizador (201)
+- ✅ PUT /users/:id - Atualizar utilizador (200)
+- ✅ DELETE /users/:id - Deletar utilizador (200)
+- ✅ PATCH /users/:id - Alternar status (200)
+- ✅ GET /users/stats - Buscar estatísticas (200)
+
+### Comentários (Comments)
+- ✅ POST /tasks/1/comments - Criar comentário em tarefa (201)
+- ✅ GET /tasks/1/comments - Buscar comentários da tarefa (200)
+- ✅ DELETE /tasks/1/comments/:commentId - Deletar comentário (200)
+
+### Projetos
+- ✅ GET /projects - Buscar todos os projetos (200)
+- ✅ POST /projects - Criar novo projeto (201)
+- ✅ PUT /projects/:id - Atualizar projeto (200)
+- ✅ DELETE /projects/:id - Deletar projeto (200)
+
+### Sprints
+- ✅ GET /sprints - Buscar todos os sprints (200)
+- ✅ POST /sprints - Criar novo sprint (201)
+- ✅ PUT /sprints/:id - Atualizar sprint (200)
+- ✅ DELETE /sprints/:id - Deletar sprint (200)
+
+### Notificações
+- ✅ GET /notifications - Buscar todas as notificações (200)
+- ✅ POST /notifications - Criar nova notificação (201)
+- ✅ PUT /notifications/:id - Marcar como lida (200)
+- ✅ DELETE /notifications/:id - Deletar notificação (200)
+
+### Busca e Filtros
+- ✅ GET /tasks?search=termo&sort=asc - Buscar tarefas com filtro (200)
+- ✅ GET /users?search=termo&sort=asc - Buscar utilizadores com filtro (200)
+
+## 👨‍💻 Autor
+
+Desenvolvido por **Danilson Sanches** @upskill217

@@ -1,119 +1,162 @@
 import { db } from "../db.js";
 
-/* Função para buscar todos os usuários */
+/* Função para buscar todos os utilizadores */
 export const getAllUsers = async (search, sort) => {
-  try {
-    let [users] = await db.query("SELECT * FROM utilizador");
+  let [users] = await db.query("SELECT * FROM utilizador");
 
-    if (search) {
-      users = users.filter(
-        (u) =>
-          u.nome.toLowerCase().includes(search.toLowerCase()) ||
-          u.email.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
-
-    if (sort && (sort === "asc" || sort === "desc")) {
-      users.sort((a, b) => {
-        const nameA = a.nome.toLowerCase();
-        const nameB = b.nome.toLowerCase();
-
-        if (sort === "asc") {
-          return nameA.localeCompare(nameB);
-        } else {
-          return nameB.localeCompare(nameA);
-        }
-      });
-    }
-
-    return users;
-  } catch (error) {
-    throw error;
+  if (search) {
+    users = users.filter(
+      (u) =>
+        u.nome.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase()),
+    );
   }
+
+  if (sort && (sort === "asc" || sort === "desc")) {
+    users.sort((a, b) => {
+      const nameA = a.nome.toLowerCase();
+      const nameB = b.nome.toLowerCase();
+
+      if (sort === "asc") {
+        return nameA.localeCompare(nameB);
+      } else {
+        return nameB.localeCompare(nameA);
+      }
+    });
+  }
+
+  return users;
 };
 
-/* Função para criar usuário */
+/* Função para criar utilizador */
 export const createUser = async (data) => {
-  try {
-    const { nome, email, telefone } = data;
-    const [result] = await db.query(
-      "INSERT INTO utilizador (nome, email, telefone) VALUES (?, ?, ?)",
-      [nome, email, telefone],
-    );
-    return { id: result.insertId, ...data };
-  } catch (error) {
-    throw error;
-  }
+  const [result] = await db.query(
+    "INSERT INTO utilizador (nome, email, telefone) VALUES (?, ?, ?)",
+    [data.nome, data.email, data.telefone || null],
+  );
+  return { id: result.insertId, ...data };
 };
 
-/* Função para buscar usuário por ID */
-export const getUserById = async (userId) => {
-  try {
-    const [users] = await db.query("SELECT * FROM utilizador WHERE id = ?", [
-      userId,
-    ]);
-    return users[0];
-  } catch (error) {
-    throw error;
-  }
-};
-
-/* Função para atualizar usuário */
+/* Função para atualizar utilizador */
 export const updateUser = async (userId, data) => {
-  try {
-    const { nome, email, telefone } = data;
-    const [result] = await db.query(
-      "UPDATE utilizador SET nome=?, email=?, telefone=? WHERE id=?",
-      [nome, email, telefone, userId],
-    );
-    return result.affectedRows;
+  const fieldsToUpdate = [];
+  const values = [];
 
-  } catch (error) {
-    throw error;
+  if (data.nome !== undefined) {
+    fieldsToUpdate.push("nome = ?");
+    values.push(data.nome);
   }
+  if (data.email !== undefined) {
+    fieldsToUpdate.push("email = ?");
+    values.push(data.email);
+  }
+  if (data.telefone !== undefined) {
+    fieldsToUpdate.push("telefone = ?");
+    values.push(data.telefone);
+  }
+
+  if (fieldsToUpdate.length === 0) {
+    throw new Error("Nenhum campo para atualizar");
+  }
+
+  values.push(userId);
+
+  const [result] = await db.query(
+    `UPDATE utilizador SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
+    values,
+  );
+  return result.affectedRows;
 };
 
-/* Função para alternar status ativo/inativo do usuário */
-export const toggleUserActive = async (userId, data) => {
-  try {
-    const [result] = await db.query(
-      "UPDATE utilizador SET activo = ? WHERE id = ?",
-      [data.activo, userId],
-    );
-    return result.affectedRows;
-  } catch (error) {
-    throw error;
-  }
-};
-
-/* Função para deletar usuário */
+/* Função para deletar utilizador */
 export const deleteUser = async (userId) => {
-  try {
-    const [result] = await db.query("DELETE FROM utilizador WHERE id=?", [
-      userId,
-    ]);
-    return result.affectedRows;
-  } catch (error) {
-    throw error;
-  }
+  const [result] = await db.query("DELETE FROM utilizador WHERE id = ?", [userId]);
+  return result.affectedRows;
 };
 
-/* Função para buscar estatísticas dos usuários */
-export const getUserStats = async () => {
-  try {
-    const users = await getAllUsers();
-    const totalUsers = users.length;
-    const activeUsers = users.filter((u) => u.activo).length;
-    const inactiveUsers = totalUsers - activeUsers;
-    const activePercentage =
-      totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;
-    return {
-      totalUsers,
-      activeUsers,
-      inactiveUsers,
-      activePercentage: activePercentage.toFixed(2) + "%",
-    };
-  } catch (error) {
-    throw error;
+/* Função para alternar status ativo/inativo do utilizador */
+export const toggleUserActive = async (userId, data) => {
+  const fieldsToUpdate = [];
+  const values = [];
+
+  if (data.activo !== undefined) {
+    fieldsToUpdate.push("activo = ?");
+    values.push(data.activo);
   }
+
+  if (fieldsToUpdate.length === 0) {
+    throw new Error("Nenhum campo para atualizar");
+  }
+
+  values.push(userId);
+
+  const [result] = await db.query(
+    `UPDATE utilizador SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
+    values,
+  );
+  return result.affectedRows;
+};
+
+/* Função para verificar se email existe */
+export const emailExists = async (email, userId = null) => {
+  let query = "SELECT * FROM utilizador WHERE email = ?";
+  const params = [email];
+
+  if (userId) {
+    query += " AND id != ?";
+    params.push(userId);
+  }
+
+  const [users] = await db.query(query, params);
+  return users.length > 0;
+};
+
+/* Função para buscar estatísticas dos utilizadores */
+export const getUserStats = async () => {
+  const [result] = await db.query("SELECT COUNT(*) as totalUsers FROM utilizador");
+  const totalUsers = result[0].totalUsers;
+
+  const [activeResult] = await db.query("SELECT COUNT(*) as activeUsers FROM utilizador WHERE activo = 1");
+  const activeUsers = activeResult[0].activeUsers;
+
+
+  const inactiveUsers = totalUsers - activeUsers;
+
+  const activePercentage = totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(2) : "0.00";
+  const inactivePercentage = totalUsers > 0 ? ((inactiveUsers / totalUsers) * 100).toFixed(2) : "0.00";
+
+  return {
+    totalUsers,
+    activeUsers,
+    inactiveUsers,
+    activePercentage: activePercentage + "%",
+    inactivePercentage: inactivePercentage + "%",
+  };
+};
+
+/* Função para obter notificações não lidas */
+export const getUnreadNotifications = async (userId) => {
+  const [notifications] = await db.query(
+    "SELECT * FROM notificacao WHERE id_utilizador = ? AND lida = 0",
+    [userId]
+  );
+  return notifications;
+};
+
+/* Função para obter notificações do utilizador */
+export const getNotificationsByUser = async (userId) => {
+  const [notifications] = await db.query(
+    "SELECT * FROM notificacao WHERE id_utilizador = ?",
+    [userId]
+  );
+  return notifications;
+};
+
+/* Função para marcar notificação como lida */
+export const markNotificationAsRead = async (notificationId) => {
+  const [result] = await db.query(
+    "UPDATE notificacao SET lida = 1 WHERE id = ?",
+    [notificationId]
+  );
+  return result.affectedRows;
 };

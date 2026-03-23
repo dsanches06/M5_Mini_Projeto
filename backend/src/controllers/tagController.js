@@ -24,6 +24,11 @@ export const createTag = async (req, res) => {
       return res.status(400).json({ message: "O nome da etiqueta deve ter no mínimo 2 caracteres" });
     }
 
+    const tagExists = await tagService.tagNameExists(nome.trim());
+    if (tagExists) {
+      return res.status(400).json({ message: "Já existe uma etiqueta com este nome" });
+    }
+
     const tag = await tagService.createTag(req.body);
     res.status(201).json(tag);
   } catch (error) {
@@ -34,12 +39,9 @@ export const createTag = async (req, res) => {
 /* Função para deletar etiqueta */
 export const deleteTag = async (req, res) => {
   try {
-    const affectedRows = await tagService.deleteTag(Number(req.params.id));
-    if (affectedRows === 0) {
-      return res.status(404).json({ message: "Etiqueta não encontrada" });
-    }
+    const tag = await tagService.deleteTag(Number(req.params.id));
     await taskService.removeTagFromAllTasks(Number(req.params.id));
-    res.status(200).json({ message: "Etiqueta deletada com sucesso" });
+    res.status(200).json({ message: "Etiqueta deletada com sucesso", tag });
   } catch (error) {
     res.status(404).json({ message: `Erro ao deletar etiqueta: ${error.message}` });
   }

@@ -57,11 +57,8 @@ export const createTask = async (req, res) => {
 /* Função para atualizar tarefa */
 export const updateTask = async (req, res) => {
   try {
-    const affectedRows = await taskService.updateTask(Number(req.params.id), req.body);
-    if (affectedRows === 0) {
-      return res.status(404).json({ error: "Tarefa não encontrada" });
-    }
-    res.json({ message: "Tarefa atualizada com sucesso" });
+    const task = await taskService.updateTask(Number(req.params.id), req.body);
+    res.json(task);
   } catch (error) {
     res.status(400).json({ error: `Erro ao atualizar tarefa: ${error.message}` });
   }
@@ -70,10 +67,7 @@ export const updateTask = async (req, res) => {
 /* Função para deletar tarefa */
 export const deleteTask = async (req, res) => {
   try {
-    const affectedRows = await taskService.deleteTask(Number(req.params.id));
-    if (affectedRows === 0) {
-      return res.status(404).json({ error: "Tarefa não encontrada" });
-    }
+    await taskService.deleteTask(Number(req.params.id));
     res.status(200).json({ message: "Tarefa deletada com sucesso" });
   } catch (error) {
     res.status(404).json({ message: `Erro ao deletar tarefa: ${error.message}` });
@@ -115,15 +109,10 @@ export const removeTagFromTask = async (req, res) => {
       return res.status(400).json({ message: "O ID da etiqueta é obrigatório" });
     }
 
-    const affectedRows = await taskService.removeTagFromTask(taskId, tagId);
-    
-    if (affectedRows === 0) {
-      return res.status(404).json({ message: "Relação tarefa-etiqueta não encontrada" });
-    }
-    
+    const relation = await taskService.removeTagFromTask(taskId, tagId);
     res
       .status(200)
-      .json({ message: "Etiqueta removida da tarefa com sucesso" });
+      .json({ message: "Etiqueta removida da tarefa com sucesso", relation });
   } catch (error) {
     res
       .status(400)
@@ -193,13 +182,8 @@ export const getComments = async (req, res) => {
 export const deleteComment = async (req, res) => {
   try {
     const commentId = Number(req.params.commentId);
-    const affectedRows = await commentService.deleteComment(commentId);
-    
-    if (affectedRows === 0) {
-      return res.status(404).json({ message: "Comentário não encontrado" });
-    }
-    
-    res.json({ message: "Comentário deletado com sucesso" });
+    const comment = await commentService.deleteComment(commentId);
+    res.json({ message: "Comentário deletado com sucesso", comment });
   } catch (error) {
     res
       .status(404)
@@ -254,6 +238,8 @@ export const resolveComment = async (req, res) => {
 /* Função para atualizar comentário */
 export const updateComment = async (req, res) => {
   try {
+    console.log("[DEBUG] updateComment called with params:", req.params);
+    console.log("[DEBUG] updateComment body:", req.body);
     const { commentId } = req.params;
     const { content } = req.body;
     if (!commentId) {
@@ -273,6 +259,7 @@ export const updateComment = async (req, res) => {
     );
     res.json({ message: "Comentário atualizado com sucesso", comment });
   } catch (error) {
+    console.error("[DEBUG] updateComment error:", error.message);
     res
       .status(400)
       .json({ message: `Erro ao atualizar comentário: ${error.message}` });
