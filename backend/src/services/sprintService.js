@@ -42,11 +42,11 @@ export const updateSprint = async (sprintId, data) => {
     "UPDATE sprints SET nome=?, data_inicio=?, data_fim=? WHERE id=?",
     [nome, dataInicio, dataFim, sprintId],
   );
-  return result;
+  return result.affectedRows;
 };
 
 /* Função para deletar sprint */
 export const deleteSprint = async (sprintId) => {
   const [result] = await db.query("DELETE FROM sprints WHERE id=?", [sprintId]);
-  return result;
+  return result.affectedRows;
 };

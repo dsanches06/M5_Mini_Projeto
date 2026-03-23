@@ -44,17 +44,23 @@ export const updateProject = async (req, res) => {
       return res.status(400).json({ error: "O nome do projeto deve ter no mínimo 3 caracteres" });
     }
 
-    const project = await projectService.updateProject(Number(req.params.id), req.body);
-    res.json(project);
+    const affectedRows = await projectService.updateProject(Number(req.params.id), req.body);
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: "Projeto não encontrado" });
+    }
+    res.json({ message: "Projeto atualizado com sucesso" });
   } catch (error) {
     res.status(400).json({ error: `Erro ao atualizar projeto: ${error.message}` });
   }
 };
 
 /* Função para deletar projeto */
-export const deleteProject = (req, res) => {
+export const deleteProject = async (req, res) => {
   try {
-    projectService.deleteProject(Number(req.params.id));
+    const affectedRows = await projectService.deleteProject(Number(req.params.id));
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: "Projeto não encontrado" });
+    }
     res.status(200).json({ message: "Projeto deletado com sucesso" });
   } catch (error) {
     res.status(404).json({ error: `Erro ao deletar projeto: ${error.message}` });

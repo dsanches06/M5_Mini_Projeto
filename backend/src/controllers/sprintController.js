@@ -52,8 +52,11 @@ export const updateSprint = async (req, res) => {
       return res.status(400).json({ error: "O nome da sprint deve ter no mínimo 3 caracteres" });
     }
 
-    const sprint = await sprintService.updateSprint(Number(req.params.id), req.body);
-    res.json(sprint);
+    const affectedRows = await sprintService.updateSprint(Number(req.params.id), req.body);
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: "Sprint não encontrada" });
+    }
+    res.json({ message: "Sprint atualizada com sucesso" });
   } catch (error) {
     res.status(400).json({ error: `Erro ao atualizar sprint: ${error.message}` });
   }
@@ -62,7 +65,10 @@ export const updateSprint = async (req, res) => {
 /* Função para deletar sprint */
 export const deleteSprint = async (req, res) => {
   try {
-    await sprintService.deleteSprint(Number(req.params.id));
+    const affectedRows = await sprintService.deleteSprint(Number(req.params.id));
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: "Sprint não encontrada" });
+    }
     res.status(200).json({ message: "Sprint deletada com sucesso" });
   } catch (error) {
     res.status(404).json({ error: `Erro ao deletar sprint: ${error.message}` });

@@ -105,16 +105,42 @@ export const updateNotification = async (req, res) => {
       return res.status(400).json({ message: "A mensagem não pode estar vazia" });
     }
 
-    const notification = await notificationService.updateNotification(
+    const affectedRows = await notificationService.updateNotification(
       Number(req.params.id),
       req.body,
     );
-
-
-   
+    
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Notificação não encontrada" });
+    }
+    
+    res.json({ message: "Notificação atualizada com sucesso" });
   } catch (error) {
     res
       .status(400)
       .json({ message: `Erro ao atualizar notificação: ${error.message}` });
+  }
+};
+
+/* Função para deletar notificação */
+export const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ message: "ID é obrigatório" });
+    }
+    
+    const affectedRows = await notificationService.deleteNotification(Number(id));
+    
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Notificação não encontrada" });
+    }
+    
+    res.json({ message: "Notificação deletada com sucesso" });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: `Erro ao deletar notificação: ${error.message}` });
   }
 };

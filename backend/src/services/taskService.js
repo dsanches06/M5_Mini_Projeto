@@ -8,16 +8,15 @@ export const getAllTasks = async (search, sort) => {
     if (search) {
       tasks = tasks.filter(
         (t) =>
-          t.title.toLowerCase().includes(search.toLowerCase()) ||
-          t.userId.toLowerCase().includes(search.toLowerCase()) ||
-          t.category.toLowerCase().includes(search.toLowerCase()),
+          t.titulo.toLowerCase().includes(search.toLowerCase()) ||
+          t.descricao.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
     if (sort && (sort === "asc" || sort === "desc")) {
       tasks.sort((a, b) => {
-        const titleA = a.title.toLowerCase();
-        const titleB = b.title.toLowerCase();
+        const titleA = a.titulo.toLowerCase();
+        const titleB = b.titulo.toLowerCase();
 
         if (sort === "asc") {
           return titleA.localeCompare(titleB);
@@ -37,10 +36,19 @@ export const getAllTasks = async (search, sort) => {
 export const createTask = async (data) => {
   try {
     const [result] = await db.query(
-      "INSERT INTO tarefa (titulo, categoria, responsavel, concluida) VALUES (?, ?, ?, ?)",
-      [data.title, data.category, data.userId, 0],
+      "INSERT INTO tarefa (titulo, descricao, id_estado_tarefa, id_prioridade, id_categoria, id_projeto, horas_estimadas, data_limite) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        data.titulo,
+        data.descricao,
+        data.id_estado_tarefa,
+        data.id_prioridade,
+        data.id_categoria,
+        data.id_projeto,
+        data.horas_estimadas,
+        data.data_limite || null,
+      ],
     );
-    return { id: result.insertId, ...data, completed: 0 };
+    return { id: result.insertId, ...data };
   } catch (error) {
     throw error;
   }
@@ -49,10 +57,52 @@ export const createTask = async (data) => {
 /* Função para atualizar tarefa */
 export const updateTask = async (taskId, data) => {
   try {
-    const { title, category, userId, completed, completedDate } = data;
+    // Constrói a query dinamicamente apenas com os campos fornecidos
+    const fieldsToUpdate = [];
+    const values = [];
+
+    if (data.titulo !== undefined) {
+      fieldsToUpdate.push("titulo = ?");
+      values.push(data.titulo);
+    }
+    if (data.descricao !== undefined) {
+      fieldsToUpdate.push("descricao = ?");
+      values.push(data.descricao);
+    }
+    if (data.id_estado_tarefa !== undefined) {
+      fieldsToUpdate.push("id_estado_tarefa = ?");
+      values.push(data.id_estado_tarefa);
+    }
+    if (data.id_prioridade !== undefined) {
+      fieldsToUpdate.push("id_prioridade = ?");
+      values.push(data.id_prioridade);
+    }
+    if (data.id_categoria !== undefined) {
+      fieldsToUpdate.push("id_categoria = ?");
+      values.push(data.id_categoria);
+    }
+    if (data.horas_estimadas !== undefined) {
+      fieldsToUpdate.push("horas_estimadas = ?");
+      values.push(data.horas_estimadas);
+    }
+    if (data.data_limite !== undefined) {
+      fieldsToUpdate.push("data_limite = ?");
+      values.push(data.data_limite);
+    }
+    if (data.data_conclusao !== undefined) {
+      fieldsToUpdate.push("data_conclusao = ?");
+      values.push(data.data_conclusao);
+    }
+
+    if (fieldsToUpdate.length === 0) {
+      throw new Error("Nenhum campo para atualizar");
+    }
+
+    values.push(taskId);
+
     const [result] = await db.query(
-      "UPDATE tarefa SET titulo=?, categoria=?, responsavel=?, concluida=?, data_conclusao=? WHERE id=?",
-      [title, category, userId, completed, completedDate, taskId],
+      `UPDATE tarefa SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
+      values,
     );
     return result.affectedRows;
   } catch (error) {
@@ -165,7 +215,7 @@ export const getTaskStats = async () => {
   try {
     const tasks = await getAllTasks();
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter((t) => t.concluida).length;
+    const completedTasks = tasks.filter((t) => t.data_conclusao !== null).length;
     const pendingTasks = totalTasks - completedTasks;
     const completedPercentage =
       totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;

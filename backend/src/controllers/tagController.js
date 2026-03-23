@@ -34,9 +34,12 @@ export const createTag = async (req, res) => {
 /* Função para deletar etiqueta */
 export const deleteTag = async (req, res) => {
   try {
-    const tag = await tagService.deleteTag(Number(req.params.id));
+    const affectedRows = await tagService.deleteTag(Number(req.params.id));
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Etiqueta não encontrada" });
+    }
     await taskService.removeTagFromAllTasks(Number(req.params.id));
-    res.status(200).json({ message: "Etiqueta deletada com sucesso", tag });
+    res.status(200).json({ message: "Etiqueta deletada com sucesso" });
   } catch (error) {
     res.status(404).json({ message: `Erro ao deletar etiqueta: ${error.message}` });
   }

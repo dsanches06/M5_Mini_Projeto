@@ -62,7 +62,7 @@ export const updateUser = async (req, res) => {
 
     if (affectedRows === 0) {
       return res.status(404).json({
-        message: `O utilizador com id ${userId} não foi encontrado`,
+      message: `O utilizador com id ${userId} não foi encontrado`,
       });
     }
 

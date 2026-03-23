@@ -53,7 +53,7 @@ export const createNotification = async (data) => {
 /* Função para atualizar notificação */
 export const updateNotification = async (notificationId, data) => {
   const { mensagem, lida } = data;
-  const result = await db.query(
+  const [result] = await db.query(
     "UPDATE notificacao SET mensagem = ?, lida = ? WHERE id = ?",
     [mensagem, lida, notificationId],
   );
@@ -62,7 +62,7 @@ export const updateNotification = async (notificationId, data) => {
 };
 
 export const toggleReadStatus = async (notificationId, lida) => {
-  const result = await db.query(
+  const [result] = await db.query(
     "UPDATE notificacao SET lida = ? WHERE id = ?",
     [lida, notificationId],
   );
@@ -71,9 +71,8 @@ export const toggleReadStatus = async (notificationId, lida) => {
 
 /* Função para deletar notificação */
 export const deleteNotification = async (notificationId) => {
-  const [result] = await db.query("DELETE FROM notificacao WHERE id=?  AND utilizador_id = ?", [
+  const [result] = await db.query("DELETE FROM notificacao WHERE id = ?", [
     notificationId,
-    req.user.id
   ]);
   return result.affectedRows;
 };

@@ -67,6 +67,7 @@ export const updateUser = async (userId, data) => {
       [nome, email, telefone, userId],
     );
     return result.affectedRows;
+
   } catch (error) {
     throw error;
   }

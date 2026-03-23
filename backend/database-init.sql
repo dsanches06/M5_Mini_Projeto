@@ -8,7 +8,7 @@ USE clickup_db;
 CREATE TABLE utilizador (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(200) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL,
     telefone INT,
     activo BOOLEAN DEFAULT TRUE,
     data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -29,7 +29,9 @@ CREATE TABLE projeto (
     id_estado_projeto INT,
     data_inicio DATETIME,
     data_fim_prevista DATETIME,
-	FOREIGN KEY (id_estado_projeto) REFERENCES estados_projeto (id)
+    FOREIGN KEY (id_estado_projeto)
+        REFERENCES estados_projeto (id)
+        ON DELETE CASCADE
 );
 
 /* Tabela Estados */
@@ -66,10 +68,18 @@ CREATE TABLE tarefa (
     data_limite DATETIME,
     data_conclusao DATETIME,
     horas_estimadas INT NOT NULL,
-    FOREIGN KEY (id_projeto) REFERENCES projeto (id),
-    FOREIGN KEY (id_estado_tarefa) REFERENCES estados_tarefa (id),
-    FOREIGN KEY (id_prioridade) REFERENCES prioridades (id),
-    FOREIGN KEY (id_categoria) REFERENCES categorias (id)
+    FOREIGN KEY (id_projeto)
+        REFERENCES projeto (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_estado_tarefa)
+        REFERENCES estados_tarefa (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_prioridade)
+        REFERENCES prioridades (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_categoria)
+        REFERENCES categorias (id)
+        ON DELETE CASCADE
 );
 
 /* Tabela Intermédia: Tarefa_Responsavel  (N:M) */
@@ -78,8 +88,12 @@ CREATE TABLE tarefa_responsavel (
     id_utilizador INT NOT NULL,
     data_atribuicao DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_tarefa , id_utilizador),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
+    FOREIGN KEY (id_tarefa)
+        REFERENCES tarefa (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_utilizador)
+        REFERENCES utilizador (id)
+        ON DELETE CASCADE
 );
 
 /* Tabela Etiqueta */
@@ -94,8 +108,12 @@ CREATE TABLE etiqueta_tarefa (
     id_tarefa INT,
     id_etiqueta INT,
     PRIMARY KEY (id_tarefa , id_etiqueta),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
-    FOREIGN KEY (id_etiqueta) REFERENCES etiquetas (id)
+    FOREIGN KEY (id_tarefa)
+        REFERENCES tarefa (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_etiqueta)
+        REFERENCES etiquetas (id)
+        ON DELETE CASCADE
 );
 
 /* Tabela Comentários */
@@ -107,8 +125,12 @@ CREATE TABLE comentario (
     data_comentario DATETIME DEFAULT CURRENT_TIMESTAMP,
     editado_em DATETIME,
     resolvido BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
+    FOREIGN KEY (id_tarefa)
+        REFERENCES tarefa (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_utilizador)
+        REFERENCES utilizador (id)
+        ON DELETE CASCADE
 );
 
 /* tabela Anexos de tarefas */
@@ -119,7 +141,9 @@ CREATE TABLE anexos_tarefas (
     tipo VARCHAR(50) NOT NULL,
     tamanho_kb INT,
     data_upload DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
+    FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE
 );
 
 /* Tabela Notificações */
@@ -130,7 +154,9 @@ CREATE TABLE notificacao (
     mensagem TEXT NOT NULL,
     lida BOOLEAN DEFAULT FALSE,
     data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador(id) ON DELETE CASCADE
+    FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador(id) 
+        ON DELETE CASCADE
 );
 
 /* Tabela Equipas*/
@@ -147,9 +173,13 @@ CREATE TABLE equipa_membros (
     id_utilizador INT NOT NULL,
     papel VARCHAR(20) CHECK (papel IN ('admin', 'membro')) DEFAULT 'membro',
     data_entrada DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_equipa , id_utilizador),
-    FOREIGN KEY (id_equipa) REFERENCES equipas (id),
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
+    PRIMARY KEY (id_equipa, id_utilizador),
+    FOREIGN KEY (id_equipa) 
+        REFERENCES equipas (id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE
 );
 
 /* Tabela Votos em Tarefas (Prioridade por votação) */
@@ -157,9 +187,13 @@ CREATE TABLE votos_tarefas (
     id_tarefa INT NOT NULL,
     id_utilizador INT NOT NULL,
     data_voto DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_tarefa , id_utilizador),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador (id)
+    PRIMARY KEY (id_tarefa, id_utilizador),
+    FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE
 );
 
 /* Tabela Histórico de Estado */
@@ -169,9 +203,15 @@ CREATE TABLE historico_estado (
     id_estado_anterior INT NOT NULL,
     id_estado_novo INT NOT NULL,
     data_mudanca TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_tarefa)  REFERENCES tarefa(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_estado_anterior) REFERENCES estados_tarefa(id),
-	FOREIGN KEY (id_estado_novo)  REFERENCES estados_tarefa(id)
+    FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa(id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_estado_anterior) 
+        REFERENCES estados_tarefa(id) 
+        ON DELETE CASCADE,
+	FOREIGN KEY (id_estado_novo)  
+        REFERENCES estados_tarefa(id) 
+        ON DELETE CASCADE
 );
 
 /* tabela Permissões de Projeto */
@@ -180,7 +220,13 @@ CREATE TABLE permissoes_projeto (
     id_utilizador INT NOT NULL,
     pode_editar BOOLEAN NOT NULL DEFAULT FALSE,
     pode_apagar BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (id_projeto, id_utilizador)
+    PRIMARY KEY (id_projeto, id_utilizador),
+    FOREIGN KEY (id_projeto) 
+        REFERENCES projeto (id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -200,8 +246,12 @@ CREATE TABLE subtarefas (
   titulo VARCHAR(200),
   id_estado INT,
   data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_tarefa_pai) REFERENCES tarefa (id) ON DELETE CASCADE,
-  FOREIGN KEY (id_estado) REFERENCES estados_tarefa (id)
+  FOREIGN KEY (id_tarefa_pai) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE,
+  FOREIGN KEY (id_estado) 
+        REFERENCES estados_tarefa (id) 
+        ON DELETE CASCADE
 );
 
 
@@ -216,8 +266,12 @@ CREATE TABLE dependencias_tarefas (
   id_tarefa_dependente INT,
   tipo VARCHAR(30),   -- bloqueia / depende
   PRIMARY KEY (id_tarefa, id_tarefa_dependente),
-  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE,
-  FOREIGN KEY (id_tarefa_dependente) REFERENCES tarefa (id) ON DELETE CASCADE
+  FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE,
+  FOREIGN KEY (id_tarefa_dependente) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -229,8 +283,12 @@ CREATE TABLE tarefas_favoritas (
   id_tarefa INT,
   data_marcacao DATETIME,
   PRIMARY KEY (id_utilizador, id_tarefa),
-  FOREIGN KEY (id_utilizador) REFERENCES utilizador (id),
-  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
+  FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE,
+  FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -245,8 +303,12 @@ CREATE TABLE lembretes (
   mensagem VARCHAR(200),
   data_lembrete DATETIME,
   enviado BOOLEAN,
-  FOREIGN KEY (id_utilizador) REFERENCES utilizador (id),
-  FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
+  FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE,
+  FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -260,15 +322,21 @@ CREATE TABLE sprints (
     nome VARCHAR(100),
     data_inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
     data_fim DATETIME,
-    FOREIGN KEY (id_projeto) REFERENCES projeto (id)
+    FOREIGN KEY (id_projeto) 
+        REFERENCES projeto (id) 
+        ON DELETE CASCADE
 );
 
 CREATE TABLE sprint_tarefas (
     id_sprint INT,
     id_tarefa INT,
-    PRIMARY KEY (id_sprint , id_tarefa),
-    FOREIGN KEY (id_sprint) REFERENCES sprints (id),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
+    PRIMARY KEY (id_sprint, id_tarefa),
+    FOREIGN KEY (id_sprint) 
+        REFERENCES sprints (id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -279,8 +347,12 @@ CREATE TABLE mencoes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_comentario INT,
     id_utilizador_mencionado INT,
-    FOREIGN KEY (id_comentario) REFERENCES comentario (id),
-    FOREIGN KEY (id_utilizador_mencionado) REFERENCES utilizador (id)
+    FOREIGN KEY (id_comentario) 
+        REFERENCES comentario (id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_utilizador_mencionado) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================
@@ -293,8 +365,12 @@ CREATE TABLE registos_tempo (
     horas INT NOT NULL, 
     descricao TEXT NOT NULL,
     data_conclusao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_utilizador) REFERENCES utilizador (id),
-    FOREIGN KEY (id_tarefa) REFERENCES tarefa (id) ON DELETE CASCADE
+    FOREIGN KEY (id_utilizador) 
+        REFERENCES utilizador (id) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_tarefa) 
+        REFERENCES tarefa (id) 
+        ON DELETE CASCADE
 );
 
 -- =====================================================

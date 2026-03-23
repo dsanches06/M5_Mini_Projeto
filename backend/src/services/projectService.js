@@ -44,11 +44,11 @@ export const updateProject = async (projectId, data) => {
     "UPDATE projeto SET nome=?, descricao=?, data_inicio=?, data_fim_prevista=? WHERE id=?",
     [nome, descricao, dataInicio, dataFim, projectId],
   );
-  return result;
+  return result.affectedRows;
 };
 
 /* Função para deletar projeto */
 export const deleteProject = async (projectId) => {
   const [result] = await db.query("DELETE FROM projeto WHERE id=?", [projectId]);
-  return result;
+  return result.affectedRows;
 };
