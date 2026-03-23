@@ -2,7 +2,23 @@
 
 Uma API RESTful completa desenvolvida com Node.js, Express e MySQL para gerenciar tarefas, utilizadores, tags e comentários.
 
-## 📋 Tecnologias Utilizadas
+## � Como Obter o Projeto
+
+### Clonar do GitHub
+
+```bash
+git clone https://github.com/dsanches06/M5_Mini_Projeto.git
+cd M5_Mini_Projeto
+```
+
+Ou use HTTPS:
+
+```bash
+git clone https://github.com/dsanches06/M5_Mini_Projeto.git
+cd M5_Mini_Projeto
+```
+
+## �📋 Tecnologias Utilizadas
 
 - **Node.js** - Runtime JavaScript
 - **Express** - Framework web
@@ -59,25 +75,125 @@ Pressione `Ctrl+C` no terminal.
 ## 📁 Estrutura do Projeto
 
 ```
-src/
-├── app.js                 # Aplicação Express principal
-├── db.js                  # Configuração do banco de dados
-├── controllers/           # Controladores das rotas
-│   ├── taskController.js
-│   ├── tagController.js
-│   └── userController.js
-├── middlewares/           # Middlewares personalizados
-│   ├── checkUserExists.js
-│   └── loggerMiddleware.js
-├── routes/                # Definição das rotas
-│   ├── taskRoutes.js
-│   ├── tagRoutes.js
-│   └── userRoutes.js
-└── services/              # Lógica de negócio
-    ├── taskService.js
-    ├── tagService.js
-    ├── userService.js
-    └── commentService.js
+M5_Mini_Projeto/
+├── package.json           # Dependências e scripts
+├── database-init.sql      # Script de inicialização do banco de dados
+├── test-api-full.ps1      # Script de testes automatizados (PowerShell)
+│
+├── backend/               # API RESTful com Node.js e Express
+│   ├── package.json
+│   ├── database-init.sql
+│   ├── test-api-full.ps1
+│   └── src/
+│       ├── .env                   # Variáveis de ambiente (CRIAR MANUALMENTE)
+│       ├── app.js                 # Aplicação Express principal
+│       ├── db.js                  # Configuração do banco de dados
+│       ├── controllers/           # Controladores das rotas
+│       │   ├── taskController.js
+│       │   ├── tagController.js
+│       │   ├── userController.js
+│       │   ├── projectController.js
+│       │   ├── sprintController.js
+│       │   ├── notificationController.js
+│       │   └── commentController.js
+│       ├── middlewares/           # Middlewares personalizados
+│       │   ├── checkUserExists.js
+│       │   └── loggerMiddleware.js
+│       ├── routes/                # Definição das rotas
+│       │   ├── taskRoutes.js
+│       │   ├── tagRoutes.js
+│       │   ├── userRoutes.js
+│       │   ├── projectRoutes.js
+│       │   ├── sprintRoutes.js
+│       │   ├── notificationRoutes.js
+│       │   └── commentRoutes.js
+│       └── services/              # Lógica de negócio
+│           ├── taskService.js
+│           ├── tagService.js
+│           ├── userService.js
+│           ├── projectService.js
+│           ├── sprintService.js
+│           ├── notificationService.js
+│           ├── commentService.js
+│           └── otherServices.js
+│
+└── frontend/              # Interface com TypeScript e Vite
+    ├── package.json
+    ├── tsconfig.json
+    ├── vitest.config.ts
+    ├── index.html
+    ├── main.ts
+    ├── src/
+    │   ├── assets/                # Imagens e recursos estáticos
+    │   ├── attachments/           # Serviços de anexos
+    │   │   └── Attachment.ts
+    │   ├── comments/              # Serviços de comentários
+    │   │   └── Comment.ts
+    │   ├── dashboards/            # Configurações de dashboard
+    │   │   ├── DashboardColumn.ts
+    │   │   └── DashboardConfig.ts
+    │   ├── helpers/               # Funções auxiliares
+    │   │   ├── Buffer.ts
+    │   │   ├── fakeData.ts
+    │   │   ├── generateRandomColor.ts
+    │   │   ├── getTaskByFilter.ts
+    │   │   ├── infoBanner.ts
+    │   │   └── index.ts
+    │   ├── logs/                  # Sistema de logging
+    │   │   └── SystemLogger.ts
+    │   ├── models/                # Modelos de dados
+    │   │   ├── BaseEntity.ts
+    │   │   ├── IUser.ts
+    │   │   ├── UserClass.ts
+    │   │   └── index.ts
+    │   ├── notifications/         # Sistema de notificações
+    │   │   └── Notifications.ts
+    │   ├── security/              # Segurança e permissões
+    │   │   ├── PermissionService.ts
+    │   │   ├── UserRole.ts
+    │   │   └── index.ts
+    │   ├── services/              # Serviços de negócio
+    │   │   ├── assignmentService.ts
+    │   │   ├── attachmentService.ts
+    │   │   ├── automationRulesService.ts
+    │   │   ├── backupService.ts
+    │   │   ├── BusinessRules.ts
+    │   │   ├── commentService.ts
+    │   │   ├── deadLineService.ts
+    │   │   ├── notificationService.ts
+    │   │   ├── searchService.ts
+    │   │   ├── statisticsService.ts
+    │   │   ├── SystemConfig.ts
+    │   │   └── index.ts
+    │   ├── styles/                # Folhas de estilo CSS
+    │   ├── tasks/                 # Componentes de tarefas
+    │   ├── ui/                    # Componentes UI reutilizáveis
+    │   └── utils/                 # Utilitários gerais
+    │
+    └── testes/                    # Testes com Vitest
+        ├── assignmentService.test.ts
+        ├── attachmentService.test.ts
+        ├── automationRulesService.test.ts
+        ├── backupService.test.ts
+        ├── businessRules.test.ts
+        ├── commentService.test.ts
+        ├── deadLineService.test.ts
+        ├── dependencyGraph.test.ts
+        ├── entityList.test.ts
+        ├── favorites.test.ts
+        ├── notificationService.test.ts
+        ├── paginator.test.ts
+        ├── priorityManager.test.ts
+        ├── ratingSystem.test.ts
+        ├── searchService.test.ts
+        ├── simpleCache.test.ts
+        ├── statisticsService.test.ts
+        ├── systemConfig.test.ts
+        ├── tagManager.test.ts
+        ├── taskService.test.ts
+        ├── taskUtils.test.ts
+        ├── userService.test.ts
+        └── watcherSystem.test.ts
 ```
 
 ## 📡 Documentação das Rotas
@@ -130,7 +246,7 @@ curl -X POST http://localhost:3000/tags \
 ```bash
 curl -X POST http://localhost:3000/users \
   -H "Content-Type: application/json" \
-  -d '{"name":"João Silva","email":"joao@example.com"}'
+  -d '{"nome":"João Silva","email":"joao@example.com","telefone":"987654321"}'
 ```
 
 ### Comentários (em Tarefas)
@@ -241,7 +357,7 @@ Execute o script de testes automatizados que testa todos os endpoints:
 powershell -ExecutionPolicy Bypass -File test-api-full.ps1
 ```
 
-Este script realiza 23 testes completos cobrindo todas as operações CRUD e endpoints principais da API.
+Este script realiza 25 testes completos cobrindo todas as operações CRUD, validações e endpoints principais da API.
 
 ### Com Postman ou Insomnia
 
@@ -257,60 +373,103 @@ Importe as URLs das rotas listadas na seção "📡 Documentação das Rotas" e 
 | 404 | Not Found - Recurso não encontrado |
 | 500 | Internal Server Error - Erro no servidor |
 
+### 📋 Exemplos Detalhados de Testes
+
+#### Teste 1: Criar Novo Utilizador (POST /users)
+
+**Requisição:**
+```
+Method: POST
+URI: http://localhost:3000/users
+Content-Type: application/json
+
+Body:
+{
+  "nome": "João Silva",
+  "email": "joao.silva@example.com",
+  "telefone": "987654321"
+}
+```
+
+**Resposta (201 Created):**
+```json
+{
+  "id": 5,
+  "nome": "João Silva",
+  "email": "joao.silva@example.com",
+  "telefone": "987654321",
+  "ativo": 1,
+  "dataCriacão": "2024-03-23T10:30:45.000Z"
+}
+```
+
+#### Teste 2: Validação de Email Duplicado (POST /users com erro)
+
+**Requisição:**
+```
+Method: POST
+URI: http://localhost:3000/users
+Content-Type: application/json
+
+Body:
+{
+  "nome": "Outro Utilizador",
+  "email": "joao.silva@example.com",    ← Email já existe
+  "telefone": "123456789"
+}
+```
+
+**Resposta (400 Bad Request):**
+```json
+{
+  "erro": "Este email já está registrado",
+  "codigo": "EMAIL_DUPLICADO",
+  "statusCode": 400
+}
+```
+
 ## ✅ Testes Realizados
 
-### Tarefas (Tasks)
-- ✅ GET /tasks - Buscar todas as tarefas (200)
-- ✅ POST /tasks - Criar nova tarefa (201)
-- ✅ PUT /tasks/:id - Atualizar tarefa (200)
-- ✅ DELETE /tasks/:id - Deletar tarefa (200)
-- ✅ GET /tasks/stats - Buscar estatísticas (200)
+O script `test-api-full.ps1` executa **25 testes completos** cobrindo toda a API:
 
-### Tags
-- ✅ GET /tags - Buscar todas as tags (200)
-- ✅ POST /tags - Criar nova tag (201)
-- ✅ DELETE /tags/:id - Deletar tag (200)
-- ✅ GET /tags/:id/tasks - Buscar tarefas por tag (200)
+### Testes de GET (Listagem)
+1. ✅ GET /tasks - Listar todas as tarefas
+2. ✅ GET /users - Listar todos os utilizadores
+3. ✅ GET /tags - Listar todas as tags
+4. ✅ GET /users/stats - Estatísticas de utilizadores
+5. ✅ GET /tasks/stats - Estatísticas de tarefas
 
-### Tags em Tarefas
-- ✅ POST /tasks/1/tags - Adicionar tag à tarefa (201)
-- ✅ GET /tasks/1/tags - Buscar tags da tarefa (200)
-- ✅ DELETE /tasks/1/tags - Remover tag da tarefa (200)
+### Testes de POST (Criação)
+6. ✅ POST /users - Criar novo utilizador
+7. ✅ POST /tags - Criar nova tag
+8. ✅ POST /tasks - Criar nova tarefa
+9. ✅ POST /tasks/:id/tags - Adicionar tag à tarefa
+10. ✅ POST /tasks/:id/comments - Criar comentário
 
-### Utilizadores (Users)
-- ✅ GET /users - Buscar todos os utilizadores (200)
-- ✅ POST /users - Criar novo utilizador (201)
-- ✅ PUT /users/:id - Atualizar utilizador (200)
-- ✅ DELETE /users/:id - Deletar utilizador (200)
-- ✅ PATCH /users/:id - Alternar status (200)
-- ✅ GET /users/stats - Buscar estatísticas (200)
+### Testes de Validação
+11. ✅ POST /users (duplicate email) - Validar rejeição de emails duplicados
+12. ✅ POST /tags (duplicate name) - Validar rejeição de nomes de tags duplicados
 
-### Comentários (Comments)
-- ✅ POST /tasks/1/comments - Criar comentário em tarefa (201)
-- ✅ GET /tasks/1/comments - Buscar comentários da tarefa (200)
-- ✅ DELETE /tasks/1/comments/:commentId - Deletar comentário (200)
+### Testes de PUT (Atualização)
+13. ✅ PUT /users/:id - Atualizar utilizador
+14. ✅ PUT /tasks/:id - Atualizar tarefa
+15. ✅ PUT /tasks/:id/comments/:commentId - Atualizar comentário
 
-### Projetos
-- ✅ GET /projects - Buscar todos os projetos (200)
-- ✅ POST /projects - Criar novo projeto (201)
-- ✅ PUT /projects/:id - Atualizar projeto (200)
-- ✅ DELETE /projects/:id - Deletar projeto (200)
+### Testes de PATCH (Modificação Parcial)
+16. ✅ PATCH /users/:id - Alternar status ativo/inativo
+17. ✅ PATCH /tasks/:id/comments/:commentId - Marcar comentário como resolvido
 
-### Sprints
-- ✅ GET /sprints - Buscar todos os sprints (200)
-- ✅ POST /sprints - Criar novo sprint (201)
-- ✅ PUT /sprints/:id - Atualizar sprint (200)
-- ✅ DELETE /sprints/:id - Deletar sprint (200)
+### Testes de DELETE (Remoção)
+18. ✅ DELETE /tasks/:id/tags/:tagId - Remover tag da tarefa
+19. ✅ DELETE /tasks/:id/comments/:commentId - Deletar comentário
+20. ✅ DELETE /tasks/:id - Deletar tarefa
+21. ✅ DELETE /tags/:id - Deletar tag
+22. ✅ DELETE /users/:id - Deletar utilizador (com validação de FK)
 
-### Notificações
-- ✅ GET /notifications - Buscar todas as notificações (200)
-- ✅ POST /notifications - Criar nova notificação (201)
-- ✅ PUT /notifications/:id - Marcar como lida (200)
-- ✅ DELETE /notifications/:id - Deletar notificação (200)
-
-### Busca e Filtros
-- ✅ GET /tasks?search=termo&sort=asc - Buscar tarefas com filtro (200)
-- ✅ GET /users?search=termo&sort=asc - Buscar utilizadores com filtro (200)
+### Testes de GET com Relacionamentos
+23. ✅ GET /tasks/:id/tags - Buscar tags de uma tarefa
+24. ✅ GET /tasks/:id/comments - Buscar comentários de uma tarefa
+25. ✅ GET /tags/:id/tasks - Buscar tarefas com uma tag
 
 ## 👨‍💻 Autor
 

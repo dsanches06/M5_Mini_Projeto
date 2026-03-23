@@ -28,6 +28,12 @@ export const getAllUsers = async (search, sort) => {
   return users;
 };
 
+/* Função para buscar utilizador por ID */
+export const getUserById = async (userId) => {
+  const [users] = await db.query("SELECT * FROM utilizador WHERE id = ?", [userId]);
+  return users[0] || null;
+};
+
 /* Função para criar utilizador */
 export const createUser = async (data) => {
   const [result] = await db.query(
@@ -119,8 +125,8 @@ export const getUserStats = async () => {
   const [activeResult] = await db.query("SELECT COUNT(*) as activeUsers FROM utilizador WHERE activo = 1");
   const activeUsers = activeResult[0].activeUsers;
 
-
-  const inactiveUsers = totalUsers - activeUsers;
+  const [inactiveResult] = await db.query("SELECT COUNT(*) as inactiveUsers FROM utilizador WHERE activo = 0");
+  const inactiveUsers = inactiveResult[0].inactiveUsers;
 
   const activePercentage = totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(2) : "0.00";
   const inactivePercentage = totalUsers > 0 ? ((inactiveUsers / totalUsers) * 100).toFixed(2) : "0.00";
@@ -132,31 +138,4 @@ export const getUserStats = async () => {
     activePercentage: activePercentage + "%",
     inactivePercentage: inactivePercentage + "%",
   };
-};
-
-/* Função para obter notificações não lidas */
-export const getUnreadNotifications = async (userId) => {
-  const [notifications] = await db.query(
-    "SELECT * FROM notificacao WHERE id_utilizador = ? AND lida = 0",
-    [userId]
-  );
-  return notifications;
-};
-
-/* Função para obter notificações do utilizador */
-export const getNotificationsByUser = async (userId) => {
-  const [notifications] = await db.query(
-    "SELECT * FROM notificacao WHERE id_utilizador = ?",
-    [userId]
-  );
-  return notifications;
-};
-
-/* Função para marcar notificação como lida */
-export const markNotificationAsRead = async (notificationId) => {
-  const [result] = await db.query(
-    "UPDATE notificacao SET lida = 1 WHERE id = ?",
-    [notificationId]
-  );
-  return result.affectedRows;
 };
