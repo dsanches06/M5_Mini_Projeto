@@ -144,7 +144,7 @@ export const addTagToTask = async (taskId, tagId) => {
     [taskId, tagId],
   );
 
-  return { taskId, tagId };
+  return { taskId, tagId, relationId: result.insertId };
 };
 
 /* Função para remover etiqueta da tarefa */

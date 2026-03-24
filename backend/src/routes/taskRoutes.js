@@ -6,8 +6,9 @@ const router = express.Router();
 //Taks routes
 router.get("/", taskController.getTasks);
 router.get("/stats", taskController.getStats);
-router.post("/", taskController.createTask);
-router.put("/:id", taskController.updateTask);
+router.post("/", validateTaskData, taskController.createTask);
+router.put("/:id", validateTaskData, taskController.updateTask);
+router.patch("/:id", taskController.taskMarkedAsCompleted);
 router.delete("/:id", taskController.deleteTask);
 
 // Tags routes (must come before /:id routes)

@@ -24,7 +24,6 @@ export const getAllUsers = async (search, sort) => {
       }
     });
   }
-
   return users;
 };
 
@@ -82,23 +81,9 @@ export const deleteUser = async (userId) => {
 
 /* Função para alternar status ativo/inativo do utilizador */
 export const toggleUserActive = async (userId, data) => {
-  const fieldsToUpdate = [];
-  const values = [];
-
-  if (data.activo !== undefined) {
-    fieldsToUpdate.push("activo = ?");
-    values.push(data.activo);
-  }
-
-  if (fieldsToUpdate.length === 0) {
-    throw new Error("Nenhum campo para atualizar");
-  }
-
-  values.push(userId);
-
   const [result] = await db.query(
-    `UPDATE utilizador SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
-    values,
+    "UPDATE utilizador SET activo = ? WHERE id = ?",
+    [data.activo, userId],
   );
   return result.affectedRows;
 };
