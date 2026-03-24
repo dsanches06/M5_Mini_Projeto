@@ -76,3 +76,8 @@ export const deleteNotification = async (notificationId) => {
   ]);
   return result.affectedRows;
 };
+
+/* Função para marcar notificação como lida */
+export const markAsRead = async (notificationId) => {
+  return await toggleReadStatus(notificationId, true);
+};

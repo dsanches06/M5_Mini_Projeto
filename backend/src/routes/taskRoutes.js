@@ -1,5 +1,6 @@
 import express from "express";
 import * as taskController from "../controllers/taskController.js";
+import { validateTaskData } from "../middlewares/validateTaskData.js";
 
 const router = express.Router();
 

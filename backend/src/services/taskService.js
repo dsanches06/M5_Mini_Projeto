@@ -100,8 +100,6 @@ export const updateTask = async (taskId, data) => {
 
 /* Função para deletar tarefa */
 export const deleteTask = async (taskId) => {
-  await db.query("DELETE FROM etiqueta_tarefa WHERE id_tarefa=?", [taskId]);
-  await db.query("DELETE FROM comentario WHERE id_tarefa=?", [taskId]);
   const [result] = await db.query("DELETE FROM tarefa WHERE id=?", [taskId]);
   return result.affectedRows;
 };
@@ -179,11 +177,14 @@ export const getTaskStats = async () => {
   const [result] = await db.query("SELECT COUNT(*) as totalTasks FROM tarefa");
   const totalTasks = result[0].totalTasks;
 
-  const [completedResult] = await db.query("SELECT COUNT(*) as completedTasks FROM tarefa WHERE data_conclusao IS NOT NULL");
+  const [completedResult] = await db.query(
+    "SELECT COUNT(*) as completedTasks FROM tarefa WHERE data_conclusao IS NOT NULL",
+  );
   const completedTasks = completedResult[0].completedTasks;
 
   const pendingTasks = totalTasks - completedTasks;
-  const completedPercentage = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : "0.00";
+  const completedPercentage =
+    totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : "0.00";
 
   return {
     totalTasks,

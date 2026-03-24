@@ -1,4 +1,5 @@
 import * as userService from "../services/userService.js";
+import * as notificationService from "../services/notificationService.js";
 
 /* Função para buscar usuários */
 export const getUsers = async (req, res) => {
@@ -115,5 +116,47 @@ export const getStats = async (req, res) => {
     res
       .status(400)
       .json({ message: `Erro ao buscar estatísticas: ${error.message}` });
+  }
+};
+
+/* Função para buscar notificações não lidas de um usuário */
+export const getUnreadNotifications = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const notifications = await notificationService.getUnreadNotifications(Number(userId));
+    res.json(notifications);
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: `Erro ao buscar notificações não lidas: ${error.message}` });
+  }
+};
+
+/* Função para buscar notificações de um usuário */
+export const getNotificationsByUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const notifications = await notificationService.getNotificationsByUser(Number(userId));
+    res.json(notifications);
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: `Erro ao buscar notificações: ${error.message}` });
+  }
+};
+
+/* Função para marcar notificação como lida */
+export const markAsRead = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const affectedRows = await notificationService.markAsRead(Number(notificationId));
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Notificação não encontrada" });
+    }
+    res.json({ message: "Notificação marcada como lida" });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: `Erro ao marcar notificação como lida: ${error.message}` });
   }
 };
