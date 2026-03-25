@@ -15,6 +15,7 @@
     <link rel="canonical" href="./index.html" />
     <link rel="icon" href="./src/assets/favicon.ico" />
     <link rel="stylesheet" href="./src/styles/style.css" />
+    <link rel="stylesheet" href="./src/styles/sidebar.css" />
     <script src="./dist/main.js" type="module" defer></script>
     <script
       src="https://kit.fontawesome.com/874e9efdc5.js"
@@ -24,13 +25,45 @@
   <body>
     <header>
       <h1>ClickUp</h1>
-      <nav>
-        <ul class="menu">
-          <li><a id="menuUsers" class="js-link">Users</a></li>
-          <li><a id="menuTasks" class="js-link">Tasks</a></li>
-        </ul>
-      </nav>
     </header>
+    <aside class="sidebar" role="navigation">
+      <div class="left">
+        <img src="./src/assets/logo.png" alt="Logo" />
+        <button>
+          <i class="fas fa-home"></i>
+        </button>
+      </div>
+      <div class="right">
+        <div class="right-inner">
+          <div class="header">
+            <div>
+              <h2>Clickup</h2>
+              <h3>Gestão de Projetos</h3>
+            </div>
+            <i class="fas fa-sort"></i>
+          </div>
+          <nav>
+            <a id="menuStatistics" class="js-link">
+              <i class="fas fa-chart-line"></i>
+              <span>Dashboard</span>
+            </a>
+            <a id="menuProjects" class="js-link">
+              <i class="fas fa-folder"></i>
+              <span>Projetos</span>
+            </a>
+            <a id="menuUsers" class="js-link">
+              <i class="fas fa-user"></i>
+              <span>Utilizadores</span>
+            </a>
+            <a id="menuTasks" class="js-link">
+              <i class="fas fa-tasks"></i>
+              <span>Tarefas</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
+
     <main role="main">
       <section id="containerSection" class="container"></section>
     </main>

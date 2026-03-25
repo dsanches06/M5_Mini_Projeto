@@ -1,5 +1,4 @@
 import { IUser } from "../../models/index.js";
-import { ITask } from "../../tasks/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 import { showTasksCounters } from "./index.js";
 import { renderTaskModal } from "../modal/index.js";
@@ -11,7 +10,6 @@ import {
 import {
   addElementInContainer,
   createSection,
-  menuSelected,
   createHeadingTitle,
   createStatisticsCounter,
   createSearchContainer,
@@ -23,9 +21,6 @@ import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 
 /* Lista de tarefas  */
 export function loadTasksPage(user?: IUser): void {
-  /* ativa o menu tarefas */
-  menuSelected("#menuTasks");
-
   const tasks = user ? user.getTasks() : TaskService.getAllTasks();
   const title = user ? `Tarefas de ${user.getName()}` : "GESTÃO DE TAREFAS";
 

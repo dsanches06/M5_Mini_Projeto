@@ -3,7 +3,6 @@ import { UserService } from "../../services/index.js";
 import {
   addElementInContainer,
   createSection,
-  menuSelected,
   createHeadingTitle,
   createStatisticsCounter,
   createSearchContainer,
@@ -20,8 +19,6 @@ import {
 
 /* Lista de utilizadores */
 export function loadUsersPage(users: IUser[]): void {
-  /* ativa o menu Users */
-  menuSelected("#menuUsers");
   clearContainer("#containerSection");
 
   addElementInContainer(
