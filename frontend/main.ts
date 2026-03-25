@@ -3,6 +3,7 @@ import {
   loadAInitialTasks,
 } from "./src/ui/gestUserTask/index.js";
 import { activateMenu } from "./src/ui/dom/index.js";
+import { setupCompleteStatisticsPage } from "./src/ui/statistics/StatisticsPageExample.js";
 
 //inicializar a aplicação
 window.onload = () => {
@@ -42,6 +43,6 @@ const allMenuStatistics = document.querySelectorAll('#menuStatistics') as NodeLi
 allMenuStatistics.forEach(button => {
   button.addEventListener("click", () => {
     activateMenu("#menuStatistics");
-    // Carregar estatísticas quando a função estiver disponível
+    setupCompleteStatisticsPage();
   });
 });
