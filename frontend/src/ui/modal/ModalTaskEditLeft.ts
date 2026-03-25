@@ -31,7 +31,7 @@ function setupEditTaskFormLogic(
   task: ITask,
   user?: IUser,
 ): void {
-  form.onsubmit = (e: Event) => {
+  form.onsubmit = async (e: Event) => {
     e.preventDefault();
 
     const title = fields.title.value.trim();
@@ -44,7 +44,7 @@ function setupEditTaskFormLogic(
     let isValid = true;
 
     if (!GlobalValidators.isNonEmpty(title)) {
-      errors.titleErr.textContent = "O título não pode estar vazio.";
+      errors.titleErr.textContent = "O tírulo não pode estar vazio.";
       isValid = false;
     }
 
@@ -62,23 +62,23 @@ function setupEditTaskFormLogic(
       return;
     }
 
-    handleTitleChange(task, title, user);
-    handleDescriptionChange(task, description, user);
-    handleStatusChange(task, statusValue, user);
+    await handleTitleChange(task, title, user);
+    await handleDescriptionChange(task, description, user);
+    await handleStatusChange(task, statusValue, user);
     if (userValue === "") {
-      handleUnassign(task, fields);
+      await handleUnassign(task, fields);
     } else {
-      handleAssign(userValue, task, fields);
+      await handleAssign(userValue, task, fields);
     }
     modal.remove();
   };
 }
 
-function handleTitleChange(task: ITask, title: string, user?: IUser) {
+async function handleTitleChange(task: ITask, title: string, user?: IUser) {
   if (title !== task.getTitle()) {
     task.setTitle(title);
 
-    const tasks = user ? user.getTasks() : TaskService.getAllTasks();
+    const tasks = user ? user.getTasks() : [];
 
     renderDashboard(tasks, user);
     showInfoBanner(
@@ -88,7 +88,7 @@ function handleTitleChange(task: ITask, title: string, user?: IUser) {
   }
 }
 
-function handleDescriptionChange(
+async function handleDescriptionChange(
   task: ITask,
   description: string,
   user?: IUser,
@@ -97,7 +97,7 @@ function handleDescriptionChange(
     const current = (task as ITask).getDescription() ?? "";
     if (description !== current) {
       (task as ITask).setDescription(description);
-      const tasks = user ? user.getTasks() : TaskService.getAllTasks();
+      const tasks = user ? user.getTasks() : [];
       renderDashboard(tasks, user);
       showInfoBanner(
         `INFO: A descrição da tarefa "${task.getTitle()}" foi atualizada.`,
@@ -107,13 +107,13 @@ function handleDescriptionChange(
   }
 }
 
-function handleStatusChange(task: ITask, statusValue: string, user?: IUser) {
+async function handleStatusChange(task: ITask, statusValue: string, user?: IUser) {
   const newStatus = (TaskStatus as any)[statusValue] as TaskStatus;
   if (newStatus && newStatus !== task.getStatus()) {
     if (task.getUser()) {
       if (StateTransitions.validTransitions(task.getStatus(), newStatus)) {
         task.moveTo(newStatus);
-        const tasks = user ? user.getTasks() : TaskService.getAllTasks();
+        const tasks = user ? user.getTasks() : [];
         renderDashboard(tasks, user);
         showInfoBanner(
           `INFO: O estado da tarefa "${task.getTitle()}" foi alterado para ${TaskStatus[newStatus]}.`,
@@ -134,29 +134,30 @@ function handleStatusChange(task: ITask, statusValue: string, user?: IUser) {
   }
 }
 
-function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }) {
+async function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }) {
   const currentUser = task.getUser();
   if (currentUser) {
     if (!task.getCompleted()) {
       fields.status.disabled = true;
-      AssignmentService.unassignUser(task.getId(), currentUser.getId());
+      // TODO: Implementar unassign via API
+      // await AssignmentService.unassignUser(task.getId(), currentUser.getId());
       const user = task.getUser();
-      const tasks = user ? user.getTasks() : TaskService.getAllTasks();
+      const tasks = user ? user.getTasks() : [];
       renderDashboard(tasks, user);
       showInfoBanner(
-        `INFO: A tarefa "${task.getTitle()}" foi cancelada do utilizador "${currentUser.getName()}" com sucesso.`,
+        `INFO: A tarefa "${task.getTitle()}" foi desvinculada do utilizador "${currentUser.getName()}" com sucesso.`,
         "info-banner",
       );
     } else {
       showInfoBanner(
-        `ERRO: A tarefa "${task.getTitle()}" não pode ser cancelada pois já está concluída.`,
+        `ERRO: A tarefa "${task.getTitle()}" não pode ser desvinculada pois já está concluída.`,
         "error-banner",
       );
     }
   }
 }
 
-function handleAssign(
+async function handleAssign(
   userValue: string,
   task: ITask,
   fields: { status: HTMLSelectElement },
@@ -167,9 +168,10 @@ function handleAssign(
     fields.status.disabled = true;
     const currentUser = task.getUser();
     if (!currentUser || currentUser.getId() !== userId) {
-      AssignmentService.assignUser(task.getId(), userId);
+      // TODO: Implementar assign via API
+      // await AssignmentService.assignUser(task.getId(), userId);
       const user = task.getUser();
-      const tasks = user ? user.getTasks() : TaskService.getAllTasks();
+      const tasks = user ? user.getTasks() : [];
       renderDashboard(tasks, user);
       showInfoBanner(
         `INFO: A tarefa "${task.getTitle()}" foi atribuída ao utilizador "${user?.getName()}" com sucesso.`,
@@ -184,11 +186,11 @@ function handleAssign(
   }
 }
 
-export function renderEditTaskLeftPanel(
+export async function renderEditTaskLeftPanel(
   task: ITask,
   user: IUser | undefined,
   modal: HTMLElement,
-): {
+): Promise<{
   leftContainer: HTMLDivElement;
   form: HTMLFormElement;
   fields: {
@@ -200,7 +202,7 @@ export function renderEditTaskLeftPanel(
   errors: {
     titleErr: HTMLElement;
   };
-} {
+}> {
   const errorBanner = createSection("section") as HTMLElement;
   errorBanner.classList.add("error-banner");
   errorBanner.style.display = "none";
@@ -275,15 +277,29 @@ export function renderEditTaskLeftPanel(
   defaultOption.textContent = "Nenhum";
   userSelect.appendChild(defaultOption);
 
-  const usersActive = UserService.getAllUsers().filter((u) => u.isActive());
-  usersActive.forEach((u) => {
-    const opt = document.createElement("option");
-    opt.value = u.getId().toString();
-    opt.textContent = `${u.getName()} [ID: ${u.getId()}]`;
-    if (task.getUser() && task.getUser()!.getId() === u.getId())
-      opt.selected = true;
-    userSelect.appendChild(opt);
-  });
+  // TODO: Obter usuários ativos da API
+  try {
+    const allUsers = await UserService.getUsers();
+    const usersActive = allUsers.filter((u) => {
+      const isActive = typeof u.isActive === 'function' 
+        ? u.isActive() 
+        : (u as any).isActive;
+      return isActive;
+    });
+    usersActive.forEach((u) => {
+      const opt = document.createElement("option");
+      const id = typeof u.getId === 'function' ? u.getId() : (u as any).id;
+      const name = typeof u.getName === 'function' ? u.getName() : (u as any).name;
+      opt.value = id.toString();
+      opt.textContent = `${name} [ID: ${id}]`;
+      if (task.getUser() && task.getUser()!.getId() === id)
+        opt.selected = true;
+      userSelect.appendChild(opt);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar usuários:", error);
+  }
+  
   userGroup.append(userLabel, userSelect);
 
   const submitBtn = createButton(

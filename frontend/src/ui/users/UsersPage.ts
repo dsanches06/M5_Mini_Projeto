@@ -34,7 +34,7 @@ export function loadUsersPage(users: IUser[]): void {
   const searchContainer = showSearchContainer();
   addElementInContainer("#containerSection", searchContainer);
 
-  const usersContainer = renderUsers( UserService.getAllUsers());
+  const usersContainer = renderUsers(users);
   addElementInContainer("#containerSection", usersContainer);
 
   // Adicionar event listeners aos botões de contador para filtrar
@@ -56,24 +56,27 @@ export function loadUsersPage(users: IUser[]): void {
   ) as HTMLElement;
   filterUsersBtn.title = "Mostrar todos os utilizadores filtrados pelo nome";
 
-  allUsersBtn.addEventListener("click", () => {
-    const currentUsers = UserService.getAllUsers();
-    renderUsers(currentUsers as UserClass[]);
-    showUsersCounters(currentUsers as UserClass[], "utilizadores");
+  allUsersBtn.addEventListener("click", async () => {
+    // TODO: Obter usuários da API
+    const currentUsers = await UserService.getUsers();
+    // renderUsers(currentUsers as UserClass[]);
+    // showUsersCounters(currentUsers as UserClass[], "utilizadores");
   });
 
-  ativeUsersBtn.addEventListener("click", () => {
-    const currentUsers = UserService.getAllUsers();
-    const activeUsers = getActiveUsers(currentUsers);
-    renderUsers(activeUsers as UserClass[]);
-    showUsersCounters(activeUsers as UserClass[], "activos");
+  ativeUsersBtn.addEventListener("click", async () => {
+    // TODO: Obter usuários ativos da API
+    const currentUsers = await UserService.getUsers();
+    // const activeUsers = getActiveUsers(currentUsers);
+    // renderUsers(activeUsers as UserClass[]);
+    // showUsersCounters(activeUsers as UserClass[], "activos");
   });
 
-  unableUsersBtn.addEventListener("click", () => {
-    const currentUsers = UserService.getAllUsers();
-    const inactiveUsers = getInactiveUsers(currentUsers);
-    renderUsers(inactiveUsers as UserClass[]);
-    showUsersCounters(inactiveUsers as UserClass[], "inactivos");
+  unableUsersBtn.addEventListener("click", async () => {
+    // TODO: Obter usuários inativos da API
+    const currentUsers = await UserService.getUsers();
+    // const inactiveUsers = getInactiveUsers(currentUsers);
+    // renderUsers(inactiveUsers as UserClass[]);
+    // showUsersCounters(inactiveUsers as UserClass[], "inactivos");
   });
 
   // Adicionar event listeners aos botões de busca
@@ -87,16 +90,17 @@ export function loadUsersPage(users: IUser[]): void {
   if (sortUsersBtn) {
     //Crie uma variável de controle de estado
     let isAscending = true;
-    sortUsersBtn.addEventListener("click", () => {
-      const sortedUsers = sortUsersByName(isAscending);
-      //Inverta o estado para o próximo clique
-      isAscending = !isAscending;
-      // Mostrar os utilizadores ordenados
-      loadUsersPage(sortedUsers);
-      renderUsers(sortedUsers as UserClass[]);
-      showUsersCounters(sortedUsers as UserClass[], "userFiltered");
-      // Atualize o texto ou ícone do botão
-      sortUsersBtn.textContent = isAscending ? "Ordenar A-Z" : "Ordenar Z-A";
+    sortUsersBtn.addEventListener("click", async () => {
+      // TODO: Ordenar usuários da API
+      // const sortedUsers = await sortUsersByName(isAscending);
+      // //Inverta o estado para o próximo clique
+      // isAscending = !isAscending;
+      // // Mostrar os utilizadores ordenados
+      // await loadUsersPage(sortedUsers);
+      // renderUsers(sortedUsers as UserClass[]);
+      // showUsersCounters(sortedUsers as UserClass[], "userFiltered");
+      // // Atualize o texto ou ícone do botão
+      // sortUsersBtn.textContent = isAscending ? "Ordenar A-Z" : "Ordenar Z-A";
     });
   } else {
     console.warn("Elemento #sortUsersBtn não foi renderizado no DOM.");
@@ -105,11 +109,12 @@ export function loadUsersPage(users: IUser[]): void {
   //
   const searchUser = document.querySelector("#searchUser") as HTMLInputElement;
   if (searchUser) {
-    searchUser.addEventListener("input", () => {
-      const name = searchUser.value.toLowerCase();
-      const filteredUsers = searchUserByName(name);
-      renderUsers(filteredUsers);
-      showUsersCounters(filteredUsers as UserClass[], "userFiltered");
+    searchUser.addEventListener("input", async () => {
+      // TODO: Buscar usuários da API
+      // const name = searchUser.value.toLowerCase();
+      // const filteredUsers = await searchUserByName(name);
+      // renderUsers(filteredUsers);
+      // showUsersCounters(filteredUsers as UserClass[], "userFiltered");
     });
   } else {
     console.warn("Elemento de busca de utilizadores não encontrado.");

@@ -1,4 +1,4 @@
-import { ITask } from "../../tasks/index.js";
+import { ITask, Task } from "../../tasks/index.js";
 import { UserService, CommentService } from "../../services/index.js";
 import {
   createButton,
@@ -11,6 +11,7 @@ import {
   showInfoBanner,
 } from "../../helpers/index.js";
 import Comment from "../../comments/Comment.js";
+import { TaskStatus } from "../../tasks/TaskStatus.js";
 
 function renderEditCommentModal(comment: Comment, onSave: () => void): void {
   const editModal = createSection("editCommentModal") as HTMLElement;
@@ -68,7 +69,8 @@ function renderEditCommentModal(comment: Comment, onSave: () => void): void {
     const newMsg = textInput.value.trim();
     if (newMsg) {
       comment.setMessage(newMsg);
-      CommentService.updateComment(comment.getId(), newMsg);
+      // TODO: Implementar atualização de comentário via API
+      // await CommentService.updateTaskComment(task.getId(), comment.getId(), { message: newMsg });
       showInfoBanner("INFO: Comentário atualizado com sucesso.", "info-banner");
       onSave();
       editModal.remove();
@@ -147,7 +149,8 @@ export function renderEditTaskRightPanel(task: ITask): HTMLDivElement {
     const msg = commentInput.value.trim();
     if (msg) {
       const userId = task.getUser() ? task.getUser()!.getId() : 0;
-      CommentService.addComment(task.getId(), userId, msg);
+      // TODO: Implementar criação de comentário via API
+      // await CommentService.createTaskComment(task.getId(), { userId, message: msg });
       commentInput.value = "";
       refreshComments(task, commentList);
     }
@@ -160,13 +163,16 @@ export function renderEditTaskRightPanel(task: ITask): HTMLDivElement {
 
 function refreshComments(task: ITask, commentList: HTMLElement): void {
   commentList.innerHTML = "";
-  const comments = CommentService.getComments(task.getId());
+  const comments: any[] = []; // TODO: Obter comentários da API
+  // const comments = await CommentService.getTaskComments(task.getId());
   comments.forEach((comment) => {
-    const user = UserService.getUserById(comment.getUserId());
+    // TODO: Obter usuário da API
+    const user = null; // await UserService.getUserById(comment.getUserId());
     const item = document.createElement("div");
     item.className = "comment-item";
     const authorName = document.createElement("strong");
-    authorName.textContent = user ? user.getName() : "[desconhecido]";
+    // TODO: Implementar getName() quando user for obtido da API
+    authorName.textContent = user ? "[user name]" : "[desconhecido]";
 
     const commentText = document.createElement("p");
     commentText.textContent = comment.getMessage();
@@ -175,14 +181,15 @@ function refreshComments(task: ITask, commentList: HTMLElement): void {
     item.append(authorName, commentText);
 
     // Aplicar cor do border baseada no taskId
-    const task = CommentService.getTaskByCommentId(comment.getId());
-    const borderColor = getCardBorderColor(task!.getStatus());
+    const taskFromComment = null; // TODO: Obter tarefa do comentário via API
+    // TODO: Implementar getStatus() quando task for obtido da API
+    const borderColor = getCardBorderColor(TaskStatus.ARCHIVED); // Placeholder color
     setCardBorderColor(item, borderColor);
 
     item.style.cursor = "pointer";
     item.onclick = () => {
       renderEditCommentModal(comment, () =>
-        refreshComments(task!, commentList),
+        refreshComments(task, commentList),
       );
     };
     commentList.appendChild(item);

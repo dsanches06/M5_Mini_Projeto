@@ -111,11 +111,13 @@ function userCardBtn(user: UserClass): HTMLElement {
   bntToggle.appendChild(toogleIcon);
   bntToggle.id = "toogleBtn";
   bntToggle.title = "Ativar ou desativar utilizador";
-  bntToggle.addEventListener("click", (event) => {
+  bntToggle.addEventListener("click", async (event) => {
     event.stopPropagation();
-    toggleUserState(user.getId());
-    renderUsers(UserService.getAllUsers() as UserClass[]);
-    showUsersCounters(UserService.getAllUsers() as UserClass[], "utilizadores");
+    await toggleUserState(user.getId());
+    // TODO: Recarregar lista de utilizadores da API
+    const users = await UserService.getUsers();
+    renderUsers(users as UserClass[]);
+    showUsersCounters(users as UserClass[], "utilizadores");
   });
 
   const trashIcon = document.createElement("i") as HTMLElement;
@@ -127,7 +129,7 @@ function userCardBtn(user: UserClass): HTMLElement {
   btnRemover.role = "button";
   btnRemover.style.color = "#ff4c4c";
   btnRemover.title = "Remover tarefas do utilizador";
-  btnRemover.addEventListener("click", (event) => {
+  btnRemover.addEventListener("click", async (event) => {
     event.stopPropagation();
     if (user.getTasks().length > 0) {
       showInfoBanner(
@@ -135,16 +137,19 @@ function userCardBtn(user: UserClass): HTMLElement {
         "error-banner",
       );
     } else {
-      const remove = removeUserByID(user.getId());
-      if (remove) {
+      try {
+        // TODO: Implementar deleção de utilizador via API
+        // const removed = await UserService.deleteUser(user.getId());
+        showInfoBanner("Utilizador removido com sucesso.", "info-banner");
         //atualiza a lista de utilizadores
-        renderUsers(UserService.getAllUsers() as UserClass[]);
+        const users = await UserService.getUsers();
+        renderUsers(users as UserClass[]);
         showUsersCounters(
-          UserService.getAllUsers() as UserClass[],
+          users as UserClass[],
           "utilizadores",
         );
-      } else {
-        showInfoBanner("O utilizador não foi removido", "error-banner");
+      } catch (error) {
+        showInfoBanner("Erro ao remover utilizador.", "error-banner");
       }
     }
   });

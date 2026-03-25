@@ -1,7 +1,7 @@
 import { ITask } from "../tasks/index.js";
 import {
   NotificationService,
-  AutomationRulesService,
+  // AutomationRulesService,
 } from "../services/index.js";
 import { SystemLogger } from "../logs/SystemLogger.js";
 import { TaskStatus } from "../tasks/TaskStatus.js";
@@ -52,24 +52,29 @@ export function processTask(task: ITask) {
         SystemLogger.log(
           `ERRO: Bug ${task.getId()} tem título inválido. O título precisa ter pelo menos 10 caracteres.`,
         );
-        NotificationService.notifyAdmins(
-          `Bug ${task.getTitle()} (id:${task.getId()}) possui título inválido e não pode ser processado.`,
-        );
-        if (user) {
-          NotificationService.notifyUser(
-            user.getId(),
-            `Bug ${task.getTitle()} não pôde ser processado devido a título inválido.`,
-          );
-        }
+        // TODO: Implementar notificação assincróna
+        // await NotificationService.createNotification({
+        //   message: `Bug ${task.getTitle()} (id:${task.getId()}) possui título inválido e não pode ser processado.`,
+        //   recipientType: 'admins'
+        // });
+        // TODO: Implementar notificação assincróna
+        // if (user) {
+        //   await NotificationService.createNotification({
+        //     userId: user.getId(),
+        //     message: `Bug ${task.getTitle()} não pôde ser processado devido a título inválido.`,
+        //   });
+        // }
         return;
       }
       if (!user) {
         SystemLogger.log(
           `ERRO: Bug ${task.getId()} não possui usuário atribuído e regras mais rígidas impedem o processamento.`,
         );
-        NotificationService.notifyAdmins(
-          `Bug ${task.getTitle()} (id:${task.getId()}) sem usuário atribuíd o e não pode ser processado.`,
-        );
+        // TODO: Implementar notificação assincróna
+        // await NotificationService.createNotification({
+        //   message: `Bug ${task.getTitle()} (id:${task.getId()}) sem usuário atribuído e não pode ser processado.`,
+        //   recipientType: 'admins'
+        // });
         return;
       }
       notifyOnSuccess = true;
@@ -82,12 +87,13 @@ export function processTask(task: ITask) {
         SystemLogger.log(
           `ERRO: Feature ${task.getId()} possui título vazio e não pode ser processado.`,
         );
-        if (user) {
-          NotificationService.notifyUser(
-            user.getId(),
-            `Feature ${task.getTitle()} não pôde ser processado porque o título está vazio.`,
-          );
-        }
+        // TODO: Implementar notificação assincróna
+        // if (user) {
+        //   await NotificationService.createNotification({
+        //     userId: user.getId(),
+        //     message: `Feature ${task.getTitle()} não pôde ser processado porque o título está vazio.`,
+        //   });
+        // }
         return;
       }
       if (!GlobalValidators.minLength(title, 3)) {
@@ -125,7 +131,8 @@ function processTransition(
 ) {
   try {
     task.moveTo(nextStatus);
-    AutomationRulesService.applyRules(task);
+    // TODO: Implementar AutomationRulesService.applyRules() via API
+    // AutomationRulesService.applyRules(task);
 
     SystemLogger.log(
       `INFO: A tarefa ${task.getTitle()} do tipo ${type} atribuido ao ${user?.getName()} foi processado [${currentStatus.toString()} -> ${nextStatus.toString()}].`,
@@ -139,32 +146,38 @@ function processTransition(
     }
 
     if (notifyOnSuccess && user) {
-      NotificationService.notifyUser(
-        user.getId(),
-        `A tarefa ${task.getTitle()} do tipo ${type} atribuido ao ${user.getName()} foi processado [${currentStatus.toString()} -> ${nextStatus.toString()}].`,
-      );
+      // TODO: Implementar notificação assincróna
+      // await NotificationService.createNotification({
+      //   userId: user.getId(),
+      //   message: `A tarefa ${task.getTitle()} do tipo ${type} atribuido ao ${user.getName()} foi processado [${currentStatus.toString()} -> ${nextStatus.toString()}].`,
+      // });
     }
 
     if (notifyAdminsOnSuccess) {
-      NotificationService.notifyAdmins(
-        `A tarefa ${task.getTitle()} (id:${task.getId()}) do tipo ${type} foi processada [${currentStatus.toString()} -> ${nextStatus.toString()}].`,
-      );
+      // TODO: Implementar notificação assincróna
+      // await NotificationService.createNotification({
+      //   message: `A tarefa ${task.getTitle()} (id:${task.getId()}) do tipo ${type} foi processada [${currentStatus.toString()} -> ${nextStatus.toString()}].`,
+      //   recipientType: 'admins'
+      // });
     }
   } catch (error: any) {
     SystemLogger.log(
       `ERRO: Falha ao processar a tarefa ${task.getTitle()} do tipo ${type} atribuido ao ${user?.getName()}. Motivo: ${error.message}`,
     );
     if (user) {
-      NotificationService.notifyUser(
-        user.getId(),
-        `Falha ao processar a tarefa ${task.getTitle()} do tipo ${type} atribuido ao ${user.getName()}. Motivo: ${error.message}`,
-      );
+      // TODO: Implementar notificação assincróna
+      // await NotificationService.createNotification({
+      //   userId: user.getId(),
+      //   message: `Falha ao processar a tarefa ${task.getTitle()} do tipo ${type} atribuido ao ${user.getName()}. Motivo: ${error.message}`,
+      // });
     }
 
     if (notifyAdminsOnSuccess) {
-      NotificationService.notifyAdmins(
-        `Falha ao processar a tarefa ${task.getTitle()} (id:${task.getId()}) do tipo ${type}. Motivo: ${error.message}`,
-      );
+      // TODO: Implementar notificação assincróna
+      // await NotificationService.createNotification({
+      //   message: `Falha ao processar a tarefa ${task.getTitle()} (id:${task.getId()}) do tipo ${type}. Motivo: ${error.message}`,
+      //   recipientType: 'admins'
+      // });
     }
   }
 }

@@ -426,9 +426,10 @@ export class StatisticPageUI {
     canvas.width = 500;
     canvas.height = 300;
 
-    const totalTasks = this.statisticsService.countTasks();
-    const completedTasks = this.statisticsService.countCompletedTasks();
-    const activeTasks = this.statisticsService.countActiveTasks();
+    // TODO: Implementar métodos de contagem via API
+    const totalTasks = 0; // this.statisticsService.countTasks();
+    const completedTasks = 0; // this.statisticsService.countCompletedTasks();
+    const activeTasks = 0; // this.statisticsService.countActiveTasks();
 
     this.drawBarChart(
       canvas,
@@ -460,9 +461,8 @@ export class StatisticPageUI {
       TaskStatus.COMPLETED,
     ];
     const statusNames = ["Pendente", "Em Progresso", "Concluída"];
-    const data = statuses.map((status) =>
-      this.statisticsService.tasksByStatus(status)
-    );
+    // TODO: Implementar tasksByStatus() via API
+    const data = [0, 0, 0]; // statuses.map((status) => this.statisticsService.tasksByStatus(status));
 
     this.drawPieChart(canvas, statusNames, data, [
       "#dc3545",
@@ -487,8 +487,9 @@ export class StatisticPageUI {
     canvas.width = 400;
     canvas.height = 300;
 
-    const total = this.statisticsService.countTasks();
-    const completed = this.statisticsService.countCompletedTasks();
+    // TODO: Implementar métodos de contagem via API
+    const total = 0; // this.statisticsService.countTasks();
+    const completed = 0; // this.statisticsService.countCompletedTasks();
     const remaining = total - completed;
 
     this.drawDoughnutChart(
@@ -515,8 +516,9 @@ export class StatisticPageUI {
     canvas.width = 500;
     canvas.height = 300;
 
-    const active = this.statisticsService.countActiveTasks();
-    const completed = this.statisticsService.countCompletedTasks();
+    // TODO: Implementar métodos de contagem via API
+    const active = 0; // this.statisticsService.countActiveTasks();
+    const completed = 0; // this.statisticsService.countCompletedTasks();
 
     this.drawLineChart(
       canvas,
@@ -570,11 +572,12 @@ export class StatisticPageUI {
    * Exporta dados dos gráficos como JSON
    */
   public exportChartData(): ChartDataExport {
+    // TODO: Implementar métodos de contagem via API
     return {
-      totalTasks: this.statisticsService.countTasks(),
-      completedTasks: this.statisticsService.countCompletedTasks(),
-      activeTasks: this.statisticsService.countActiveTasks(),
-      users: this.statisticsService.countUsers(),
+      totalTasks: 0, // this.statisticsService.countTasks(),
+      completedTasks: 0, // this.statisticsService.countCompletedTasks(),
+      activeTasks: 0, // this.statisticsService.countActiveTasks(),
+      users: 0, // this.statisticsService.countUsers(),
       timestamp: new Date().toISOString(),
     };
   }

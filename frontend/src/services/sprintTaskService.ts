@@ -1,0 +1,29 @@
+import * as fetchSprintTasks from "../api/fetchSprintTasks.js";
+
+/* Serviço para gerenciar tarefas de sprint */
+export class SprintTaskService {
+  /* Função para obter a lista de tarefas de sprint */
+  static async getSprintTasks(): Promise<any[]> {
+    return await fetchSprintTasks.getSprintTasks();
+  }
+
+  /* Função para obter uma tarefa de sprint por ID */
+  static async getSprintTaskById(id: number): Promise<any | null> {
+    return await fetchSprintTasks.getSprintTaskById(id);
+  }
+
+  /* Função para criar uma nova tarefa de sprint */
+  static async createSprintTask(sprintTask: any): Promise<any | null> {
+    return await fetchSprintTasks.createSprintTask(sprintTask);
+  }
+
+  /* Função para atualizar uma tarefa de sprint existente */
+  static async updateSprintTask(id: number, sprintTask: any): Promise<any | null> {
+    return await fetchSprintTasks.updateSprintTask(id, sprintTask);
+  }
+
+  /* Função para excluir uma tarefa de sprint */
+  static async deleteSprintTask(id: number): Promise<boolean> {
+    return await fetchSprintTasks.deleteSprintTask(id);
+  }
+}

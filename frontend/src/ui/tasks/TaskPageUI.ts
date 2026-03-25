@@ -1,4 +1,5 @@
 import { IUser } from "../../models/index.js";
+import { ITask } from "../../tasks/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 import { showTasksCounters } from "./index.js";
 import { renderTaskModal } from "../modal/index.js";
@@ -21,7 +22,7 @@ import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 
 /* Lista de tarefas  */
 export function loadTasksPage(user?: IUser): void {
-  const tasks = user ? user.getTasks() : TaskService.getAllTasks();
+  const tasks: ITask[] = user ? user.getTasks() : []; // TODO: Obter todas as tarefas da API
   const title = user ? `Tarefas de ${user.getName()}` : "GESTÃO DE TAREFAS";
 
   clearContainer("#containerSection");
@@ -113,8 +114,8 @@ export function loadTasksPage(user?: IUser): void {
   ) as HTMLElement;
 
   if (removeAllCompletedTaskBtn) {
-    removeAllCompletedTaskBtn.addEventListener("click", () => {
-      const removedTasks = removeAllCompletedTask(tasks);
+    removeAllCompletedTaskBtn.addEventListener("click", async () => {
+      const removedTasks = await removeAllCompletedTask(tasks);
 
       if (removedTasks.length > 0) {
         const completedTaskCount = removedTasks.filter((task) =>

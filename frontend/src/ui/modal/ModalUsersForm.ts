@@ -10,7 +10,8 @@ import { UserService } from "../../services/index.js";
 import { IUser, UserClass } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 import { renderUsers, showUsersCounters } from "../users/index.js";
-import { GlobalValidators, IdGenerator } from "../../utils/index.js";
+import { GlobalValidators } from "../../utils/index.js";
+// import { IdGenerator } from "../../utils/index.js"; // TODO: IDs são gerados pelo backend via API
 import { UserRole } from "../../security/UserRole.js";
 
 /**
@@ -32,7 +33,7 @@ function setupFormLogic(
   },
   modal: HTMLElement,
 ): void {
-  form.onsubmit = (e: Event) => {
+  form.onsubmit = async (e: Event) => {
     e.preventDefault();
 
     //obter os resultados
@@ -99,8 +100,8 @@ function setupFormLogic(
 
     // Verificação Final
     if (isValid && roleUser === undefined) {
-      //obter um novo id sequencial global
-      let newId: number = IdGenerator.generateUserId();
+      // TODO: IDs são gerados pelo backend via API, não gerar no frontend
+      let newId: number = 0; // IdGenerator.generateUserId();
       //cria um novo user com os dados inseridos no formulario
 
       if (role === "ADMIN") {
@@ -118,7 +119,8 @@ function setupFormLogic(
       if (roleUser) {
         const user: IUser = new UserClass(newId, name, email, phone, gender, true, roleUser);
         //adiciona a lista de utilizadores
-        UserService.addUser(user);
+        // TODO: Criar usuário via API
+        // await UserService.createUser(user);
         //mensagem de sucesso ou erro
         if (user && user.getName()) {
           showInfoBanner(
@@ -132,10 +134,12 @@ function setupFormLogic(
           );
         }
         //mostra todos os utilizadores
-        renderUsers( UserService.getAllUsers() as UserClass[]);
+        // TODO: Recarregar lista de usuários da API
+        const users = await UserService.getUsers();
+        renderUsers(users as UserClass[]);
         // atualizar contadores
         showUsersCounters(
-           UserService.getAllUsers() as UserClass[],
+          users as UserClass[],
           "utilizadores",
         );
         modal.remove();

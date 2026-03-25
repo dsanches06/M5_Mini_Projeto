@@ -4,7 +4,7 @@ import { createHeadingTitle, createSection } from "../dom/index.js";
 import { renderEditTaskLeftPanel } from "./index.js";
 import { renderEditTaskRightPanel } from "./index.js";
 
-export function renderModalEditTask(task: ITask, user?: IUser): void {
+export async function renderModalEditTask(task: ITask, user?: IUser): Promise<void> {
   const modal = createSection("modalEditTask") as HTMLElement;
   modal.classList.add("modal");
 
@@ -21,7 +21,7 @@ export function renderModalEditTask(task: ITask, user?: IUser): void {
     `Editar ${task.getTitle()}`,
   ) as HTMLHeadingElement;
 
-  const leftPanel = renderEditTaskLeftPanel(task, user, modal);
+  const leftPanel = await renderEditTaskLeftPanel(task, user, modal);
 
   const rightPanel = renderEditTaskRightPanel(task);
 

@@ -2,26 +2,26 @@ import { UserService, TaskService } from "./index.js";
 
 /* Serviço para backup de dados */
 export class BackupService {
-  exportUsers() {
-    return JSON.stringify(UserService.getAllUsers());
+  async exportUsers() {
+    return JSON.stringify(await UserService.getUsers());
   }
-  exportTasks() {
-    return JSON.stringify(TaskService.getAllTasks());
+  async exportTasks() {
+    return JSON.stringify(await TaskService.getTasks());
   }
 
-  exportAssignments() {
-    const assignments = TaskService.getAllTasks().map((task) => ({
+  async exportAssignments() {
+    const assignments = (await TaskService.getTasks()).map((task) => ({
       taskId: task.getId(),
       assignedTo: task.getUser()?.getId() ?? null,
     }));
     return JSON.stringify(assignments);
   }
 
-  exportAll() {
+  async exportAll() {
     return {
-      users: this.exportUsers(),
-      tasks: this.exportTasks(),
-      assignments: this.exportAssignments(),
+      users: await this.exportUsers(),
+      tasks: await this.exportTasks(),
+      assignments: await this.exportAssignments(),
     };
   }
 }

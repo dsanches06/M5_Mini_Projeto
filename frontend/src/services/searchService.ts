@@ -5,16 +5,20 @@ import { UserService, TaskService } from "./index.js";
 export class SearchService {
   constructor() {}
 
-  searchByTitle(text: string) {
-    return TaskService.getAllTasks().filter((task) => task.getTitle().includes(text));
+  async searchByTitle(text: string) {
+    return await (
+      await TaskService.getTasks()
+    ).filter((task) => task.getTitle().includes(text));
   }
 
-  searchByUser(userId: number) {
-    return UserService.getUserById(userId);
+  async searchByUser(userId: number) {
+    return await UserService.getUserById(userId);
   }
 
-  searchByStatus(status: TaskStatus) {
-    return TaskService.getAllTasks().filter((task) => task.getStatus() === status);
+  async searchByStatus(status: TaskStatus) {
+    return await (
+      await TaskService.getTasks()
+    ).filter((task) => task.getStatus() === status);
   }
 
   globalSearch(query: any) {

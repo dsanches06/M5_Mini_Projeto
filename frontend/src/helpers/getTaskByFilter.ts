@@ -5,7 +5,9 @@ import { showInfoBanner } from "./index.js";
 /* Função para obter tarefas por filtro */
 export  function getUserTasksByFilter(filter: string, title?: string): ITask[] {
   let tasks: ITask[] = [];
-  for (const task of  UserService.getAllUserTasks()) {
+  // TODO: Obter tarefas de usuários via API
+  const userTasks: any[] = [];
+  for (const task of userTasks) {
     switch (filter) {
       case "all":
         tasks.push(task);

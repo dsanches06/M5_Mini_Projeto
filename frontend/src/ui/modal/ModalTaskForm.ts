@@ -1,7 +1,8 @@
 import { ITask, BugTask, FeatureTask, Task } from "../../tasks/index.js";
 import { TaskCategory } from "../../tasks/TaskCategory.js";
 import { IUser } from "../../models/index.js";
-import { GlobalValidators, IdGenerator } from "../../utils/index.js";
+import { GlobalValidators } from "../../utils/index.js";
+// import { IdGenerator } from "../../utils/index.js"; // TODO: IDs são gerados pelo backend via API
 import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 import { TaskService } from "../../services/index.js";
 
@@ -79,8 +80,8 @@ function setupTaskFormLogic(
           taskCategory = TaskCategory.STUDY;
         }
       }
-      //obter um novo id sequencial global
-      let newId: number = IdGenerator.generateTaskId();
+      // TODO: IDs são gerados pelo backend via API, não gerar no frontend
+      let newId: number = 0; // IdGenerator.generateTaskId();
       //obter o tipo de task a criar
       if (type.trim() === "Bugs") {
         newTask = new BugTask(newId, title, undefined, taskCategory);
@@ -93,15 +94,17 @@ function setupTaskFormLogic(
       if (newTask) {
         if (user) {
           user.createTask(newTask);
-          TaskService.addTask(newTask);
+          // TODO: Implementar criação de tarefa via API
+          // await TaskService.createTask(newTask);
           renderDashboard(user.getTasks(), user);
           showInfoBanner(
             `INFO: A tarefa ${newTask.getTitle()} foi criado ao utilizador ${user.getName()} com sucesso.`,
             "info-banner",
           );
         } else {
-          TaskService.addTask(newTask);
-          renderDashboard(TaskService.getAllTasks());
+          // TODO: Implementar criação de tarefa via API
+          // await TaskService.createTask(newTask);
+          renderDashboard([] as ITask[]);
           showInfoBanner(
             `INFO: A tarefa ${newTask.getTitle()} foi criado com sucesso.`,
             "info-banner",

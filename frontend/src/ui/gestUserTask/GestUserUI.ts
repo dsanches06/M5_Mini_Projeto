@@ -9,91 +9,93 @@ import { clearContainer } from "../dom/index.js";
 import { loadUsersPage } from "../users/index.js";
 
 /* Função principal para carregar utilizadores iniciais */
-export function loadInitialUsers(): void {
+export async function loadInitialUsers(): Promise<void> {
   //Limpa o container antes de mostrar os utilizadores
   clearContainer("#containerSection");
-  // carrega a pagina dinamica de utilizadores
-  loadUsersPage(UserService.getAllUsers());
+
+  const users = await UserService.getUsers();
+  loadUsersPage(users);
 }
 
 /* Remover utilizador */
-export function removeUserByID(id: number) {
-  return UserService.removeUser(id);
+export async function removeUserByID(id: number): Promise<void> {
+  // TODO: Implementar deleção com API
+  await UserService.deleteUser(id);
 }
 
 /* Alternar estado (ativo / inativo) */
-export function toggleUserState(id: number): void {
-  //encontra o utilizador pelo ID
-  const user = UserService.getUserById(id);
-  //se o utilizador for encontrado
-  if (user) {
-    //alternar o estado
-    user.toggleActive();
-    //para ativo
-    if (user.isActive()) {
-      showInfoBanner(
-        `O utilizador "${user.getName()}" está agora ativo.`,
-        "info-banner",
-      );
+export async function toggleUserState(id: number): Promise<void> {
+  try {
+    const user = await UserService.getUserById(id);
+    if (user) {
+      await UserService.toggleUserActive(id, !user.isActive());
+      showInfoBanner(`O estado do utilizador foi alterado.`, "info-banner");
     } else {
-      //todas as tarefas serão processadas
-      const tasksToRemove = [...user.getTasks()];
-
-      if (tasksToRemove.length === 0) {
-        showInfoBanner(
-          `O utilizador "${user.getName()}" não tem tarefas a cancelar.`,
-          "info-banner",
-        );
-      } else {
-        for (const task of tasksToRemove) {
-          if (!task.getCompleted()) {
-            //se não tiver completa, desassignar
-            unassigUserTask(user, task.getId());
-          }
-          //remover tarefa do utilizador
-          user.removeTask(task.getId());
-          //remover tarefa do sistema
-          TaskService.removeTask(task.getId());
-        }
-
-        if (!user.isActive()) {
-          showInfoBanner(
-            `Todas as tarefas do utilizador "${user.getName()}" foram canceladas porque está inactivo.`,
-            "info-banner",
-          );
-        }
-      }
+      showInfoBanner(`Utilizador não encontrado.`, "info-banner");
     }
+  } catch (error) {
+    showInfoBanner(
+      `Erro ao alternar estado do utilizador: ${error}`,
+      "error-banner",
+    );
   }
 }
 
-export function getActiveUsers(users: IUser[]): IUser[] {
+export async function getActiveUsers(): Promise<IUser[]> {
+  const users = await UserService.getUsers();
   return users.filter((user) => user.isActive());
 }
 
-export function getInactiveUsers(users: IUser[]): IUser[] {
+export async function getInactiveUsers(): Promise<IUser[]> {
+  const users = await UserService.getUsers();
   return users.filter((user) => !user.isActive());
 }
 
 /* Procurar utilizador por nome */
-export function searchUserByName(name: string): IUser[] {
-  const lowerCaseName = name.toLowerCase();
-  return UserService.getAllUsers().filter((user) =>
-    user.getName().toLowerCase().includes(lowerCaseName),
-  );
+export async function searchUserByName(name: string): Promise<IUser[]> {
+  try {
+    const allUsers = await UserService.getUsers();
+    const lowerCaseName = name.toLowerCase();
+    return allUsers.filter((user) => {
+      const userName =
+        typeof user.getName === "function"
+          ? user.getName()
+          : (user as any).name;
+      return userName.toLowerCase().includes(lowerCaseName);
+    });
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    return [];
+  }
 }
 
 /* Ordenar utilizadores por nome */
-export function sortUsersByName(ascending: boolean = true): IUser[] {
-  const sortedUsers = [...UserService.getAllUsers()];
-  if (ascending) {
-    sortedUsers.sort((a, b) => a.getName().localeCompare(b.getName()));
-  } else {
-    sortedUsers.sort((a, b) => b.getName().localeCompare(a.getName()));
+export async function sortUsersByName(
+  ascending: boolean = true,
+): Promise<IUser[]> {
+  try {
+    const allUsers = await UserService.getUsers();
+    const sortedUsers = [...allUsers];
+    if (ascending) {
+      sortedUsers.sort((a, b) => {
+        const nameA =
+          typeof a.getName === "function" ? a.getName() : (a as any).name;
+        const nameB =
+          typeof b.getName === "function" ? b.getName() : (b as any).name;
+        return nameA.localeCompare(nameB);
+      });
+    } else {
+      sortedUsers.sort((a, b) => {
+        const nameA =
+          typeof a.getName === "function" ? a.getName() : (a as any).name;
+        const nameB =
+          typeof b.getName === "function" ? b.getName() : (b as any).name;
+        return nameB.localeCompare(nameA);
+      });
+    }
+    return sortedUsers;
+  } catch (error) {
+    console.error("Erro ao ordenar usuários:", error);
+    return [];
   }
-  return sortedUsers;
-}
-
-export function unassigUserTask(user: IUser, taskId: number): void {
-  AssignmentService.unassignUser(taskId, user.getId());
 }

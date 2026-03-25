@@ -44,7 +44,7 @@ export function searchTasksByTitle(
   return tasksFiltered;
 }
 
-export function removeAllCompletedTask(taskList: ITask[]): ITask[] {
+export async function removeAllCompletedTask(taskList: ITask[]): Promise<ITask[]> {
   if (!taskList || taskList.length === 0) {
     showInfoBanner("Não existe tarefas para remover.", "info-banner");
     return [];
@@ -52,8 +52,8 @@ export function removeAllCompletedTask(taskList: ITask[]): ITask[] {
   tasksFiltered = [];
   for (const task of taskList) {
     if (task.getCompleted()) {
-      UserService.getUserByTaskId(task.getId())?.removeTask(task.getId());
-      TaskService.removeTask(task.getId());
+      // TODO: Implementar deleção de tarefas via API
+      // await TaskService.deletarTarefa(task.getId());
     } else {
       tasksFiltered.push(task);
     }

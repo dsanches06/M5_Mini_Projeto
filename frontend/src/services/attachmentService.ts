@@ -1,35 +1,33 @@
+import * as fetchTaskAttachments from "../api/fetchTaskAttachments.js";
 import Attachment from "../attachments/Attachment.js";
 
 /* Serviço para gerir anexos associados a tarefas */
 export class AttachmentService {
-  private attachments: Map<number, Attachment[]>;
-
-  constructor() {
-    this.attachments = new Map<number, Attachment[]>();
+  /* Obtém a lista de anexos de tarefas da API */
+  static async getTaskAttachments(): Promise<any[]> {
+    return await fetchTaskAttachments.getTaskAttachments();
   }
 
-  /* Adiciona um anexo a uma tarefa específica */
-  addAttachment(taskId: number, attachment: Attachment) {
-    if (!this.attachments.has(taskId)) {
-      this.attachments.set(taskId, []);
-    }
-    this.attachments.get(taskId)?.push(attachment);
+  /* Obtém um anexo de tarefa por ID da API */
+  static async getTaskAttachmentById(id: number): Promise<any | null> {
+    return await fetchTaskAttachments.getTaskAttachmentById(id);
   }
 
-  /* Obtém todos os anexos associados a uma tarefa específica */
-  getAttachments(taskId: number) {
-    return this.attachments.get(taskId) || [];
+  /* Cria um novo anexo de tarefa na API */
+  static async createTaskAttachment(attachment: any): Promise<any | null> {
+    return await fetchTaskAttachments.createTaskAttachment(attachment);
   }
 
-  /* Remove um anexo específico */
-  removeAttachment(attachmentId: number) {
-    for (const attachments of this.attachments.values()) {
-      const index = attachments.findIndex(
-        (att) => att.getId() === attachmentId,
-      );
-      if (index !== -1) {
-        attachments.splice(index, 1);
-      }
-    }
+  /* Atualiza um anexo de tarefa na API */
+  static async updateTaskAttachment(
+    id: number,
+    attachment: any,
+  ): Promise<any | null> {
+    return await fetchTaskAttachments.updateTaskAttachment(id, attachment);
+  }
+
+  /* Exclui um anexo de tarefa na API */
+  static async deleteTaskAttachment(id: number): Promise<boolean> {
+    return await fetchTaskAttachments.deleteTaskAttachment(id);
   }
 }

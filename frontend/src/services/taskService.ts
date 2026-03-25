@@ -1,42 +1,62 @@
+import * as fetchTasks from "../api/fetchTasks.js";
 import { ITask } from "../tasks/index.js";
 import { TaskStatus } from "../tasks/TaskStatus.js";
 
 /* Serviço para gerir tarefas */
 export class TaskService {
-  private static tasks = new Map<number, ITask>();
-
-  /* Adiciona uma nova tarefa ao serviço */
-  static addTask(task: ITask): void {
-    if (!this.tasks.has(task.getId())) {
-      this.tasks.set(task.getId(), task);
-    }
+  
+  /* Obtém tarefas da API */
+  static async getTasks(sort?: string, search?: string): Promise<ITask[]> {
+    return await fetchTasks.getTasks(sort, search);
   }
 
-  /* Remove uma tarefa do serviço pelo ID */
-  static removeTask(id: number): boolean {
-    return this.tasks.delete(id);
+  /* Obtém estatísticas de tarefas da API */
+  static async getTaskStats(): Promise<any> {
+    return await fetchTasks.getTaskStats();
   }
 
-  /* Obtém todas as tarefas não concluídas */
-  static getAllTasks(): ITask[] {
-    return Array.from(this.tasks.values());
+  /* Obtém tags de uma tarefa da API */
+  static async getTaskTags(taskId: number): Promise<any[]> {
+    return await fetchTasks.getTaskTags(taskId);
   }
 
-  static getTaskById(id: number): ITask | undefined {
-    return this.tasks.get(id);
+  /* Obtém comentários de uma tarefa da API */
+  static async getTaskComments(taskId: number): Promise<any[]> {
+    return await fetchTasks.getTaskComments(taskId);
   }
 
-  /* Obtém todas as tarefas atribuídas */
-  static getTasksAssign(): ITask[] {
-    return Array.from(this.tasks.values()).filter(
-      (task) => task.getStatus() === TaskStatus.ASSIGNED,
-    );
+  /* Cria um nova tarefa na API */
+  static async createTask(taskData: Partial<ITask>): Promise<ITask> {
+    return await fetchTasks.createTask(taskData);
   }
 
-  /* Obtém todas as tarefas não atribuídas */
-  static getTasksUnassign(): ITask[] {
-    return Array.from(this.tasks.values()).filter(
-      (task) => task.getUser() === undefined,
-    );
+  /* Adiciona uma tag a uma tarefa na API */
+  static async addTagToTask(taskId: number, tagData: any): Promise<any> {
+    return await fetchTasks.addTagToTask(taskId, tagData);
+  }
+
+  /* Cria um comentário em uma tarefa na API */
+  static async createTaskComment(
+    taskId: number,
+    commentData: any,
+  ): Promise<any> {
+    return await fetchTasks.createTaskComment(taskId, commentData);
+  }
+
+  /* Atualiza uma tarefa na API */
+  static async updateTask(
+    taskId: number,
+    taskData: Partial<ITask>,
+  ): Promise<ITask> {
+    return await fetchTasks.updateTask(taskId, taskData);
+  }
+
+  /* Atualiza um comentário na API */
+  static async updateTaskComment(
+    taskId: number,
+    commentId: number,
+    commentData: any,
+  ): Promise<any> {
+    return await fetchTasks.updateTaskComment(taskId, commentId, commentData);
   }
 }

@@ -102,12 +102,13 @@ export async function updateUser(userId: number, userData: Partial<IUser>): Prom
 /* ======================== PATCH ======================== */
 
 /* Função para ativar/desativar um utilizador */
-export async function toggleUserActive(userId: number): Promise<IUser> {
+export async function toggleUserActive(userId: number, active: boolean): Promise<IUser> {
   const res = await fetch(`${BASE_URL}users/${userId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ active }),
   });
   if (!res.ok) {
     throw new Error("ERRO: Não foi possível atualizar utilizador " + res.status);

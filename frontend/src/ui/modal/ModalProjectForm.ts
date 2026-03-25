@@ -102,15 +102,15 @@ function setupProjectFormLogic(
         projectStatus = ProjectStatus.FINISHED;
       }
 
-      // Criar objeto do projeto (sem ID - será gerado pela base de dados)
-      const newProjectData = {
-        name: name.trim(),
-        description: description || "",
-        projectStatusId: 1,
-        startDate: new Date(startDate),
-        endDateExpected: new Date(endDate),
-        status: projectStatus,
-      };
+      // Criar objeto do projeto (ID 0 será gerado pela base de dados)
+      const newProjectData = new Project(
+        0, // ID placeholder - será gerado pelo backend
+        name.trim(),
+        description || "",
+        1, // projectStatusId
+        new Date(startDate),
+        new Date(endDate),
+      );
 
       try {
         // Criar projeto via serviço (envia para a API)
