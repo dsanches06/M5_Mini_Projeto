@@ -17,38 +17,38 @@ export const getTasks = async (req, res) => {
 export const createTask = async (req, res) => {
   try {
     const {
-      titulo,
-      descricao,
-      id_estado_tarefa,
-      id_prioridade,
-      id_categoria,
-      id_projeto,
-      horas_estimadas,
+      title,
+      description,
+      task_status_id,
+      priority_id,
+      category_id,
+      project_id,
+      estimated_hours,
     } = req.body;
 
     // Validações apenas dos campos NOT NULL
-    if (!titulo || titulo.toString().trim().length === 0) {
-      return res.status(400).json({ error: "Titulo é obrigatório" });
+    if (!title || title.toString().trim().length === 0) {
+      return res.status(400).json({ error: "Title is required" });
     }
 
-    if (!descricao || descricao.toString().trim().length === 0) {
-      return res.status(400).json({ error: "Descricao é obrigatória" });
+    if (!description || description.toString().trim().length === 0) {
+      return res.status(400).json({ error: "Description is required" });
     }
 
-    if (!id_estado_tarefa) {
+    if (!task_status_id) {
       return res
         .status(400)
-        .json({ error: "ID do estado da tarefa é obrigatório" });
+        .json({ error: "Task status ID is required" });
     }
 
-    if (!id_prioridade) {
-      return res.status(400).json({ error: "ID da prioridade é obrigatório" });
+    if (!priority_id) {
+      return res.status(400).json({ error: "Priority ID is required" });
     }
 
     const task = await taskService.createTask(req.body);
     res.status(201).json(task);
   } catch (error) {
-    res.status(400).json({ error: `Erro ao criar tarefa: ${error.message}` });
+    res.status(400).json({ error: `Error creating task: ${error.message}` });
   }
 };
 
@@ -153,7 +153,7 @@ export const getTaskTags = async (req, res) => {
     const tags = await taskService.getTagsByTaskId(taskId);
 
     const tagDetails = await Promise.all(
-      tags.map((relation) => tagService.getTagById(relation.id_etiqueta)),
+      tags.map((relation) => tagService.getTagById(relation.label_id)),
     );
     res.json(tagDetails);
   } catch (error) {

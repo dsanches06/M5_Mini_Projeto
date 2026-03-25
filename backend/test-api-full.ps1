@@ -71,9 +71,10 @@ $testsTotal++
 $userId = $null
 try {
     $body = @{
-        nome = "Test User $(Get-Random)"
+        name = "Test User $(Get-Random)"
         email = "test$(Get-Random)@test.com"
-        telefone = "987654321"
+        phone = "987654321"
+        gender = "Male"
     } | ConvertTo-Json
     
     Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -102,7 +103,7 @@ $testsTotal++
 $tagId = $null
 try {
     $body = @{
-        nome = "Tag Test $(Get-Random)"
+        name = "Tag Test $(Get-Random)"
     } | ConvertTo-Json
     
     Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -137,9 +138,10 @@ try {
         
         if ($existingUser -and $existingUser.email) {
             $body = @{
-                nome = "Duplicate Email Test"
+                name = "Duplicate Email Test"
                 email = $existingUser.email
-                telefone = "123456789"
+                phone = "123456789"
+                gender = "Female"
             } | ConvertTo-Json
             
             Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -181,31 +183,31 @@ try {
 
 Write-Host ""
 
-# TEST 7: POST /tags with duplicate name (validation test)
-Write-Host "TEST 7: POST /tags (duplicate name - should fail)" -ForegroundColor Yellow
+# TEST 7: POST /labels with duplicate name (validation test)
+Write-Host "TEST 7: POST /labels (duplicate name - should fail)" -ForegroundColor Yellow
 $testsTotal++
 try {
-    if ($tagId) {
-        # Get the tag name from the created tag to test duplicate
-        $getTagResponse = Invoke-WebRequest -Uri "http://localhost:3000/tags" -Method GET -ErrorAction Stop
-        $tags = $getTagResponse.Content | ConvertFrom-Json
-        $existingTag = $tags | Where-Object { $_.id -eq $tagId } | Select-Object -First 1
+    if ($labelId) {
+        # Get the label name from the created label to test duplicate
+        $getLabelResponse = Invoke-WebRequest -Uri "http://localhost:3000/labels" -Method GET -ErrorAction Stop
+        $labels = $getLabelResponse.Content | ConvertFrom-Json
+        $existingLabel = $labels | Where-Object { $_.id -eq $labelId } | Select-Object -First 1
         
-        if ($existingTag -and $existingTag.nome) {
+        if ($existingLabel -and $existingLabel.name) {
             $body = @{
-                nome = $existingTag.nome
+                name = $existingLabel.name
             } | ConvertTo-Json
             
             Write-Host "  [HEADERS]" -ForegroundColor Cyan
             Write-Host "    Method: POST" -ForegroundColor Gray
-            Write-Host "    URI: http://localhost:3000/tags" -ForegroundColor Gray
+            Write-Host "    URI: http://localhost:3000/labels" -ForegroundColor Gray
             Write-Host "    Content-Type: application/json" -ForegroundColor Gray
             Write-Host "  [REQUEST BODY]" -ForegroundColor Cyan
             Write-Host $body -ForegroundColor Gray
-            Write-Host "  [EXPECTED] 400 Bad Request (tag name already exists)" -ForegroundColor Yellow
+            Write-Host "  [EXPECTED] 400 Bad Request (label name already exists)" -ForegroundColor Yellow
             
             try {
-                $response = Invoke-WebRequest -Uri "http://localhost:3000/tags" -Method POST -Headers @{"Content-Type"="application/json"} -Body $body -ErrorAction Stop
+                $response = Invoke-WebRequest -Uri "http://localhost:3000/labels" -Method POST -Headers @{"Content-Type"="application/json"} -Body $body -ErrorAction Stop
                 Write-Host "  [ERROR] Should have failed but succeeded!" -ForegroundColor Red
             } catch {
                 $statusCode = $_.Exception.Response.StatusCode.Value__
@@ -280,13 +282,13 @@ $taskId = $null
 try {
     if ($userId) {
         $body = @{
-            titulo = "Task Test $(Get-Random)"
-            descricao = "Test task description"
-            id_estado_tarefa = 1
-            id_prioridade = 1
-            id_categoria = 1
-            id_projeto = 1
-            horas_estimadas = 5
+            title = "Task Test $(Get-Random)"
+            description = "Test task description"
+            task_status_id = 1
+            priority_id = 1
+            category_id = 1
+            project_id = 1
+            estimated_hours = 5
         } | ConvertTo-Json
         
         Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -304,7 +306,7 @@ try {
         $taskId = [int]$json.id
         $testsPassed++
     } else {
-        Write-Host "  [ERROR] No user ID available" -ForegroundColor Red
+        Write-Host "  [ERROR] No tag ID available" -ForegroundColor Red
     }
 } catch {
     Write-Host "  [ERROR] $($_.Exception.Message)" -ForegroundColor Red
@@ -318,9 +320,10 @@ $testsTotal++
 try {
     if ($userId) {
         $body = @{
-            nome = "Updated User $(Get-Random)"
+            name = "Updated User $(Get-Random)"
             email = "updated$(Get-Random)@test.com"
-            telefone = "999999999"
+            phone = "999999999"
+            gender = "Male"
         } | ConvertTo-Json
         
         Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -351,7 +354,7 @@ $testsTotal++
 try {
     if ($userId) {
         $body = @{
-            activo = 0
+            active = 0
         } | ConvertTo-Json
         
         Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -382,13 +385,13 @@ $testsTotal++
 try {
     if ($taskId) {
         $body = @{
-            titulo = "Updated Task $(Get-Random)"
-            descricao = "Updated task description"
-            id_estado_tarefa = 2
-            id_prioridade = 2
-            id_categoria = 1
-            id_projeto = 1
-            horas_estimadas = 8
+            title = "Updated Task $(Get-Random)"
+            description = "Updated task description"
+            task_status_id = 2
+            priority_id = 2
+            category_id = 1
+            project_id = 1
+            estimated_hours = 8
         } | ConvertTo-Json
         
         Write-Host "  [HEADERS]" -ForegroundColor Cyan
@@ -405,7 +408,7 @@ try {
         Write-Host ($json | ConvertTo-Json -Depth 2) -ForegroundColor Gray
         $testsPassed++
     } else {
-        Write-Host "  [ERROR] No task ID or user ID available" -ForegroundColor Red
+        Write-Host "  [ERROR] No task ID or tag ID available" -ForegroundColor Red
     }
 } catch {
     Write-Host "  [ERROR] $($_.Exception.Message)" -ForegroundColor Red

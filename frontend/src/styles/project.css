@@ -1,0 +1,402 @@
+/* WRAPPER */
+.wrapper {
+  padding: 20px 30px;
+}
+
+/* TOPBAR */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.tabs {
+  display: flex;
+  gap: 20px;
+}
+
+.tab {
+  font-size: 14px;
+  color: #7f8c8d;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab.active {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #3498db;
+  border-radius: 2px;
+}
+
+/* BUTTONS */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  border: 1px solid #dfe6e9;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: #3498db;
+  color: white;
+  border: none;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* CARD */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #ecf0f1;
+  transition: 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+/* HEADER */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.menu {
+  color: #bdc3c7;
+  cursor: pointer;
+}
+
+/* TAG */
+.tag {
+  font-size: 12px;
+  color: #e74c3c;
+  display: inline-block;
+  margin: 6px 0;
+}
+
+/* DESC */
+.desc {
+  font-size: 13px;
+  color: #95a5a6;
+  margin-bottom: 10px;
+}
+
+/* ICONS */
+.icons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.icons span {
+  width: 14px;
+  height: 14px;
+  background: #ecf0f1;
+  border-radius: 3px;
+}
+
+/* PROGRESS */
+.progress {
+  height: 5px;
+  background: #ecf0f1;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress div {
+  height: 100%;
+  background: #3498db;
+}
+
+/* AVATARS */
+.avatars {
+  display: flex;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f39c12, #e74c3c);
+  border: 2px solid white;
+  margin-right: -8px;
+}
+
+.avatar:nth-child(2) {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+}
+
+.avatar:nth-child(3) {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.avatar.more {
+  background: #bdc3c7;
+  color: white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* PROJECTS GRID CONTAINER */
+.projects-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+
+/* PROJECT CARD */
+.project-card {
+  background: #f5f6f7;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #dfe6e9;
+  transition: 0.2s;
+}
+
+.project-card:hover {
+  background: #eff3f5;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+}
+
+.project-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.project-card h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #2c3e50;
+}
+
+.project-card .menu {
+  color: #bdc3c7;
+  cursor: pointer;
+}
+
+/* PROJECT STATUS */
+.project-status {
+  font-size: 12px;
+  color: #27ae60;
+  display: inline-block;
+  margin: 6px 0;
+  padding: 4px 8px;
+  background: #d5f4e6;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* PROJECT DESC */
+.project-desc {
+  font-size: 13px;
+  color: #95a5a6;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* PROJECT DATES */
+.project-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.project-dates .start-date,
+.project-dates .end-date {
+  display: flex;
+  align-items: center;
+}
+
+/* ========================= GANTT CHART STYLES ========================= */
+
+:root {
+  --engineering: #f4a483;
+  --research: #f7a59b;
+  --product: #a882a6;
+  --marketing: #3a4353;
+  --copywriting: #5b7a92;
+  --business: #3b5a78;
+}
+
+/* GANTT CONTAINER */
+#gantt-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+/* GANTT HEADER */
+#gantt-container section {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  background: #f4a483;
+  padding: 0;
+}
+
+.title-section {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.title-section h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.title-section p {
+  margin: 8px 0 0 0;
+  font-size: 18px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* LEGEND */
+.legend {
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #555;
+}
+
+.legend-item span {
+  font-weight: 500;
+}
+
+.legend-item .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* GANTT GRID */
+#gantt-grid {
+  display: grid;
+  grid-template-columns: 120px repeat(6, 1fr);
+  grid-auto-rows: 40px;
+  grid-auto-flow: dense;
+  gap: 0;
+  padding: 0;
+}
+
+.spacer {
+  grid-column: 1 / 2;
+  background: #f5f5f5;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 12px;
+}
+
+.header-week {
+  background: #3a4353;
+  color: white;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  border-right: 1px solid #2c3e50;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-header {
+  grid-column: 1 / -1;
+  grid-row: span 1;
+  background: #e8e8e8;
+  padding: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 12px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.activity-label {
+  grid-column: 1 / 2;
+  grid-row: span 1;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #555;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+}
+
+.bar {
+  background: #3498db;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 3px;
+}
+
+/* ========================= END GANTT CHART STYLES ========================= */

@@ -2,31 +2,31 @@
 
 export const validateUserData = async (req, res, next) => {
   try {
-    const { nome, email } = req.body;
+    const { name, email } = req.body;
     const isUpdate = Boolean(req.params.id || req.user?.id);
 
     if (isUpdate) {
-      if (nome !== undefined && (typeof nome !== "string" || nome.length < 3)) {
+      if (name !== undefined && (typeof name !== "string" || name.length < 3)) {
         return res
           .status(400)
-          .json({ message: "O nome deve ter no mínimo 3 caracteres" });
+          .json({ message: "Name must have at least 3 characters" });
       }
 
       if (
         email !== undefined &&
         (typeof email !== "string" || !email.includes("@"))
       ) {
-        return res.status(400).json({ message: "Email inválido" });
+        return res.status(400).json({ message: "Invalid email" });
       }
     } else {
-      if (!nome || typeof nome !== "string" || nome.length < 3) {
+      if (!name || typeof name !== "string" || name.length < 3) {
         return res
           .status(400)
-          .json({ message: "O nome deve ter no mínimo 3 caracteres" });
+          .json({ message: "Name must have at least 3 characters" });
       }
 
       if (!email || typeof email !== "string" || !email.includes("@")) {
-        return res.status(400).json({ message: "Email inválido" });
+        return res.status(400).json({ message: "Invalid email" });
       }
     }
 
@@ -36,8 +36,8 @@ export const validateUserData = async (req, res, next) => {
 
       if (emailAlreadyExists) {
         const msg = isUpdate
-          ? "Este email já está registrado por outro utilizador"
-          : "Este email já está registrado";
+          ? "This email is already registered by another user"
+          : "This email is already registered";
         return res.status(400).json({ message: msg });
       }
     }
@@ -45,6 +45,6 @@ export const validateUserData = async (req, res, next) => {
   } catch (error) {
     res
       .status(400)
-      .json({ message: `Erro na validação de usuário: ${error.message}` });
+      .json({ message: `Error validating user: ${error.message}` });
   }
 };

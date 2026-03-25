@@ -5,7 +5,7 @@ import * as userService from "./userService.js";
 /* Função para buscar comentários de uma tarefa */
 export const getCommentsByTaskId = async (taskId) => {
   const [comments] = await db.query(
-    "SELECT * FROM comentario WHERE id_tarefa = ? ORDER BY data_comentario DESC",
+    "SELECT * FROM comment WHERE task_id = ? ORDER BY created_at DESC",
     [taskId],
   );
   return comments;
@@ -27,7 +27,7 @@ export const createComment = async (taskId, data) => {
   const mysqlDateTime = now.toISOString().slice(0, 19).replace("T", " ");
 
   const [result] = await db.query(
-    "INSERT INTO comentario (id_tarefa, id_utilizador, texto, data_comentario) VALUES (?, ?, ?, ?)",
+    "INSERT INTO comment (task_id, user_id, content, created_at) VALUES (?, ?, ?, ?)",
     [taskId, data.userId, data.content.trim(), mysqlDateTime],
   );
 
@@ -42,7 +42,7 @@ export const createComment = async (taskId, data) => {
 
 /* Função para deletar comentário */
 export const deleteComment = async (commentId) => {
-  const [result] = await db.query("DELETE FROM comentario WHERE id = ?", [
+  const [result] = await db.query("DELETE FROM comment WHERE id = ?", [
     commentId,
   ]);
   return result.affectedRows;
@@ -51,7 +51,7 @@ export const deleteComment = async (commentId) => {
 /* Função para marcar comentário como resolvido */
 export const resolveComment = async (commentId, resolved) => {
   const [result] = await db.query(
-    "UPDATE comentario SET resolvido = ? WHERE id = ?",
+    "UPDATE comment SET resolved = ? WHERE id = ?",
     [resolved ? 1 : 0, commentId],
   );
 
@@ -59,7 +59,7 @@ export const resolveComment = async (commentId, resolved) => {
     throw new Error("Comentário não encontrado");
   }
 
-  const [updated] = await db.query("SELECT * FROM comentario WHERE id = ?", [
+  const [updated] = await db.query("SELECT * FROM comment WHERE id = ?", [
     commentId,
   ]);
 
@@ -72,7 +72,7 @@ export const updateComment = async (commentId, content) => {
   const editDate = now.toISOString().slice(0, 19).replace("T", " ");
 
   const [result] = await db.query(
-    "UPDATE comentario SET texto = ?, editado_em = ? WHERE id = ?",
+    "UPDATE comment SET content = ?, edited_at = ? WHERE id = ?",
     [content, editDate, commentId],
   );
 
@@ -80,7 +80,7 @@ export const updateComment = async (commentId, content) => {
     throw new Error("Comentário não encontrado");
   }
 
-  const [updated] = await db.query("SELECT * FROM comentario WHERE id = ?", [
+  const [updated] = await db.query("SELECT * FROM comment WHERE id = ?", [
     commentId,
   ]);
 

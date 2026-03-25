@@ -6,14 +6,14 @@ export const getAllSprints = async (search, sort) => {
 
   if (search) {
     sprints = sprints.filter(
-      (s) => s.nome.toLowerCase().includes(search.toLowerCase()),
+      (s) => s.name.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
     sprints.sort((a, b) => {
-      const nameA = a.nome.toLowerCase();
-      const nameB = b.nome.toLowerCase();
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
 
       if (sort === "asc") {
         return nameA.localeCompare(nameB);
@@ -29,18 +29,18 @@ export const getAllSprints = async (search, sort) => {
 /* Função para criar sprint */
 export const createSprint = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO sprints (nome, data_inicio, data_fim) VALUES (?, ?, ?)",
-    [data.nome, data.dataInicio, data.dataFim],
+    "INSERT INTO sprints (name, start_date, end_date) VALUES (?, ?, ?)",
+    [data.name, data.start_date, data.end_date],
   );
   return { id: result.insertId, ...data };
 };
 
 /* Função para atualizar sprint */
 export const updateSprint = async (sprintId, data) => {
-  const { nome, dataInicio, dataFim } = data;
+  const { name, start_date, end_date } = data;
   const [result] = await db.query(
-    "UPDATE sprints SET nome=?, data_inicio=?, data_fim=? WHERE id=?",
-    [nome, dataInicio, dataFim, sprintId],
+    "UPDATE sprints SET name=?, start_date=?, end_date=? WHERE id=?",
+    [name, start_date, end_date, sprintId],
   );
   return result.affectedRows;
 };

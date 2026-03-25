@@ -2,20 +2,20 @@ import { db } from "../db.js";
 
 /* Função para buscar todos os projetos */
 export const getAllProjects = async (search, sort) => {
-  let [projects] = await db.query("SELECT * FROM projeto");
+  let [projects] = await db.query("SELECT * FROM project");
 
   if (search) {
     projects = projects.filter(
       (p) =>
-        p.nome.toLowerCase().includes(search.toLowerCase()) ||
-        p.descricao.toLowerCase().includes(search.toLowerCase()),
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
     projects.sort((a, b) => {
-      const nameA = a.nome.toLowerCase();
-      const nameB = b.nome.toLowerCase();
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
 
       if (sort === "asc") {
         return nameA.localeCompare(nameB);
@@ -31,24 +31,24 @@ export const getAllProjects = async (search, sort) => {
 /* Função para criar novo projeto */
 export const createProject = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO projeto (nome, descricao, data_inicio, data_fim_prevista) VALUES (?, ?, ?, ?)",
-    [data.nome, data.descricao, data.dataInicio, data.dataFim],
+    "INSERT INTO project (name, description, start_date, end_date_expected) VALUES (?, ?, ?, ?)",
+    [data.name, data.description, data.start_date, data.end_date_expected],
   );
   return { id: result.insertId, ...data };
 };
 
 /* Função para atualizar projeto */
 export const updateProject = async (projectId, data) => {
-  const { nome, descricao, dataInicio, dataFim } = data;
+  const { name, description, start_date, end_date_expected } = data;
   const [result] = await db.query(
-    "UPDATE projeto SET nome=?, descricao=?, data_inicio=?, data_fim_prevista=? WHERE id=?",
-    [nome, descricao, dataInicio, dataFim, projectId],
+    "UPDATE project SET name=?, description=?, start_date=?, end_date_expected=? WHERE id=?",
+    [name, description, start_date, end_date_expected, projectId],
   );
   return result.affectedRows;
 };
 
 /* Função para deletar projeto */
 export const deleteProject = async (projectId) => {
-  const [result] = await db.query("DELETE FROM projeto WHERE id=?", [projectId]);
+  const [result] = await db.query("DELETE FROM project WHERE id=?", [projectId]);
   return result.affectedRows;
 };

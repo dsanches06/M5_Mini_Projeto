@@ -7,15 +7,15 @@ export const getAllUsers = async (search, sort) => {
   if (search) {
     users = users.filter(
       (u) =>
-        u.nome.toLowerCase().includes(search.toLowerCase()) ||
+        u.name.toLowerCase().includes(search.toLowerCase()) ||
         u.email.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
     users.sort((a, b) => {
-      const nameA = a.nome.toLowerCase();
-      const nameB = b.nome.toLowerCase();
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
 
       if (sort === "asc") {
         return nameA.localeCompare(nameB);
@@ -36,8 +36,8 @@ export const getUserById = async (userId) => {
 /* Função para criar utilizador */
 export const createUser = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO users (nome, email, telefone) VALUES (?, ?, ?)",
-    [data.nome, data.email, data.telefone || null],
+    "INSERT INTO users (name, email, phone, gender) VALUES (?, ?, ?, ?)",
+    [data.name, data.email, data.phone || null, data.gender || "Male"],
   );
   return { id: result.insertId, ...data };
 };
@@ -47,17 +47,17 @@ export const updateUser = async (userId, data) => {
   const fieldsToUpdate = [];
   const values = [];
 
-  if (data.nome !== undefined) {
-    fieldsToUpdate.push("nome = ?");
-    values.push(data.nome);
+  if (data.name !== undefined) {
+    fieldsToUpdate.push("name = ?");
+    values.push(data.name);
   }
   if (data.email !== undefined) {
     fieldsToUpdate.push("email = ?");
     values.push(data.email);
   }
-  if (data.telefone !== undefined) {
-    fieldsToUpdate.push("telefone = ?");
-    values.push(data.telefone);
+  if (data.phone !== undefined) {
+    fieldsToUpdate.push("phone = ?");
+    values.push(data.phone);
   }
 
   if (fieldsToUpdate.length === 0) {
@@ -83,7 +83,7 @@ export const deleteUser = async (userId) => {
 export const toggleUserActive = async (userId, data) => {
   const [result] = await db.query(
     "UPDATE users SET active = ? WHERE id = ?",
-    [data.activo, userId],
+    [data.active, userId],
   );
   return result.affectedRows;
 };

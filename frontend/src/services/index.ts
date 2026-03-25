@@ -11,3 +11,4 @@ export * from "./statisticsService.js";
 export * from "./SystemConfig.js";
 export * from "./userService.js";
 export * from "./taskService.js";
+export * from "./projectService.js";

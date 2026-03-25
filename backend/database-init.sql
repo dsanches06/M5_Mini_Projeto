@@ -99,22 +99,22 @@ CREATE TABLE task_assignees (
 );
 
 /* Labels */
-CREATE TABLE labels (
+CREATE TABLE tags (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE,
     color VARCHAR(10)
 );
 
-/* Label_Task (N:M) */
-CREATE TABLE label_task (
+/* tags_Task (N:M) */
+CREATE TABLE tags_task (
     task_id INT,
-    label_id INT,
-    PRIMARY KEY (task_id , label_id),
+    tag_id INT,
+    PRIMARY KEY (task_id , tag_id),
     FOREIGN KEY (task_id)
         REFERENCES task (id)
         ON DELETE CASCADE,
-    FOREIGN KEY (label_id)
-        REFERENCES labels (id)
+    FOREIGN KEY (tag_id)
+        REFERENCES tags (id)
         ON DELETE CASCADE
 );
 
@@ -420,14 +420,14 @@ INSERT INTO comment (content, task_id, user_id, created_at, resolved) VALUES
 ('Comentário tarefa 6',6,1,'2026-02-07 03:00:00', 0), 
 ('Comentário tarefa 7',7,1,'2026-02-08 03:00:00', 0);
 
-INSERT INTO labels (name, color) VALUES
+INSERT INTO tags (name, color) VALUES
  ('Urgente', 'Vermelho'),
  ('Frontend', 'Azul'),
  ('Backend', 'Verde'), 
  ('Bug', 'Laranja'), 
  ('Melhoria', 'Roxo');
  
-INSERT INTO label_task (task_id, label_id) VALUES
+INSERT INTO tags_task (task_id, tag_id) VALUES
  (1,1), 
  (1,2), 
  (3,2), 

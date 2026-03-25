@@ -8,7 +8,7 @@ export const getNotifications = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ error: `Erro ao buscar notificações: ${error.message}` });
+      .json({ error: `Error fetching notifications: ${error.message}` });
   }
 };
 
@@ -18,18 +18,18 @@ export const getNotificationById = async (req, res) => {
     const { id } = req.params;
     
     if (!id) {
-      return res.status(400).json({ error: "ID é obrigatório" });
+      return res.status(400).json({ error: "ID is required" });
     }
     
     const notification = await notificationService.getNotificationById(Number(id));
     if (!notification) {
-      return res.status(404).json({ error: "Notificação não encontrada" });
+      return res.status(404).json({ error: "Notification not found" });
     }
     res.json(notification);
   } catch (error) {
     res
       .status(400)
-      .json({ error: `Erro ao buscar notificação: ${error.message}` });
+      .json({ error: `Error fetching notification: ${error.message}` });
   }
 };
 
@@ -39,7 +39,7 @@ export const getNotificationsByUser = async (req, res) => {
     const { userId } = req.params;
     
     if (!userId) {
-      return res.status(400).json({ error: "userId é obrigatório" });
+      return res.status(400).json({ error: "userId is required" });
     }
     
     const notifications = await notificationService.getNotificationsByUser(Number(userId));
@@ -47,7 +47,7 @@ export const getNotificationsByUser = async (req, res) => {
   } catch (error) {
     res
       .status(400)
-      .json({ error: `Erro ao buscar notificações: ${error.message}` });
+      .json({ error: `Error fetching notifications: ${error.message}` });
   }
 };
 
@@ -57,7 +57,7 @@ export const getUnreadNotifications = async (req, res) => {
     const { userId } = req.params;
     
     if (!userId) {
-      return res.status(400).json({ message: "userId é obrigatório" });
+      return res.status(400).json({ message: "userId is required" });
     }
     
     const notifications = await notificationService.getUnreadNotifications(Number(userId));
@@ -65,44 +65,44 @@ export const getUnreadNotifications = async (req, res) => {
   } catch (error) {
     res
       .status(400)
-      .json({ message: `Erro ao buscar notificações não lidas: ${error.message}` });
+      .json({ message: `Error fetching unread notifications: ${error.message}` });
   }
 };
 
 /* Função para criar notificação */
 export const createNotification = async (req, res) => {
   try {
-    const { id_utilizador, utilizadorId, titulo, mensagem } = req.body;
-    const userId = id_utilizador || utilizadorId;
+    const { user_id, userId, title, message } = req.body;
+    const userId_actual = user_id || userId;
 
-    if (!mensagem || mensagem.trim().length === 0) {
-      return res.status(400).json({ message: "A mensagem não pode estar vazia" });
+    if (!message || message.trim().length === 0) {
+      return res.status(400).json({ message: "Message cannot be empty" });
     }
 
-    if (!userId) {
-      return res.status(400).json({ message: "id_utilizador é obrigatório" });
+    if (!userId_actual) {
+      return res.status(400).json({ message: "user_id is required" });
     }
 
     const notification = await notificationService.createNotification({
-      id_utilizador: userId,
-      titulo: titulo || "Notificação",
-      mensagem
+      user_id: userId_actual,
+      title: title || "Notification",
+      message
     });
     res.status(201).json(notification);
   } catch (error) {
     res
       .status(400)
-      .json({ message: `Erro ao criar notificação: ${error.message}` });
+      .json({ message: `Error creating notification: ${error.message}` });
   }
 };
 
 /* Função para atualizar notificação */
 export const updateNotification = async (req, res) => {
   try {
-    const { mensagem, lida } = req.body;
+    const { message, is_read } = req.body;
 
-    if (mensagem !== undefined && mensagem.trim().length === 0) {
-      return res.status(400).json({ message: "A mensagem não pode estar vazia" });
+    if (message !== undefined && message.trim().length === 0) {
+      return res.status(400).json({ message: "Message cannot be empty" });
     }
 
     const affectedRows = await notificationService.updateNotification(
@@ -111,14 +111,14 @@ export const updateNotification = async (req, res) => {
     );
     
     if (affectedRows === 0) {
-      return res.status(404).json({ message: "Notificação não encontrada" });
+      return res.status(404).json({ message: "Notification not found" });
     }
     
-    res.json({ message: "Notificação atualizada com sucesso" });
+    res.json({ message: "Notification updated successfully" });
   } catch (error) {
     res
       .status(400)
-      .json({ message: `Erro ao atualizar notificação: ${error.message}` });
+      .json({ message: `Error updating notification: ${error.message}` });
   }
 };
 
@@ -128,19 +128,19 @@ export const deleteNotification = async (req, res) => {
     const { id } = req.params;
     
     if (!id) {
-      return res.status(400).json({ message: "ID é obrigatório" });
+      return res.status(400).json({ message: "ID is required" });
     }
     
     const affectedRows = await notificationService.deleteNotification(Number(id));
     
     if (affectedRows === 0) {
-      return res.status(404).json({ message: "Notificação não encontrada" });
+      return res.status(404).json({ message: "Notification not found" });
     }
     
-    res.json({ message: "Notificação deletada com sucesso" });
+    res.json({ message: "Notification deleted successfully" });
   } catch (error) {
     res
       .status(400)
-      .json({ message: `Erro ao deletar notificação: ${error.message}` });
+      .json({ message: `Error deleting notification: ${error.message}` });
   }
 };

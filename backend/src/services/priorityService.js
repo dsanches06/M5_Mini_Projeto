@@ -1,0 +1,24 @@
+import { db } from "../db.js";
+
+export const getAllPriorities = async () => {
+  const [priorities] = await db.query("SELECT * FROM priority");
+  return priorities;
+};
+
+export const createPriority = async (data) => {
+  const [result] = await db.query(
+    "INSERT INTO priority (name, priority_level) VALUES (?, ?)",
+    [data.name, data.priority_level]
+  );
+  return { id: result.insertId, ...data };
+};
+
+export const updatePriority = async (id, data) => {
+  const [result] = await db.query("UPDATE priority SET ? WHERE id = ?", [data, id]);
+  return result.affectedRows;
+};
+
+export const deletePriority = async (id) => {
+  const [result] = await db.query("DELETE FROM priority WHERE id = ?", [id]);
+  return result.affectedRows;
+};

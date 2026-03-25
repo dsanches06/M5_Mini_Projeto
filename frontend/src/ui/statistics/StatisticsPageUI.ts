@@ -5,7 +5,7 @@
  * múltiplos tipos de gráficos em sua aplicação.
  */
 
-import { StatisticPageUI } from "./StatisticPageUI.js";
+import { StatisticPageUI } from "./StatisticUI.js";
 import { clearContainer, addElementInContainer } from "../dom/index.js";
 
 // ============================================

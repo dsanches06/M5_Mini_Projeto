@@ -7,15 +7,15 @@ export const getAllTasks = async (search, sort) => {
   if (search) {
     tasks = tasks.filter(
       (t) =>
-        t.titulo.toLowerCase().includes(search.toLowerCase()) ||
-        t.descricao.toLowerCase().includes(search.toLowerCase()),
+        t.title.toLowerCase().includes(search.toLowerCase()) ||
+        t.description.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
     tasks.sort((a, b) => {
-      const titleA = a.titulo.toLowerCase();
-      const titleB = b.titulo.toLowerCase();
+      const titleA = a.title.toLowerCase();
+      const titleB = b.title.toLowerCase();
 
       if (sort === "asc") {
         return titleA.localeCompare(titleB);
@@ -31,16 +31,16 @@ export const getAllTasks = async (search, sort) => {
 /* Função para criar tarefa */
 export const createTask = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO task (titulo, descricao, id_estado_tarefa, id_prioridade, id_categoria, id_projeto, horas_estimadas, data_limite) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO task (title, description, task_status_id, priority_id, category_id, project_id, estimated_hours, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
-      data.titulo,
-      data.descricao,
-      data.id_estado_tarefa,
-      data.id_prioridade,
-      data.id_categoria,
-      data.id_projeto,
-      data.horas_estimadas,
-      data.data_limite || null,
+      data.title,
+      data.description,
+      data.task_status_id,
+      data.priority_id,
+      data.category_id,
+      data.project_id,
+      data.estimated_hours,
+      data.due_date || null,
     ],
   );
   return { id: result.insertId, ...data };
@@ -52,37 +52,37 @@ export const updateTask = async (taskId, data) => {
   const fieldsToUpdate = [];
   const values = [];
 
-  if (data.titulo !== undefined) {
-    fieldsToUpdate.push("titulo = ?");
-    values.push(data.titulo);
+  if (data.title !== undefined) {
+    fieldsToUpdate.push("title = ?");
+    values.push(data.title);
   }
-  if (data.descricao !== undefined) {
-    fieldsToUpdate.push("descricao = ?");
-    values.push(data.descricao);
+  if (data.description !== undefined) {
+    fieldsToUpdate.push("description = ?");
+    values.push(data.description);
   }
-  if (data.id_estado_tarefa !== undefined) {
-    fieldsToUpdate.push("id_estado_tarefa = ?");
-    values.push(data.id_estado_tarefa);
+  if (data.task_status_id !== undefined) {
+    fieldsToUpdate.push("task_status_id = ?");
+    values.push(data.task_status_id);
   }
-  if (data.id_prioridade !== undefined) {
-    fieldsToUpdate.push("id_prioridade = ?");
-    values.push(data.id_prioridade);
+  if (data.priority_id !== undefined) {
+    fieldsToUpdate.push("priority_id = ?");
+    values.push(data.priority_id);
   }
-  if (data.id_categoria !== undefined) {
-    fieldsToUpdate.push("id_categoria = ?");
-    values.push(data.id_categoria);
+  if (data.category_id !== undefined) {
+    fieldsToUpdate.push("category_id = ?");
+    values.push(data.category_id);
   }
-  if (data.horas_estimadas !== undefined) {
-    fieldsToUpdate.push("horas_estimadas = ?");
-    values.push(data.horas_estimadas);
+  if (data.estimated_hours !== undefined) {
+    fieldsToUpdate.push("estimated_hours = ?");
+    values.push(data.estimated_hours);
   }
-  if (data.data_limite !== undefined) {
-    fieldsToUpdate.push("data_limite = ?");
-    values.push(data.data_limite);
+  if (data.due_date !== undefined) {
+    fieldsToUpdate.push("due_date = ?");
+    values.push(data.due_date);
   }
-  if (data.data_conclusao !== undefined) {
-    fieldsToUpdate.push("data_conclusao = ?");
-    values.push(data.data_conclusao);
+  if (data.completed_at !== undefined) {
+    fieldsToUpdate.push("completed_at = ?");
+    values.push(data.completed_at);
   }
 
   if (fieldsToUpdate.length === 0) {
@@ -128,7 +128,7 @@ export const addTagToTask = async (taskId, tagId) => {
 
   // Verifica se a tag já está associada
   const [existing] = await db.query(
-    "SELECT * FROM etiqueta_tarefa WHERE id_tarefa = ? AND id_etiqueta = ?",
+    "SELECT * FROM tags_task WHERE task_id = ? AND tag_id = ?",
     [taskId, tagId],
   );
 
@@ -138,7 +138,7 @@ export const addTagToTask = async (taskId, tagId) => {
 
   // Insere a relação
   const [result] = await db.query(
-    "INSERT INTO etiqueta_tarefa (id_tarefa, id_etiqueta) VALUES (?, ?)",
+    "INSERT INTO tags_task (task_id, tag_id) VALUES (?, ?)",
     [taskId, tagId],
   );
 
@@ -148,7 +148,7 @@ export const addTagToTask = async (taskId, tagId) => {
 /* Função para remover etiqueta da tarefa */
 export const removeTagFromTask = async (taskId, tagId) => {
   const [result] = await db.query(
-    "DELETE FROM etiqueta_tarefa WHERE id_tarefa = ? AND id_etiqueta = ?",
+    "DELETE FROM tags_task WHERE task_id = ? AND tag_id = ?",
     [taskId, tagId],
   );
   return result.affectedRows;
@@ -157,7 +157,7 @@ export const removeTagFromTask = async (taskId, tagId) => {
 /* Função para buscar etiquetas da tarefa */
 export const getTagsByTaskId = async (taskId) => {
   const [relations] = await db.query(
-    "SELECT * FROM etiqueta_tarefa WHERE id_tarefa = ?",
+    "SELECT * FROM tags_task WHERE task_id = ?",
     [taskId],
   );
   return relations;
@@ -166,7 +166,7 @@ export const getTagsByTaskId = async (taskId) => {
 /* Função para remover etiqueta de todas as tarefas */
 export const removeTagFromAllTasks = async (tagId) => {
   const [result] = await db.query(
-    "DELETE FROM etiqueta_tarefa WHERE id_etiqueta = ?",
+    "DELETE FROM tags_task WHERE tag_id = ?",
     [tagId],
   );
   return result.affectedRows;
@@ -178,7 +178,7 @@ export const getTaskStats = async () => {
   const totalTasks = result[0].totalTasks;
 
   const [completedResult] = await db.query(
-    "SELECT COUNT(*) as completedTasks FROM task WHERE data_conclusao IS NOT NULL",
+    "SELECT COUNT(*) as completedTasks FROM task WHERE completed_at IS NOT NULL",
   );
   const completedTasks = completedResult[0].completedTasks;
 

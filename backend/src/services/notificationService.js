@@ -2,14 +2,14 @@ import { db } from "../db.js";
 
 /* Função para buscar todas as notificações */
 export const getAllNotifications = async () => {
-  const [notifications] = await db.query("SELECT * FROM notificacao");
+  const [notifications] = await db.query("SELECT * FROM notification");
   return notifications;
 };
 
 /* Função para buscar notificação por ID */
 export const getNotificationById = async (notificationId) => {
   const [notifications] = await db.query(
-    "SELECT * FROM notificacao WHERE id = ?",
+    "SELECT * FROM notification WHERE id = ?",
     [notificationId],
   );
   return notifications[0] || null;
@@ -18,7 +18,7 @@ export const getNotificationById = async (notificationId) => {
 /* Função para buscar notificações por ID do usuário */
 export const getNotificationsByUser = async (userId) => {
   const [notifications] = await db.query(
-    "SELECT * FROM notificacao WHERE id_utilizador = ? ORDER BY data_envio DESC",
+    "SELECT * FROM notification WHERE user_id = ? ORDER BY sent_at DESC",
     [userId],
   );
   return notifications;
@@ -27,7 +27,7 @@ export const getNotificationsByUser = async (userId) => {
 /* Função para buscar notificações não lidas de um usuário */
 export const getUnreadNotifications = async (userId) => {
   const [notifications] = await db.query(
-    "SELECT * FROM notificacao WHERE id_utilizador = ? AND lida = FALSE ORDER BY data_envio DESC",
+    "SELECT * FROM notification WHERE user_id = ? AND is_read = FALSE ORDER BY sent_at DESC",
     [userId],
   );
   return notifications;
@@ -39,11 +39,11 @@ export const createNotification = async (data) => {
   const mysqlDateTime = now.toISOString().slice(0, 19).replace("T", " ");
 
   const [result] = await db.query(
-    "INSERT INTO notificacao (id_utilizador, titulo, mensagem, data_envio) VALUES (?, ?, ?, ?)",
+    "INSERT INTO notification (user_id, title, message, sent_at) VALUES (?, ?, ?, ?)",
     [
-      data.id_utilizador,
-      data.titulo || "Notificação",
-      data.mensagem,
+      data.user_id,
+      data.title || "Notificação",
+      data.message,
       mysqlDateTime,
     ],
   );
@@ -52,26 +52,26 @@ export const createNotification = async (data) => {
 
 /* Função para atualizar notificação */
 export const updateNotification = async (notificationId, data) => {
-  const { mensagem, lida } = data;
+  const { message, is_read } = data;
   const [result] = await db.query(
-    "UPDATE notificacao SET mensagem = ?, lida = ? WHERE id = ?",
-    [mensagem, lida, notificationId],
+    "UPDATE notification SET message = ?, is_read = ? WHERE id = ?",
+    [message, is_read, notificationId],
   );
 
   return result.affectedRows;
 };
 
-export const toggleReadStatus = async (notificationId, lida) => {
+export const toggleReadStatus = async (notificationId, is_read) => {
   const [result] = await db.query(
-    "UPDATE notificacao SET lida = ? WHERE id = ?",
-    [lida, notificationId],
+    "UPDATE notification SET is_read = ? WHERE id = ?",
+    [is_read, notificationId],
   );
   return result.affectedRows;
 };
 
 /* Função para deletar notificação */
 export const deleteNotification = async (notificationId) => {
-  const [result] = await db.query("DELETE FROM notificacao WHERE id = ?", [
+  const [result] = await db.query("DELETE FROM notification WHERE id = ?", [
     notificationId,
   ]);
   return result.affectedRows;

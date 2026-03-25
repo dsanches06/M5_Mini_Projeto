@@ -1,32 +1,35 @@
 import {
   loadInitialUsers,
   loadAInitialTasks,
+  loadInitialProjects,
+  loadInitialStatistics,
 } from "./src/ui/gestUserTask/index.js";
 import { activateMenu } from "./src/ui/dom/index.js";
-import { setupCompleteStatisticsPage } from "./src/ui/statistics/StatisticsPageExample.js";
-import { getTasks, getUsers } from "./src/api/index.js";
+import { setupCompleteStatisticsPage } from "./src/ui/statistics/StatisticsPageUI.js";
+import { ProjectService } from "./src/services/index.js";
 
 //inicializar a aplicação
 window.onload = async () => {
-  loadInitialUsers();
-  activateMenu("#menuUsers");
-
- await getUsers(); 
- await getTasks();
+  activateMenu("#menuProjects");
+  loadInitialProjects();
 };
 
 //obter o menu task
-const allMenuUsers = document.querySelectorAll('#menuUsers') as NodeListOf<HTMLAnchorElement>;
-allMenuUsers.forEach(button => {
-  button.addEventListener("click", () => {
+const allMenuUsers = document.querySelectorAll(
+  "#menuUsers",
+) as NodeListOf<HTMLAnchorElement>;
+allMenuUsers.forEach((button) => {
+  button.addEventListener("click", async () => {
     activateMenu("#menuUsers");
-    loadInitialUsers();
+    await loadInitialUsers();
   });
 });
 
 //obter o menu task
-const allMenuTasks = document.querySelectorAll('#menuTasks') as NodeListOf<HTMLAnchorElement>;
-allMenuTasks.forEach(button => {
+const allMenuTasks = document.querySelectorAll(
+  "#menuTasks",
+) as NodeListOf<HTMLAnchorElement>;
+allMenuTasks.forEach((button) => {
   button.addEventListener("click", () => {
     activateMenu("#menuTasks");
     loadAInitialTasks();
@@ -34,19 +37,23 @@ allMenuTasks.forEach(button => {
 });
 
 // menuProjects
-const allMenuProjects = document.querySelectorAll('#menuProjects') as NodeListOf<HTMLAnchorElement>;
-allMenuProjects.forEach(button => {
+const allMenuProjects = document.querySelectorAll(
+  "#menuProjects",
+) as NodeListOf<HTMLAnchorElement>;
+allMenuProjects.forEach((button) => {
   button.addEventListener("click", () => {
     activateMenu("#menuProjects");
-    // Carregar projetos quando a função estiver disponível
+    loadInitialProjects();
   });
 });
 
 // menuStatistics
-const allMenuStatistics = document.querySelectorAll('#menuStatistics') as NodeListOf<HTMLAnchorElement>;
-allMenuStatistics.forEach(button => {
+const allMenuStatistics = document.querySelectorAll(
+  "#menuStatistics",
+) as NodeListOf<HTMLAnchorElement>;
+allMenuStatistics.forEach((button) => {
   button.addEventListener("click", () => {
     activateMenu("#menuStatistics");
-    setupCompleteStatisticsPage();
+    loadInitialStatistics();
   });
 });

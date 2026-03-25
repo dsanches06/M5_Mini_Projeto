@@ -1,62 +1,62 @@
 ﻿export const validateTaskData = (req, res, next) => {
   const {
-    titulo,
-    descricao,
-    id_estado_tarefa,
-    id_prioridade,
-    id_categoria,
-    id_projeto,
-    horas_estimadas,
+    title,
+    description,
+    task_status_id,
+    priority_id,
+    category_id,
+    project_id,
+    estimated_hours,
   } = req.body;
 
-  if (!titulo || titulo.toString().trim().length === 0) {
-    return res.status(400).json({ error: "Titulo é obrigatório" });
+  if (!title || title.toString().trim().length === 0) {
+    return res.status(400).json({ error: "Title is required" });
   }
 
-  if (!descricao || descricao.toString().trim().length === 0) {
-    return res.status(400).json({ error: "Descricao é obrigatória" });
+  if (!description || description.toString().trim().length === 0) {
+    return res.status(400).json({ error: "Description is required" });
   }
 
   if (
-    id_estado_tarefa === undefined ||
-    id_estado_tarefa === null ||
-    id_estado_tarefa.toString().trim().length === 0
+    task_status_id === undefined ||
+    task_status_id === null ||
+    task_status_id.toString().trim().length === 0
   ) {
     return res
       .status(400)
-      .json({ error: "ID do estado da tarefa é obrigatório" });
+      .json({ error: "Task status ID is required" });
   }
 
   if (
-    id_prioridade === undefined ||
-    id_prioridade === null ||
-    id_prioridade.toString().trim().length === 0
+    priority_id === undefined ||
+    priority_id === null ||
+    priority_id.toString().trim().length === 0
   ) {
-    return res.status(400).json({ error: "ID da prioridade é obrigatório" });
+    return res.status(400).json({ error: "Priority ID is required" });
   }
 
   if (
-    id_categoria === undefined ||
-    id_categoria === null ||
-    id_categoria.toString().trim().length === 0
+    category_id === undefined ||
+    category_id === null ||
+    category_id.toString().trim().length === 0
   ) {
-    return res.status(400).json({ error: "ID da categoria é obrigatório" });
+    return res.status(400).json({ error: "Category ID is required" });
   }
 
   if (
-    id_projeto === undefined ||
-    id_projeto === null ||
-    id_projeto.toString().trim().length === 0
+    project_id === undefined ||
+    project_id === null ||
+    project_id.toString().trim().length === 0
   ) {
-    return res.status(400).json({ error: "ID do projeto é obrigatório" });
+    return res.status(400).json({ error: "Project ID is required" });
   }
 
   if (
-    horas_estimadas === undefined ||
-    horas_estimadas === null ||
-    horas_estimadas.toString().trim().length === 0
+    estimated_hours === undefined ||
+    estimated_hours === null ||
+    estimated_hours.toString().trim().length === 0
   ) {
-    return res.status(400).json({ error: "Horas estimadas é obrigatório" });
+    return res.status(400).json({ error: "Estimated hours is required" });
   }
 
   next();

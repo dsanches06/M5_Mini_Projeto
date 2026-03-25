@@ -14,51 +14,51 @@ export const getSprints = async (req, res) => {
 /* Função para criar sprint */
 export const createSprint = async (req, res) => {
   try {
-    const { nome, data_inicio, data_fim } = req.body;
+    const { name, start_date, end_date } = req.body;
 
-    if (!nome || nome.trim().length === 0) {
-      return res.status(400).json({ error: "O nome da sprint não pode estar vazio" });
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ error: "Sprint name cannot be empty" });
     }
 
-    if (nome.length < 3) {
-      return res.status(400).json({ error: "O nome da sprint deve ter no mínimo 3 caracteres" });
+    if (name.length < 3) {
+      return res.status(400).json({ error: "Sprint name must have at least 3 characters" });
     }
 
-    if (!data_inicio) {
-      return res.status(400).json({ error: "Data de início é obrigatória" });
+    if (!start_date) {
+      return res.status(400).json({ error: "Start date is required" });
     }
 
-    if (!data_fim) {
-      return res.status(400).json({ error: "Data de fim é obrigatória" });
+    if (!end_date) {
+      return res.status(400).json({ error: "End date is required" });
     }
 
     const sprint = await sprintService.createSprint(req.body);
     res.status(201).json(sprint);
   } catch (error) {
-    res.status(400).json({ error: `Erro ao criar sprint: ${error.message}` });
+    res.status(400).json({ error: `Error creating sprint: ${error.message}` });
   }
 };
 
 /* Função para atualizar sprint */
 export const updateSprint = async (req, res) => {
   try {
-    const { nome } = req.body;
+    const { name } = req.body;
 
-    if (nome !== undefined && nome.trim().length === 0) {
-      return res.status(400).json({ error: "O nome da sprint não pode estar vazio" });
+    if (name !== undefined && name.trim().length === 0) {
+      return res.status(400).json({ error: "Sprint name cannot be empty" });
     }
 
-    if (nome !== undefined && nome.length < 3) {
-      return res.status(400).json({ error: "O nome da sprint deve ter no mínimo 3 caracteres" });
+    if (name !== undefined && name.length < 3) {
+      return res.status(400).json({ error: "Sprint name must have at least 3 characters" });
     }
 
     const affectedRows = await sprintService.updateSprint(Number(req.params.id), req.body);
     if (affectedRows === 0) {
-      return res.status(404).json({ error: "Sprint não encontrada" });
+      return res.status(404).json({ error: "Sprint not found" });
     }
-    res.json({ message: "Sprint atualizada com sucesso" });
+    res.json({ message: "Sprint updated successfully" });
   } catch (error) {
-    res.status(400).json({ error: `Erro ao atualizar sprint: ${error.message}` });
+    res.status(400).json({ error: `Error updating sprint: ${error.message}` });
   }
 };
 
