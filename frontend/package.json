@@ -8,7 +8,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc && npm run copy:assets",
-    "copy:assets": "copyfiles -u 1 src/assets/* src/styles/* dist/src/",
+    "copy:assets": "copyfiles -u 0 \"src/assets/**/*\" \"src/styles/**/*\" dist",
     "watch": "tsc -w",
     "start": "npm run build",
     "test": "vitest",
@@ -19,6 +19,7 @@
     "@types/node": "^25.3.3",
     "copyfiles": "^2.4.1",
     "jsdom": "^28.0.0",
+    "shx": "^0.4.0",
     "vitest": "^4.0.18"
   }
 }

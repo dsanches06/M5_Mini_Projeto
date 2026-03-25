@@ -4,11 +4,15 @@ import {
 } from "./src/ui/gestUserTask/index.js";
 import { activateMenu } from "./src/ui/dom/index.js";
 import { setupCompleteStatisticsPage } from "./src/ui/statistics/StatisticsPageExample.js";
+import { getTasks, getUsers } from "./src/api/index.js";
 
 //inicializar a aplicação
-window.onload = () => {
+window.onload = async () => {
   loadInitialUsers();
   activateMenu("#menuUsers");
+
+ await getUsers(); 
+ await getTasks();
 };
 
 //obter o menu task

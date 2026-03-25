@@ -9,6 +9,8 @@ export interface IUser {
   toggleActive(): void;
   getRole(): UserRole;
   getEmail(): string;
+  getPhone(): number;
+  getCreatedAt(): Date;
   createTask(task: ITask): void;
   removeTask(id: number): void;
   pendingTasks(): ITask[];

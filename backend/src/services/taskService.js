@@ -2,7 +2,7 @@ import { db } from "../db.js";
 
 /* Função para buscar todas as tarefas */
 export const getAllTasks = async (search, sort) => {
-  let [tasks] = await db.query("SELECT * FROM tarefa");
+  let [tasks] = await db.query("SELECT * FROM task");
 
   if (search) {
     tasks = tasks.filter(
@@ -31,7 +31,7 @@ export const getAllTasks = async (search, sort) => {
 /* Função para criar tarefa */
 export const createTask = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO tarefa (titulo, descricao, id_estado_tarefa, id_prioridade, id_categoria, id_projeto, horas_estimadas, data_limite) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO task (titulo, descricao, id_estado_tarefa, id_prioridade, id_categoria, id_projeto, horas_estimadas, data_limite) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
       data.titulo,
       data.descricao,
@@ -92,7 +92,7 @@ export const updateTask = async (taskId, data) => {
   values.push(taskId);
 
   const [result] = await db.query(
-    `UPDATE tarefa SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
+    `UPDATE task SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
     values,
   );
   return result.affectedRows;
@@ -100,13 +100,13 @@ export const updateTask = async (taskId, data) => {
 
 /* Função para deletar tarefa */
 export const deleteTask = async (taskId) => {
-  const [result] = await db.query("DELETE FROM tarefa WHERE id=?", [taskId]);
+  const [result] = await db.query("DELETE FROM task WHERE id=?", [taskId]);
   return result.affectedRows;
 };
 
 /* Função para buscar tarefa por ID */
 export const getTaskById = async (taskId) => {
-  const [tasks] = await db.query("SELECT * FROM tarefa WHERE id = ?", [taskId]);
+  const [tasks] = await db.query("SELECT * FROM task WHERE id = ?", [taskId]);
   return tasks[0];
 };
 
@@ -174,11 +174,11 @@ export const removeTagFromAllTasks = async (tagId) => {
 
 /* Função para buscar estatísticas das tarefas */
 export const getTaskStats = async () => {
-  const [result] = await db.query("SELECT COUNT(*) as totalTasks FROM tarefa");
+  const [result] = await db.query("SELECT COUNT(*) as totalTasks FROM task");
   const totalTasks = result[0].totalTasks;
 
   const [completedResult] = await db.query(
-    "SELECT COUNT(*) as completedTasks FROM tarefa WHERE data_conclusao IS NOT NULL",
+    "SELECT COUNT(*) as completedTasks FROM task WHERE data_conclusao IS NOT NULL",
   );
   const completedTasks = completedResult[0].completedTasks;
 

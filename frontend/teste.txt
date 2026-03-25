@@ -1,0 +1,150 @@
+/**
+ * Tipos Auxiliares para IDs e Enums
+ */
+type ID = number;
+
+enum TeamRole {
+    ADMIN = 'admin',
+    MEMBER = 'member'
+}
+
+enum DependencyType {
+    BLOCKS = 'blocks',
+    DEPENDS_ON = 'depends_on'
+}
+
+/**
+ * Entidades Principais
+ */
+
+export class User {
+    id!: ID;
+    name!: string;
+    email!: string;
+    phone!: string;
+    active: boolean = true;
+    gender!: string;
+    createdAt: Date = new Date();
+}
+
+export class ProjectStatus {
+    id!: ID;
+    name!: string;
+    flowOrder?: number;
+}
+
+export class Project {
+    id!: ID;
+    name!: string;
+    description!: string;
+    projectStatusId?: ID;
+    startDate?: Date;
+    endDateExpected?: Date;
+}
+
+export class TaskStatus {
+    id!: ID;
+    name!: string;
+    flowOrder?: number;
+}
+
+export class Category {
+    id!: ID;
+    name!: string;
+    flowOrder?: number;
+}
+
+export class Priority {
+    id!: ID;
+    name!: string;
+    flowOrder?: number;
+}
+
+export class Task {
+    id!: ID;
+    title!: string;
+    description!: string;
+    taskStatusId!: ID;
+    priorityId!: ID;
+    categoryId!: ID;
+    projectId!: ID;
+    createdAt: Date = new Date();
+    dueDate?: Date;
+    completedAt?: Date;
+    estimatedHours!: number; // DECIMAL(5,2) mapeia para number
+}
+
+export class Comment {
+    id!: ID;
+    content!: string;
+    taskId!: ID;
+    userId!: ID;
+    createdAt: Date = new Date();
+    editedAt?: Date;
+    resolved: boolean = false;
+}
+
+export class TaskAttachment {
+    id!: ID;
+    taskId!: ID;
+    fileName!: string;
+    fileType!: string;
+    sizeKb?: number;
+    uploadedAt: Date = new Date();
+}
+
+export class Team {
+    id!: ID;
+    name!: string;
+    description!: string;
+    createdAt: Date = new Date();
+}
+
+/**
+ * Tabelas de Relacionamento (N:M) e Funcionalidades Extra
+ */
+
+export class TeamMember {
+    teamId!: ID;
+    userId!: ID;
+    role: TeamRole = TeamRole.MEMBER;
+    joinedAt: Date = new Date();
+}
+
+export class TimeLog {
+    id!: ID;
+    taskId!: ID;
+    userId!: ID;
+    hours!: number;
+    description!: string;
+    loggedAt: Date = new Date();
+}
+
+export class Sprint {
+    id!: ID;
+    projectId!: ID;
+    name!: string;
+    startDate: Date = new Date();
+    endDate?: Date;
+}
+
+export class Notification {
+    id!: ID;
+    userId!: ID;
+    title!: string;
+    message!: string;
+    isRead: boolean = false;
+    sentAt: Date = new Date();
+}
+
+export class Label {
+    id!: ID;
+    name!: string;
+    color?: string;
+}
+
+export class TaskDependency {
+    taskId!: ID;
+    dependentTaskId!: ID;
+    type!: DependencyType;
+}

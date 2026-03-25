@@ -2,7 +2,7 @@ import { db } from "../db.js";
 
 /* Função para buscar todos os utilizadores */
 export const getAllUsers = async (search, sort) => {
-  let [users] = await db.query("SELECT * FROM utilizador");
+  let [users] = await db.query("SELECT * FROM users");
 
   if (search) {
     users = users.filter(
@@ -29,14 +29,14 @@ export const getAllUsers = async (search, sort) => {
 
 /* Função para buscar utilizador por ID */
 export const getUserById = async (userId) => {
-  const [users] = await db.query("SELECT * FROM utilizador WHERE id = ?", [userId]);
+  const [users] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
   return users[0] || null;
 };
 
 /* Função para criar utilizador */
 export const createUser = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO utilizador (nome, email, telefone) VALUES (?, ?, ?)",
+    "INSERT INTO users (nome, email, telefone) VALUES (?, ?, ?)",
     [data.nome, data.email, data.telefone || null],
   );
   return { id: result.insertId, ...data };
@@ -67,7 +67,7 @@ export const updateUser = async (userId, data) => {
   values.push(userId);
 
   const [result] = await db.query(
-    `UPDATE utilizador SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
+    `UPDATE users SET ${fieldsToUpdate.join(", ")} WHERE id = ?`,
     values,
   );
   return result.affectedRows;
@@ -75,14 +75,14 @@ export const updateUser = async (userId, data) => {
 
 /* Função para deletar utilizador */
 export const deleteUser = async (userId) => {
-  const [result] = await db.query("DELETE FROM utilizador WHERE id = ?", [userId]);
+  const [result] = await db.query("DELETE FROM users WHERE id = ?", [userId]);
   return result.affectedRows;
 };
 
 /* Função para alternar status ativo/inativo do utilizador */
 export const toggleUserActive = async (userId, data) => {
   const [result] = await db.query(
-    "UPDATE utilizador SET activo = ? WHERE id = ?",
+    "UPDATE users SET active = ? WHERE id = ?",
     [data.activo, userId],
   );
   return result.affectedRows;
@@ -90,7 +90,7 @@ export const toggleUserActive = async (userId, data) => {
 
 /* Função para verificar se email existe */
 export const emailExists = async (email, userId = null) => {
-  let query = "SELECT * FROM utilizador WHERE email = ?";
+  let query = "SELECT * FROM users WHERE email = ?";
   const params = [email];
 
   if (userId) {
@@ -104,13 +104,12 @@ export const emailExists = async (email, userId = null) => {
 
 /* Função para buscar estatísticas dos utilizadores */
 export const getUserStats = async () => {
-  const [result] = await db.query("SELECT COUNT(*) as totalUsers FROM utilizador");
+  const [result] = await db.query("SELECT COUNT(*) as totalUsers FROM users");
   const totalUsers = result[0].totalUsers;
 
-  const [activeResult] = await db.query("SELECT COUNT(*) as activeUsers FROM utilizador WHERE activo = 1");
+  const [activeResult] = await db.query("SELECT COUNT(*) as activeUsers FROM users WHERE active = 1");
   const activeUsers = activeResult[0].activeUsers;
-
-  const [inactiveResult] = await db.query("SELECT COUNT(*) as inactiveUsers FROM utilizador WHERE activo = 0");
+  const [inactiveResult] = await db.query("SELECT COUNT(*) as inactiveUsers FROM users WHERE active = 0");
   const inactiveUsers = inactiveResult[0].inactiveUsers;
 
   const activePercentage = totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(2) : "0.00";

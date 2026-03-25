@@ -7,7 +7,7 @@ import { SystemLogger } from "../logs/SystemLogger.js";
 
 /* Implementação da tarefa do tipo Feature */
 export class FeatureTask extends BaseEntity implements ITask {
-   private title: string;
+  private title: string;
   private description?: string;
   private completed: boolean;
   private completeDate?: Date;
@@ -15,7 +15,12 @@ export class FeatureTask extends BaseEntity implements ITask {
   private category: TaskCategory;
   private user: IUser | undefined;
 
-  constructor(id: number, title: string, description: string | undefined, category: TaskCategory) {
+  constructor(
+    id: number,
+    title: string,
+    description: string | undefined,
+    category: TaskCategory,
+  ) {
     super(id);
     this.title = title;
     this.description = description;
@@ -36,14 +41,13 @@ export class FeatureTask extends BaseEntity implements ITask {
     this.title = title;
   }
 
-    getDescription(): string | undefined {
+  getDescription(): string | undefined {
     return this.description;
   }
 
   setDescription(description: string): void {
     this.description = description;
   }
-
 
   getCompleted(): boolean {
     return this.completed;

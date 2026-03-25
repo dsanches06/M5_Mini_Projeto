@@ -34,7 +34,7 @@ export function loadUsersPage(users: IUser[]): void {
   const searchContainer = showSearchContainer();
   addElementInContainer("#containerSection", searchContainer);
 
-  const usersContainer = renderUsers(UserService.getAllUsers());
+  const usersContainer = renderUsers( UserService.getAllUsers());
   addElementInContainer("#containerSection", usersContainer);
 
   // Adicionar event listeners aos botões de contador para filtrar

@@ -13,7 +13,12 @@ const app = express();
 
 dotenv.config();
 
-app.use(express.json(), cors());
+app.use(express.json());
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(logger);
 

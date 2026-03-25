@@ -1,24 +1,21 @@
 import { IUser } from "../models/index.js";
 import { ITask } from "../tasks/index.js";
+import { getUsers } from "../api/index.js";
 
 /* Serviço para gerir usuários */
 export class UserService {
   private static users = new Map<number, IUser>();
 
   /* Adiciona um novo usuário ao serviço */
-  static addUser(user: IUser): void {
-    if (!this.users.has(user.getId())) {
-      this.users.set(user.getId(), user);
-    }
-  }
+  static addUser(user: IUser): void {}
 
   /* Remove um usuário do serviço pelo ID */
   static removeUser(id: number): boolean {
-    return this.users.delete(id);
+    return false;
   }
 
   /* Obtém todos os usuários registrados */
-  static getAllUsers(): IUser[] {
+  static  getAllUsers(): IUser[] {
     return Array.from(this.users.values());
   }
 
@@ -40,11 +37,6 @@ export class UserService {
 
   /* Obtém todas as tarefas de todos os usuários */
   static getAllUserTasks(): ITask[] {
-    const users = this.getAllUsers();
-    const allTasks: ITask[] = [];
-    users.forEach((user) => {
-      allTasks.push(...user.getTasks());
-    });
-    return allTasks;
+    return [];
   }
 }

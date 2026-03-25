@@ -89,9 +89,7 @@ function setupFormLogic(
     // }
 
     // Validar se já existe utilizador com o mesmo email
-    const existingUserByEmail = UserService.getAllUsers().find(
-      (user) => user.getEmail().toLowerCase() === email.toLowerCase(),
-    );
+    const existingUserByEmail = false;
     if (existingUserByEmail) {
       errors.emailErr.textContent = `Já existe um utilizador com o email "${email}".`;
       isValid = false;
@@ -115,8 +113,10 @@ function setupFormLogic(
         roleUser = UserRole.VIEWER;
       }
 
+      const phone = 111111111;
+
       if (roleUser) {
-        const user: IUser = new UserClass(newId, name, email, gender, roleUser);
+        const user: IUser = new UserClass(newId, name, email, phone, gender, true, roleUser);
         //adiciona a lista de utilizadores
         UserService.addUser(user);
         //mensagem de sucesso ou erro
@@ -132,10 +132,10 @@ function setupFormLogic(
           );
         }
         //mostra todos os utilizadores
-        renderUsers(UserService.getAllUsers() as UserClass[]);
+        renderUsers( UserService.getAllUsers() as UserClass[]);
         // atualizar contadores
         showUsersCounters(
-          UserService.getAllUsers() as UserClass[],
+           UserService.getAllUsers() as UserClass[],
           "utilizadores",
         );
         modal.remove();

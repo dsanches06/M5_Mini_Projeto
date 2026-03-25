@@ -3,9 +3,9 @@ import { ITask } from "../tasks/index.js";
 import { showInfoBanner } from "./index.js";
 
 /* Função para obter tarefas por filtro */
-export function getUserTasksByFilter(filter: string, title?: string): ITask[] {
+export  function getUserTasksByFilter(filter: string, title?: string): ITask[] {
   let tasks: ITask[] = [];
-  for (const task of UserService.getAllUserTasks()) {
+  for (const task of  UserService.getAllUserTasks()) {
     switch (filter) {
       case "all":
         tasks.push(task);
