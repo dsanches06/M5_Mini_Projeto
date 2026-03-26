@@ -78,7 +78,7 @@ async function handleTitleChange(task: ITask, title: string, user?: IUser) {
   if (title !== task.getTitle()) {
     task.setTitle(title);
 
-    const tasks = user ? user.getTasks() : [];
+    const tasks = user ? [] : [];
 
     renderDashboard(tasks, user);
     showInfoBanner(
@@ -97,7 +97,7 @@ async function handleDescriptionChange(
     const current = (task as ITask).getDescription() ?? "";
     if (description !== current) {
       (task as ITask).setDescription(description);
-      const tasks = user ? user.getTasks() : [];
+      const tasks = user ? [] : [];
       renderDashboard(tasks, user);
       showInfoBanner(
         `INFO: A descrição da tarefa "${task.getTitle()}" foi atualizada.`,
@@ -113,7 +113,7 @@ async function handleStatusChange(task: ITask, statusValue: string, user?: IUser
     if (task.getUser()) {
       if (StateTransitions.validTransitions(task.getStatus(), newStatus)) {
         task.moveTo(newStatus);
-        const tasks = user ? user.getTasks() : [];
+        const tasks = user ? [] : [];
         renderDashboard(tasks, user);
         showInfoBanner(
           `INFO: O estado da tarefa "${task.getTitle()}" foi alterado para ${TaskStatus[newStatus]}.`,
@@ -142,7 +142,7 @@ async function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }
       // TODO: Implementar unassign via API
       // await AssignmentService.unassignUser(task.getId(), currentUser.getId());
       const user = task.getUser();
-      const tasks = user ? user.getTasks() : [];
+      const tasks = user ? [] : [];
       renderDashboard(tasks, user);
       showInfoBanner(
         `INFO: A tarefa "${task.getTitle()}" foi desvinculada do utilizador "${currentUser.getName()}" com sucesso.`,
@@ -171,7 +171,7 @@ async function handleAssign(
       // TODO: Implementar assign via API
       // await AssignmentService.assignUser(task.getId(), userId);
       const user = task.getUser();
-      const tasks = user ? user.getTasks() : [];
+      const tasks = user ? [] : [];
       renderDashboard(tasks, user);
       showInfoBanner(
         `INFO: A tarefa "${task.getTitle()}" foi atribuída ao utilizador "${user?.getName()}" com sucesso.`,

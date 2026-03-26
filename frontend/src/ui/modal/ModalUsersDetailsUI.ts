@@ -75,7 +75,7 @@ function modalUserTask(user: UserClass): HTMLElement {
   //criar uma lista não ordenada
   const ul = document.createElement("ul") as HTMLUListElement;
   //por cada tarefa do utilizador
-  user.getTasks().forEach((task) => {
+  /*user.getTasks().forEach((task) => {
     const li = document.createElement("li") as HTMLLIElement;
     li.textContent = `${task.getTitle()} - ${
       task.getCompleted() ? "Concluído" : "Pendente"
@@ -89,9 +89,9 @@ function modalUserTask(user: UserClass): HTMLElement {
             minute: "2-digit",
           })
         : "N/A"
-    }`;
-    ul.appendChild(li);
-  });
+    }`*/
+    //ul.appendChild(li);
+  //});
 
   //criar uma nova section
   const section = document.createElement("section") as HTMLElement;

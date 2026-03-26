@@ -1,47 +1,46 @@
+import { UserService } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
 
-export function showUsersCounters(filteredUser: IUser[], type?: string): void {
-  countAllUsers("#allUsersCounter", filteredUser);
-  countAtiveUsers("#ativeUsersCounter", filteredUser);
-  countUnableUsers("#unableUsersCounter", filteredUser);
-  countFilterUsers("#filterUsersCounter", type!, filteredUser);
-  countAtiveInativePercentage(
-    "#ativeUsersPercentageCounter",
-    type!,
-    filteredUser,
-  );
+export async function showUsersCounters(type?: string): Promise<void> {
+  await countAllUsers("#allUsersCounter");
+  await countAtiveUsers("#ativeUsersCounter");
+  await countUnableUsers("#unableUsersCounter");
+  countFilterUsers("#filterUsersCounter", type!);
+  await countAtiveInativePercentage("#ativeUsersPercentageCounter", type!);
+}
+
+async function getUserStats(): Promise<any> {
+  return await UserService.getUserStats();
 }
 
 /* Contador de utilizadores ativos */
-function countAtiveUsers(id: string, filteredUser: IUser[]): void {
+async function countAtiveUsers(id: string): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
+  const stats: any = await getUserStats();
   if (section) {
-    section.textContent = `${filteredUser.filter((user) => user.isActive()).length}`;
+    section.textContent = `${stats.activeUsers}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
 }
 
 /* Contador de utilizadores inativos */
-function countUnableUsers(id: string, filteredUser: IUser[]): void {
+async function countUnableUsers(id: string): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
+  const stats: any = await getUserStats();
   if (section) {
-    section.textContent = `${filteredUser.filter((user) => !user.isActive()).length}`;
+    section.textContent = `${stats.inactiveUsers}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
 }
 
 /* Contador de utilizadores filtrados por nome */
-function countFilterUsers(
-  id: string,
-  type: string,
-  filteredUser: IUser[],
-): void {
+function countFilterUsers(id: string, type: string): void {
   const section = document.querySelector(`${id}`) as HTMLElement;
   if (section) {
     if (type === "userFiltered" && section.textContent !== "") {
-      section.textContent = `${filteredUser.length}`;
+      section.textContent = `${0}`;
     } else {
       section.textContent = "0";
     }
@@ -51,39 +50,29 @@ function countFilterUsers(
 }
 
 /* Contador de utilizadores */
-function countAllUsers(id: string, filteredUser: IUser[]): void {
+async function countAllUsers(id: string): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
+  const stats: any = await getUserStats();
   if (section) {
-    section.textContent = `${filteredUser.length}`;
+    section.textContent = `${stats.totalUsers}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
 }
 
 /* Percentagem de utilizadores ativos */
-function countAtiveInativePercentage(
-  id: string,
-  type: string,
-  filteredUser: IUser[],
-): void {
+async function countAtiveInativePercentage(id: string, type: string): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  let activeInativeUsers;
-
+  const stats: any = await getUserStats();
+  let activeInativeUsers = 0;
   if (section) {
     if (type === "inactivos") {
-      activeInativeUsers = filteredUser.filter(
-        (user) => !user.isActive(),
-      ).length;
+      activeInativeUsers = stats.inactiveUsers;
+      section.textContent = `${stats.inactivePercentage}`;
     } else {
-      activeInativeUsers = filteredUser.filter((user) =>
-        user.isActive(),
-      ).length;
+      activeInativeUsers = stats.activeUsers;
+      section.textContent = `${stats.activePercentage}`;
     }
-
-    const totalUsers = filteredUser.length;
-    const percentage =
-      totalUsers > 0 ? ((activeInativeUsers / totalUsers) * 100).toFixed(2) : 0;
-    section.textContent = `${percentage}%`;
     changeImageAndFigCaption(type!);
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);

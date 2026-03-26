@@ -1,5 +1,5 @@
+import Notifications from "../notifications/Notifications.js";
 import { UserRole } from "../security/UserRole.js";
-import { ITask } from "../tasks/index.js";
 
 /* Interface que define o contrato para um utilizador */
 export interface IUser {
@@ -11,9 +11,5 @@ export interface IUser {
   getEmail(): string;
   getPhone(): number;
   getCreatedAt(): Date;
-  createTask(task: ITask): void;
-  removeTask(id: number): void;
-  pendingTasks(): ITask[];
-  completedTasks(): ITask[];
-  getTasks(): ITask[];
+  getNotifications(): Notifications[];
 }

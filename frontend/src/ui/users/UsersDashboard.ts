@@ -47,7 +47,7 @@ export class UsersDashboard {
       },
     ];
 
-    this.dashboard = new GenericDashboardUI(this.user.getTasks(), {
+    this.dashboard = new GenericDashboardUI([], {
       containerId: "dashBoardContainer",
       columns: taskColumns,
       cardRenderer: this.createTaskCard.bind(this),

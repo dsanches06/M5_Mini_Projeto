@@ -1,6 +1,7 @@
 import { BaseEntity, IUser } from "./index.js";
 import { UserRole } from "../security/UserRole.js";
 import { ITask } from "../tasks/index.js";
+import Notifications from "@/notifications/Notifications.js";
 
 /* Representação de um utilizador */
 export class UserClass extends BaseEntity implements IUser {
@@ -9,8 +10,8 @@ export class UserClass extends BaseEntity implements IUser {
   private phone: number;
   private active: boolean;
   private role?: UserRole;
-  private tasks: ITask[];
   private gender: string;
+  private notifications: Notifications[];
 
   constructor(
     id: number,
@@ -28,7 +29,7 @@ export class UserClass extends BaseEntity implements IUser {
     this.phone = phone;
     this.active = active;
     this.role = role || UserRole.MEMBER;
-    this.tasks = [];
+    this.notifications = [];
   }
 
   getName(): string {
@@ -63,26 +64,7 @@ export class UserClass extends BaseEntity implements IUser {
     return super.getCreatedAt();
   }
 
-  createTask(task: ITask): void {
-    this.tasks.push(task);
-  }
-
-  removeTask(id: number): void {
-    const index = this.tasks.findIndex((task) => task.getId() === id);
-    if (index !== -1) {
-      this.tasks.splice(index, 1);
-    }
-  }
-
-  pendingTasks(): ITask[] {
-    return this.tasks.filter((task) => !task.getCompleted());
-  }
-
-  completedTasks(): ITask[] {
-    return this.tasks.filter((task) => task.getCompleted());
-  }
-
-  getTasks(): ITask[] {
-    return this.tasks;
+  getNotifications(): Notifications[] {
+    return this.notifications;
   }
 }

@@ -1,10 +1,42 @@
 import { BASE_URL } from "./constants.js";
-import { IUser } from "../models/index.js";
+import { IUser, UserClass } from "../models/index.js";
+import Notifications from "../notifications/Notifications.js";
 
 /* ======================== GET ======================== */
 
+/* Converter objeto plano para instância de UserClass */
+function mapToUserClass(data: any): UserClass {
+  return new UserClass(
+    data.id,
+    data.name,
+    data.email,
+    data.phone,
+    data.gender,
+    getStatus(data.active),
+    data.role,
+  );
+}
+
+/* Converter objeto plano para instância de Notifications */
+function mapToNotifications(data: any): Notifications {
+  return new Notifications(
+    data.id,
+    data.title,
+    data.message,
+    data.is_read,
+    data.sent_at,
+  );
+}
+
+function getStatus(status: number): boolean {
+  return status === 1 ? true : false;
+}
+
 /* Função para obter a lista de utilizadores */
-export async function getUsers(sort?: string, search?: string): Promise<IUser[]> {
+export async function getUsers(
+  sort?: string,
+  search?: string,
+): Promise<IUser[]> {
   try {
     let url = `${BASE_URL}users`;
     const params: string[] = [];
@@ -22,14 +54,32 @@ export async function getUsers(sort?: string, search?: string): Promise<IUser[]>
 
     const res = await fetch(url);
     if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter utilizadores " + res.status);
+      throw new Error(
+        "ERRO: Não foi possível obter utilizadores " + res.status,
+      );
     }
-    const data: IUser[] = await res.json();
+    const data: any[] = await res.json();
     console.table(data);
-    return data;
+    const users = data.map(mapToUserClass);
+    return users;
   } catch (error) {
     console.error("Erro ao obter utilizadores:", error);
     return [];
+  }
+}
+
+/* Função para obter um utilizador por ID */
+export async function getUserById(id: number): Promise<IUser | null> {
+  try {
+    const res = await fetch(`${BASE_URL}users/${id}`);
+    if (!res.ok) {
+      return null;
+    }
+    const data: any = await res.json();
+    return mapToUserClass(data);
+  } catch (error) {
+    console.error("Erro ao obter utilizador:", error);
+    return null;
   }
 }
 
@@ -44,23 +94,31 @@ export async function getUserStats(): Promise<any> {
 }
 
 /* Função para obter notificações não lidas do utilizador */
-export async function getUnreadNotifications(userId: number): Promise<any[]> {
+export async function getUnreadNotifications(userId: number): Promise<Notifications[]> {
   const res = await fetch(`${BASE_URL}users/${userId}/notifications/unread`);
   if (!res.ok) {
-    throw new Error("ERRO: Não foi possível obter notificações não lidas " + res.status);
+    throw new Error(
+      "ERRO: Não foi possível obter notificações não lidas " + res.status,
+    );
   }
-  const data = await res.json();
-  return data;
+  const data: any[] = await res.json();
+  const notifications = Array.isArray(data) 
+    ? data.map(mapToNotifications)
+    : [mapToNotifications(data)];
+  return notifications;
 }
 
 /* Função para obter todas as notificações do utilizador */
-export async function getNotificationsByUser(userId: number): Promise<any[]> {
+export async function getNotificationsByUser(userId: number): Promise<Notifications[]> {
   const res = await fetch(`${BASE_URL}users/${userId}/notifications`);
   if (!res.ok) {
     throw new Error("ERRO: Não foi possível obter notificações " + res.status);
   }
-  const data = await res.json();
-  return data;
+  const data: any[] = await res.json();
+  const notifications = Array.isArray(data) 
+    ? data.map(mapToNotifications)
+    : [mapToNotifications(data)];
+  return notifications;
 }
 
 /* ======================== POST ======================== */
@@ -77,14 +135,17 @@ export async function createUser(userData: Partial<IUser>): Promise<IUser> {
   if (!res.ok) {
     throw new Error("ERRO: Não foi possível criar utilizador " + res.status);
   }
-  const data: IUser = await res.json();
-  return data;
+  const data: any = await res.json();
+  return mapToUserClass(data);
 }
 
 /* ======================== PUT ======================== */
 
 /* Função para atualizar um utilizador */
-export async function updateUser(userId: number, userData: Partial<IUser>): Promise<IUser> {
+export async function updateUser(
+  userId: number,
+  userData: Partial<IUser>,
+): Promise<IUser> {
   const res = await fetch(`${BASE_URL}users/${userId}`, {
     method: "PUT",
     headers: {
@@ -93,16 +154,21 @@ export async function updateUser(userId: number, userData: Partial<IUser>): Prom
     body: JSON.stringify(userData),
   });
   if (!res.ok) {
-    throw new Error("ERRO: Não foi possível atualizar utilizador " + res.status);
+    throw new Error(
+      "ERRO: Não foi possível atualizar utilizador " + res.status,
+    );
   }
-  const data: IUser = await res.json();
-  return data;
+  const data: any = await res.json();
+  return mapToUserClass(data);
 }
 
 /* ======================== PATCH ======================== */
 
 /* Função para ativar/desativar um utilizador */
-export async function toggleUserActive(userId: number, active: boolean): Promise<IUser> {
+export async function toggleUserActive(
+  userId: number,
+  active: boolean,
+): Promise<IUser> {
   const res = await fetch(`${BASE_URL}users/${userId}`, {
     method: "PATCH",
     headers: {
@@ -111,22 +177,32 @@ export async function toggleUserActive(userId: number, active: boolean): Promise
     body: JSON.stringify({ active }),
   });
   if (!res.ok) {
-    throw new Error("ERRO: Não foi possível atualizar utilizador " + res.status);
+    throw new Error(
+      "ERRO: Não foi possível atualizar utilizador " + res.status,
+    );
   }
-  const data: IUser = await res.json();
-  return data;
+  const data: any = await res.json();
+  return mapToUserClass(data);
 }
 
 /* Função para marcar uma notificação como lida */
-export async function markNotificationAsRead(userId: number, notificationId: number): Promise<any> {
-  const res = await fetch(`${BASE_URL}users/${userId}/notifications/${notificationId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
+export async function markNotificationAsRead(
+  userId: number,
+  notificationId: number,
+): Promise<any> {
+  const res = await fetch(
+    `${BASE_URL}users/${userId}/notifications/${notificationId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
   if (!res.ok) {
-    throw new Error("ERRO: Não foi possível marcar notificação como lida " + res.status);
+    throw new Error(
+      "ERRO: Não foi possível marcar notificação como lida " + res.status,
+    );
   }
   const data = await res.json();
   return data;

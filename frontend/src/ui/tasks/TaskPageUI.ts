@@ -21,14 +21,14 @@ import { createNotificationsUI } from "../notifications/notificationsUI.js";
 import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 
 /* Lista de tarefas  */
-export function loadTasksPage(user?: IUser): void {
-  const tasks: ITask[] = user ? user.getTasks() : []; // TODO: Obter todas as tarefas da API
+export async function loadTasksPage(user?: IUser): Promise<void> {
+  const tasks: ITask[] = user ? [] : []; // TODO: Obter todas as tarefas da API
   const title = user ? `Tarefas de ${user.getName()}` : "GESTÃO DE TAREFAS";
 
   clearContainer("#containerSection");
 
   if (user) {
-    addElementInContainer("#containerSection", createNotificationsUI());
+    addElementInContainer("#containerSection", await createNotificationsUI(user));
   }
 
   addElementInContainer("#containerSection", createHeadingTitle("h2", title));

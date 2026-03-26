@@ -117,7 +117,15 @@ function setupFormLogic(
       const phone = 111111111;
 
       if (roleUser) {
-        const user: IUser = new UserClass(newId, name, email, phone, gender, true, roleUser);
+        const user: IUser = new UserClass(
+          newId,
+          name,
+          email,
+          phone,
+          gender,
+          true,
+          roleUser,
+        );
         //adiciona a lista de utilizadores
         // TODO: Criar usuário via API
         // await UserService.createUser(user);
@@ -138,10 +146,7 @@ function setupFormLogic(
         const users = await UserService.getUsers();
         renderUsers(users as UserClass[]);
         // atualizar contadores
-        showUsersCounters(
-          users as UserClass[],
-          "utilizadores",
-        );
+        await showUsersCounters("utilizadores");
         modal.remove();
       }
     } else {
@@ -204,19 +209,14 @@ export function renderUserModal(): void {
   selectsContainer.style.display = "flex";
   selectsContainer.style.gap = "6rem";
   selectsContainer.append(selectGenderData.section, selectRoleData.section);
- 
+
   const submitBtn = createButton(
     "button",
     "Adicionar",
     "submit",
   ) as HTMLButtonElement;
 
-  form.append(
-    nameData.section,
-    emailData.section,
-    selectsContainer,
-    submitBtn,
-  );
+  form.append(nameData.section, emailData.section, selectsContainer, submitBtn);
   content.append(closeBtn, title, form);
   modal.append(content);
   document.body.appendChild(modal);

@@ -18,7 +18,7 @@ import {
 } from "../gestUserTask/index.js";
 
 /* Lista de utilizadores */
-export function loadUsersPage(users: IUser[]): void {
+export async function loadUsersPage(users: IUser[]): Promise<void> {
   clearContainer("#containerSection");
 
   addElementInContainer(
@@ -29,7 +29,7 @@ export function loadUsersPage(users: IUser[]): void {
   const userCounterSection = createUserCounter("userCounters");
   addElementInContainer("#containerSection", userCounterSection);
 
-  showUsersCounters(users, "utilizadores");
+  await showUsersCounters("utilizadores");
 
   const searchContainer = showSearchContainer();
   addElementInContainer("#containerSection", searchContainer);

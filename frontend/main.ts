@@ -30,9 +30,9 @@ const allMenuTasks = document.querySelectorAll(
   "#menuTasks",
 ) as NodeListOf<HTMLAnchorElement>;
 allMenuTasks.forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     activateMenu("#menuTasks");
-    loadAInitialTasks();
+    await loadAInitialTasks();
   });
 });
 

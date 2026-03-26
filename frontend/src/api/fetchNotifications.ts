@@ -1,7 +1,8 @@
+import { INotifications } from "../notifications/INotifications.js";
 import { BASE_URL } from "./constants.js";
 
 /* Função para obter a lista de notificações */
-export async function getNotifications(): Promise<any[]> {
+export async function getNotifications(): Promise<INotifications[]> {
   try {
     const res = await fetch(`${BASE_URL}notifications`);
     if (!res.ok) {
@@ -17,7 +18,7 @@ export async function getNotifications(): Promise<any[]> {
 }
 
 /* Função para obter uma notificação específica por ID */
-export async function getNotificationById(id: number): Promise<any | null> {
+export async function getNotificationById(id: number): Promise<INotifications | null> {
   try {
     const res = await fetch(`${BASE_URL}notifications/${id}`);
     if (!res.ok) {
@@ -33,7 +34,7 @@ export async function getNotificationById(id: number): Promise<any | null> {
 }
 
 /* Função para criar uma nova notificação */
-export async function createNotification(notification: any): Promise<any | null> {
+export async function createNotification(notification: INotifications): Promise<INotifications | null> {
   try {
     const res = await fetch(`${BASE_URL}notifications`, {
       method: "POST",
@@ -55,7 +56,7 @@ export async function createNotification(notification: any): Promise<any | null>
 }
 
 /* Função para atualizar uma notificação existente */
-export async function updateNotification(id: number, notification: any): Promise<any | null> {
+export async function updateNotification(id: number, notification: INotifications): Promise<INotifications | null> {
   try {
     const res = await fetch(`${BASE_URL}notifications/${id}`, {
       method: "PUT",

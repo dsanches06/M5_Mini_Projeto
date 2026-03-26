@@ -24,7 +24,7 @@ export function createUserCard(user: UserClass): HTMLElement {
   content1.className = "content";
 
   const randomValue = Math.floor(Math.random() * 4) + 1;
-  const imageFolder = user.getGender() === "Masculino" ? "man" : "woman";
+  const imageFolder = user.getGender() === "Male" ? "man" : "woman";
   const img = document.createElement("img") as HTMLImageElement;
   img.src = `./src/assets/${imageFolder}-${randomValue}.png`;
   img.alt = "User Avatar";
@@ -55,7 +55,7 @@ export function createUserCard(user: UserClass): HTMLElement {
   email.textContent = user.getEmail();
 
   const status = document.createElement("span") as HTMLElement;
-  status.textContent = `${user.isActive() ? "ativo" : "Inativo"}`;
+  status.textContent = `${user.isActive() ? "activo" : "Inactivo"}`;
 
   //Mostra o estado com texto ou cor diferente
   status.style.color = user.isActive() ? "green" : "red";
@@ -67,7 +67,7 @@ export function createUserCard(user: UserClass): HTMLElement {
 
   const tasks = document.createElement("span");
   tasks.className = "tasks";
-  tasks.textContent = `${user.getTasks().length} tarefas`;
+  tasks.textContent = `${0} tarefas`;
 
   const eyeOpenIcon = document.createElement("i") as HTMLElement;
   eyeOpenIcon.className = "fa-solid fa-eye fa-lg";
@@ -75,11 +75,11 @@ export function createUserCard(user: UserClass): HTMLElement {
   const eyeCloseIcon = document.createElement("i") as HTMLElement;
   eyeCloseIcon.className = "fa-solid fa-eye-slash fa-lg";
 
-  const eyeIcon = user.getTasks().length > 0 ? eyeOpenIcon : eyeCloseIcon;
+  const eyeIcon = 1 > 0 ? eyeOpenIcon : eyeCloseIcon;
   eyeIcon.style.cursor = "pointer";
-  eyeIcon.addEventListener("click", (event) => {
+  eyeIcon.addEventListener("click", async (event) => {
     event.stopPropagation();
-    loadTasksPage(user);
+    await loadTasksPage(user);
   });
 
   viewTask.append(tasks, eyeIcon);
@@ -117,7 +117,7 @@ function userCardBtn(user: UserClass): HTMLElement {
     // TODO: Recarregar lista de utilizadores da API
     const users = await UserService.getUsers();
     renderUsers(users as UserClass[]);
-    showUsersCounters(users as UserClass[], "utilizadores");
+    await showUsersCounters("utilizadores");
   });
 
   const trashIcon = document.createElement("i") as HTMLElement;
@@ -131,7 +131,7 @@ function userCardBtn(user: UserClass): HTMLElement {
   btnRemover.title = "Remover tarefas do utilizador";
   btnRemover.addEventListener("click", async (event) => {
     event.stopPropagation();
-    if (user.getTasks().length > 0) {
+    if (1 > 0) {
       showInfoBanner(
         "Utilizador com tarefas pendentes não pode ser removido.",
         "error-banner",
@@ -144,10 +144,7 @@ function userCardBtn(user: UserClass): HTMLElement {
         //atualiza a lista de utilizadores
         const users = await UserService.getUsers();
         renderUsers(users as UserClass[]);
-        showUsersCounters(
-          users as UserClass[],
-          "utilizadores",
-        );
+        await showUsersCounters("utilizadores");
       } catch (error) {
         showInfoBanner("Erro ao remover utilizador.", "error-banner");
       }

@@ -93,10 +93,10 @@ function setupTaskFormLogic(
 
       if (newTask) {
         if (user) {
-          user.createTask(newTask);
+         // user.createTask(newTask);
           // TODO: Implementar criação de tarefa via API
           // await TaskService.createTask(newTask);
-          renderDashboard(user.getTasks(), user);
+          renderDashboard([], user);
           showInfoBanner(
             `INFO: A tarefa ${newTask.getTitle()} foi criado ao utilizador ${user.getName()} com sucesso.`,
             "info-banner",

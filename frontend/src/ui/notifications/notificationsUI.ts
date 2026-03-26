@@ -1,13 +1,15 @@
+import { IUser } from "../../models/index.js";
+import { UserService } from "../../services/index.js";
 import { toggleNotifications } from "./notificationBoxUI.js";
 
-export function createNotificationsUI(): HTMLButtonElement {
+export async function createNotificationsUI(user: IUser): Promise<HTMLButtonElement> {
   const btnNotifications = document.createElement(
     "button",
   ) as HTMLButtonElement;
   btnNotifications.className = "icon-button";
-  btnNotifications.addEventListener("click", (event) => {
+  btnNotifications.addEventListener("click", async (event) => {
     event.stopPropagation();
-    toggleNotifications();
+    await toggleNotifications(user);
   });
 
   const spanIcone = document.createElement("span");
@@ -18,10 +20,36 @@ export function createNotificationsUI(): HTMLButtonElement {
   const spanBadge = document.createElement("span") as HTMLSpanElement;
   spanBadge.className = "icon-button-badge";
 
-  const notify = Math.floor(Math.random() * 5);
+  // Inicialmente mostrar um valor padrão
+  spanBadge.textContent = "0";
+
+  // Tentar obter notificações não lidas do utilizador
+  try {
+    const userId = user.getId();
+    console.log("Obtendo notificações para userId:", userId);
+    
+    if (!userId) {
+      throw new Error("UserId inválido");
+    }
+    
+    const unreadNotifications = await UserService.getUnreadNotifications(userId);
+    console.log("Notificações recebidas:", unreadNotifications);
+    
+    if (unreadNotifications) {
+      // Contar apenas notificações não lidas
+      const notifyCount = unreadNotifications.filter(n => !n.isNotificationRead()).length;
+      spanBadge.textContent = notifyCount.toString();
+      console.log("Badge atualizado com:", notifyCount);
+    }
+  } catch (error) {
+    console.error("Erro ao obter notificações da API:", error);
+    // Mostrar erro no badge para que o utilizador saiba que há um problema
+    spanBadge.textContent = "!";
+    spanBadge.style.backgroundColor = "red";
+  }
+
   icone.className = "fa-solid fa-bell fa-2xl fa-shake";
   icone.style.animationIterationCount = "1";
-  spanBadge.textContent = notify.toString();
 
   icone.addEventListener(
     "animationend",

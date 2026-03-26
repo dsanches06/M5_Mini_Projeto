@@ -1,16 +1,8 @@
+import { IUser } from "@/models/index.js";
 import Notifications from "../../notifications/Notifications.js";
+import { UserService } from "../../services/index.js";
 import { addElementInContainer, createSection } from "../dom/index.js";
 
-// Dados de exemplo
-const notifications: Notifications[] = [
-  new Notifications("@lorem ipsum dolor sit amet"),
-  new Notifications("@lorem ipsum dolor sit amet"),
-  new Notifications("@lorem ipsum dolor sit amet"),
-  new Notifications("@lorem ipsum dolor sit amet"),
-  new Notifications("@lorem ipsum dolor sit amet"),
-];
-
-// Track toggle state across function calls
 let isNotificationBoxOpen = false;
 
 function createNotificationItem(data: Notifications): HTMLDivElement {
@@ -20,10 +12,21 @@ function createNotificationItem(data: Notifications): HTMLDivElement {
   const textDiv = document.createElement("div");
   textDiv.className = "text";
 
+  const title = document.createElement("strong");
+  title.textContent = data.getTitle();
+
   const p = document.createElement("p");
   p.textContent = data.getMessage();
 
-  item.appendChild(p);
+  const sentAt = document.createElement("small");
+  sentAt.textContent = new Date(data.getSentAt()).toLocaleString("pt-PT");
+  sentAt.style.color = "#999";
+
+  textDiv.appendChild(title);
+  textDiv.appendChild(p);
+  textDiv.appendChild(sentAt);
+
+  item.appendChild(textDiv);
 
   return item;
 }
@@ -31,7 +34,7 @@ function createNotificationItem(data: Notifications): HTMLDivElement {
 /**
  * Renderiza todas as notificações no contentor
  */
-function renderNotifications(): void {
+async function renderNotifications(user: IUser): Promise<void> {
   let box = document.querySelector("#box") as HTMLElement;
 
   // Se o elemento não existir, cria-o e adiciona ao documento
@@ -50,21 +53,43 @@ function renderNotifications(): void {
     const title = box.querySelector("h2");
     const items = box.querySelectorAll(".notifi-item");
     items.forEach((item) => item.remove());
-    if (!title) {
-      const h2 = document.createElement("h2");
-      h2.textContent = "Notificações";
-      box.insertBefore(h2, box.firstChild);
-    }
   }
 
-  // Adiciona os novos itens
-  notifications.forEach((notif) => {
-    box.appendChild(createNotificationItem(notif));
-  });
+  // Buscar notificações da API
+  try {
+    const notifications = await UserService.getNotificationsByUser(user.getId());
+    console.log("Notificações carregadas:", notifications);
+
+    // Atualizar título com contagem
+    const h2 = box.querySelector("h2");
+    if (h2) {
+      h2.textContent = `Notificações (${notifications.length})`;
+    }
+
+    // Adiciona os novos itens
+    if (notifications && notifications.length > 0) {
+      notifications.forEach((notif) => {
+        box.appendChild(createNotificationItem(notif));
+      });
+    } else {
+      const emptyMsg = document.createElement("p");
+      emptyMsg.textContent = "Sem notificações";
+      emptyMsg.style.padding = "10px";
+      emptyMsg.style.color = "#999";
+      box.appendChild(emptyMsg);
+    }
+  } catch (error) {
+    console.error("Erro ao carregar notificações:", error);
+    const errorMsg = document.createElement("p");
+    errorMsg.textContent = "Erro ao carregar notificações";
+    errorMsg.style.padding = "10px";
+    errorMsg.style.color = "red";
+    box.appendChild(errorMsg);
+  }
 }
 
-export function toggleNotifications(): void {
-  renderNotifications();
+export async function toggleNotifications(user: IUser): Promise<void> {
+  await renderNotifications(user);
 
   const box = document.querySelector("#box") as HTMLElement;
 

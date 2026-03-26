@@ -10,11 +10,23 @@ import { loadUsersPage } from "../users/index.js";
 
 /* Função principal para carregar utilizadores iniciais */
 export async function loadInitialUsers(): Promise<void> {
-  //Limpa o container antes de mostrar os utilizadores
-  clearContainer("#containerSection");
+  try {
+    //Limpa o container antes de mostrar os utilizadores
+    clearContainer("#containerSection");
 
-  const users = await UserService.getUsers();
-  loadUsersPage(users);
+    const users = await UserService.getUsers();
+    console.log("Utilizadores carregados:", users);
+    
+    if (!users || users.length === 0) {
+      console.warn("Nenhum utilizador foi retornado");
+      showInfoBanner("Nenhum utilizador disponível", "warning-banner");
+    }
+    
+    await loadUsersPage(users);
+  } catch (error) {
+    console.error("Erro ao carregar utilizadores:", error);
+    showInfoBanner(`Erro ao carregar utilizadores: ${error}`, "error-banner");
+  }
 }
 
 /* Remover utilizador */
@@ -26,9 +38,13 @@ export async function removeUserByID(id: number): Promise<void> {
 /* Alternar estado (ativo / inativo) */
 export async function toggleUserState(id: number): Promise<void> {
   try {
-    const user = await UserService.getUserById(id);
+    // Obter o estado atual do utilizador da lista em memória
+    const allUsers = await UserService.getUsers();
+    const user = allUsers.find(u => u.getId() === id);
+    
     if (user) {
-      await UserService.toggleUserActive(id, !user.isActive());
+      const newState = !user.isActive();
+      await UserService.toggleUserActive(id, newState);
       showInfoBanner(`O estado do utilizador foi alterado.`, "info-banner");
     } else {
       showInfoBanner(`Utilizador não encontrado.`, "info-banner");

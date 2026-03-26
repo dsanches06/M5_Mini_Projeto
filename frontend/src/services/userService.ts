@@ -1,5 +1,6 @@
 import * as fetchUsers from "../api/fetchUsers.js";
 import { IUser } from "../models/index.js";
+import Notifications from "../notifications/Notifications.js";
 
 /* Serviço para gerenciar usuários */
 export class UserService {
@@ -10,11 +11,7 @@ export class UserService {
 
   /* Função para obter um usuário por ID da API */
   static async getUserById(id: number): Promise<IUser | null> {
-    const res = await fetch(`http://localhost:3000/users/${id}`);
-    if (!res.ok) {
-      return null;
-    }
-    return await res.json();
+    return await fetchUsers.getUserById(id);
   }
 
   /* Função para obter estatísticas de usuário */
@@ -23,12 +20,12 @@ export class UserService {
   }
 
   /* Função para obter notificações não lidas do usuário */
-  static async getUnreadNotifications(userId: number): Promise<any[]> {
+  static async getUnreadNotifications(userId: number): Promise<Notifications[]> {
     return await fetchUsers.getUnreadNotifications(userId);
   }
 
   /* Função para obter todas as notificações do usuário */
-  static async getNotificationsByUser(userId: number): Promise<any[]> {
+  static async getNotificationsByUser(userId: number): Promise<Notifications[]> {
     return await fetchUsers.getNotificationsByUser(userId);
   }
 
