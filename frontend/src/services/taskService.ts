@@ -26,7 +26,7 @@ export class TaskService {
   }
 
   /* Cria um nova tarefa na API */
-  static async createTask(taskData: Partial<ITask>): Promise<ITask> {
+  static async createTask(taskData: Partial<ITask>): Promise<ITask | null> {
     return await fetchTasks.createTask(taskData);
   }
 
@@ -47,7 +47,7 @@ export class TaskService {
   static async updateTask(
     taskId: number,
     taskData: Partial<ITask>,
-  ): Promise<ITask> {
+  ): Promise<ITask | null> {
     return await fetchTasks.updateTask(taskId, taskData);
   }
 

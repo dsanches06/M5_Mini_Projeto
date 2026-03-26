@@ -30,7 +30,7 @@ export class UserService {
   }
 
   /* Função para criar um novo usuário */
-  static async createUser(userData: Partial<IUser>): Promise<IUser> {
+  static async createUser(userData: Partial<IUser>): Promise<IUser | null> {
     return await fetchUsers.createUser(userData);
   }
 
@@ -38,7 +38,7 @@ export class UserService {
   static async updateUser(
     userId: number,
     userData: Partial<IUser>,
-  ): Promise<IUser> {
+  ): Promise<IUser | null> {
     return await fetchUsers.updateUser(userId, userData);
   }
 
@@ -46,7 +46,7 @@ export class UserService {
   static async toggleUserActive(
     userId: number,
     active: boolean,
-  ): Promise<IUser> {
+  ): Promise<IUser | null> {
     return await fetchUsers.toggleUserActive(userId, active);
   }
 
@@ -59,7 +59,7 @@ export class UserService {
   }
 
   /* Função para deletar um usuário */
-  static async deleteUser(userId: number): Promise<void> {
+  static async deleteUser(userId: number): Promise<boolean> {
     return await fetchUsers.deleteUser(userId);
   }
 }

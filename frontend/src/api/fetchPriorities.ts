@@ -1,105 +1,34 @@
-import { BASE_URL } from "./constants.js";
+import { get, getById, create, put, remove } from "./index.js";
+import { PriorityAPIResponse } from "./dto/index.js";
 
-/* Função para obter a lista de prioridades */
-export async function getPriorities(): Promise<any[]> {
-  try {
-    const res = await fetch(`${BASE_URL}priorities`);
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter prioridades " + res.status);
-    }
-    const data: any[] = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error("Erro ao obter prioridades:", error);
-    return [];
-  }
+const ENDPOINT = "priorities";
+
+export async function getPriorities(
+  sort?: string,
+  search?: string,
+): Promise<PriorityAPIResponse[]> {
+  return get<PriorityAPIResponse>(ENDPOINT, sort, search);
 }
 
-/* Função para obter uma prioridade específica por ID */
-export async function getPriorityById(id: number): Promise<any | null> {
-  try {
-    const res = await fetch(`${BASE_URL}priorities/${id}`);
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível obter a prioridade " + res.status,
-      );
-    }
-    const data: any = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error(`Erro ao obter a prioridade com ID ${id}:`, error);
-    return null;
-  }
+export async function getPriorityById(
+  id: number,
+): Promise<PriorityAPIResponse | null> {
+  return getById<PriorityAPIResponse>(ENDPOINT, id);
 }
 
-/* Função para criar uma nova prioridade */
-export async function createPriority(priority: any): Promise<any | null> {
-  try {
-    const res = await fetch(`${BASE_URL}priorities`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(priority),
-    });
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível criar a prioridade " + res.status,
-      );
-    }
-    const data: any = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error("Erro ao criar a prioridade:", error);
-    return null;
-  }
+export async function createPriority(
+  priority: Partial<PriorityAPIResponse>,
+): Promise<PriorityAPIResponse | null> {
+  return create<PriorityAPIResponse>(ENDPOINT, priority);
 }
 
-/* Função para atualizar uma prioridade existente */
 export async function updatePriority(
   id: number,
-  priority: any,
-): Promise<any | null> {
-  try {
-    const res = await fetch(`${BASE_URL}priorities/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(priority),
-    });
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível atualizar a prioridade " + res.status,
-      );
-    }
-    const data: any = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error("Erro ao atualizar a prioridade:", error);
-    return null;
-  }
+  priority: Partial<PriorityAPIResponse>,
+): Promise<PriorityAPIResponse | null> {
+  return put<PriorityAPIResponse>(ENDPOINT, id, priority);
 }
 
-/* Função para excluir uma prioridade por ID */
 export async function deletePriority(id: number): Promise<boolean> {
-  try {
-    const res = await fetch(`${BASE_URL}priorities/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível excluir a prioridade " + res.status,
-      );
-    }
-    console.log(`Prioridade com ID ${id} excluída com sucesso.`);
-    return true;
-  } catch (error) {
-    console.error(`Erro ao excluir a prioridade com ID ${id}:`, error);
-    return false;
-  }
+  return remove(ENDPOINT, id);
 }

@@ -1,94 +1,24 @@
-import { BASE_URL } from "./constants.js";
+import { get, getById, create, put, remove } from "./index.js";
+import { TagTaskAPIResponse } from "./dto/index.js";
 
-/* Função para obter a lista de tags-tarefas */
-export async function getTagTasks(): Promise<any[]> {
-  try {
-    const res = await fetch(`${BASE_URL}tags_task`);
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter tags-tarefas " + res.status);
-    }
-    const data: any[] = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error("Erro ao obter tags-tarefas:", error);
-    return [];
-  }
+const ENDPOINT = "tags_task";
+
+export async function getTagTasks(sort?: string, search?: string): Promise<TagTaskAPIResponse[]> {
+  return get<TagTaskAPIResponse>(ENDPOINT, sort, search);
 }
 
-/* Função para obter uma tag-tarefa específica por ID */
-export async function getTagTaskById(id: number): Promise<any | null> {
-  try {
-    const res = await fetch(`${BASE_URL}tags_task/${id}`);
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter a tag-tarefa " + res.status);
-    }
-    const data: any = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error(`Erro ao obter a tag-tarefa com ID ${id}:`, error);
-    return null;
-  }
+export async function getTagTaskById(id: number): Promise<TagTaskAPIResponse | null> {
+  return getById<TagTaskAPIResponse>(ENDPOINT, id);
 }
 
-/* Função para criar uma nova tag-tarefa */
-export async function createTagTask(tagTask: any): Promise<any | null> {
-  try {
-    const res = await fetch(`${BASE_URL}tags_task`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tagTask),
-    });
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível criar a tag-tarefa " + res.status);
-    }
-    const data: any = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error("Erro ao criar a tag-tarefa:", error);
-    return null;
-  }
+export async function createTagTask(tagTask: Partial<TagTaskAPIResponse>): Promise<TagTaskAPIResponse | null> {
+  return create<TagTaskAPIResponse>(ENDPOINT, tagTask);
 }
 
-/* Função para atualizar uma tag-tarefa existente */
-export async function updateTagTask(id: number, tagTask: any): Promise<any | null> {
-  try {
-    const res = await fetch(`${BASE_URL}tags_task/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tagTask),
-    });
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível atualizar a tag-tarefa " + res.status);
-    }
-    const data: any = await res.json();
-    console.table(data);
-    return data;
-  } catch (error) {
-    console.error("Erro ao atualizar a tag-tarefa:", error);
-    return null;
-  }
+export async function updateTagTask(id: number, tagTask: Partial<TagTaskAPIResponse>): Promise<TagTaskAPIResponse | null> {
+  return put<TagTaskAPIResponse>(ENDPOINT, id, tagTask);
 }
 
-/* Função para excluir uma tag-tarefa por ID */
 export async function deleteTagTask(id: number): Promise<boolean> {
-  try {
-    const res = await fetch(`${BASE_URL}tags_task/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível excluir a tag-tarefa " + res.status);
-    }
-    console.log(`Tag-tarefa com ID ${id} excluída com sucesso.`);
-    return true;
-  } catch (error) {
-    console.error(`Erro ao excluir a tag-tarefa com ID ${id}:`, error);
-    return false;
-  }
+  return remove(ENDPOINT, id);
 }
