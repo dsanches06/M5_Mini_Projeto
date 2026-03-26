@@ -10,18 +10,16 @@ export async function getTaskStatuses(sort?: string, search?: string): Promise<T
   return get<TaskStatusAPIResponse>(ENDPOINT, sort, search);
 }
 
+/* Função para obter um status de tarefa por ID */
 export async function getTaskStatusById(id: number): Promise<TaskStatusAPIResponse | null> {
   return getById<TaskStatusAPIResponse>(ENDPOINT, id);
 }
-
-export async function createTaskStatus(status: Partial<TaskStatusAPIResponse>): Promise<TaskStatusAPIResponse | null> {
+/* Função para criar um novo status de tarefa */export async function createTaskStatus(status: Partial<TaskStatusAPIResponse>): Promise<TaskStatusAPIResponse | null> {
   return create<TaskStatusAPIResponse>(ENDPOINT, status);
 }
-
-export async function updateTaskStatus(id: number, status: Partial<TaskStatusAPIResponse>): Promise<TaskStatusAPIResponse | null> {
+/* Função para atualizar um status de tarefa */export async function updateTaskStatus(id: number, status: Partial<TaskStatusAPIResponse>): Promise<TaskStatusAPIResponse | null> {
   return put<TaskStatusAPIResponse>(ENDPOINT, id, status);
 }
-
-export async function deleteTaskStatus(id: number): Promise<boolean> {
+/* Função para deletar um status de tarefa */export async function deleteTaskStatus(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }

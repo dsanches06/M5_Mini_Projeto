@@ -29,6 +29,7 @@ export async function updatePriority(
   return put<PriorityAPIResponse>(ENDPOINT, id, priority);
 }
 
+/* Função para deletar uma prioridade */
 export async function deletePriority(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }

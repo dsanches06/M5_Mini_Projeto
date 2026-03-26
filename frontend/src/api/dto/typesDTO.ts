@@ -1,6 +1,6 @@
 import { UserRole } from "../../security/UserRole.js";
 
-/** Type para representar usuário vindo da API */
+/* Type para representar usuário vindo da API */
 export type UserAPIResponse = {
   id: number;
   name: string;
@@ -11,7 +11,7 @@ export type UserAPIResponse = {
   role?: UserRole;
 };
 
-/** Type para representar notificação vindo da API */
+/* Type para representar notificação vindo da API */
 export type NotificationAPIResponse = {
   id: number;
   title: string;
@@ -20,7 +20,7 @@ export type NotificationAPIResponse = {
   sent_at: string;
 };
 
-/** Type para representar tarefa vindo da API */
+/* Type para representar tarefa vindo da API */
 export type TaskAPIResponse = {
   id: number;
   title: string;

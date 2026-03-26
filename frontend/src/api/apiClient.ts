@@ -1,19 +1,5 @@
 import { BASE_URL } from "./constants.js";
 
-/* Interface para resposta da API */
-export interface ApiResponse<T> {
-  data: T;
-  status: number;
-  message?: string;
-}
-
-/* Interface para erros da API */
-export interface ApiError {
-  status: number;
-  message: string;
-  error?: any;
-}
-
 /* Função genérica para GET - obter lista de recursos */
 export async function get<T>(
   endpoint: string,
