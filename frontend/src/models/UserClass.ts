@@ -11,7 +11,6 @@ export class UserClass extends BaseEntity implements IUser {
   private active: boolean;
   private role?: UserRole;
   private gender: string;
-  private notifications: Notifications[];
 
   constructor(
     id: number,
@@ -29,7 +28,6 @@ export class UserClass extends BaseEntity implements IUser {
     this.phone = phone;
     this.active = active;
     this.role = role || UserRole.MEMBER;
-    this.notifications = [];
   }
 
   getName(): string {
@@ -62,9 +60,5 @@ export class UserClass extends BaseEntity implements IUser {
 
   getCreatedAt(): Date {
     return super.getCreatedAt();
-  }
-
-  getNotifications(): Notifications[] {
-    return this.notifications;
   }
 }

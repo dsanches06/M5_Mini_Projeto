@@ -11,5 +11,4 @@ export interface IUser {
   getEmail(): string;
   getPhone(): number;
   getCreatedAt(): Date;
-  getNotifications(): Notifications[];
 }
