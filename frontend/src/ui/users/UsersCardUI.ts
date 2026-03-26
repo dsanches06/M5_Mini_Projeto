@@ -1,4 +1,4 @@
-import { UserService } from "../../services/index.js";
+import { UserService, TaskService } from "../../services/index.js";
 import { UserClass } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 import { renderUsers, showUsersCounters } from "./index.js";
@@ -6,9 +6,10 @@ import { createSection } from "../dom/index.js";
 import { removeUserByID, toggleUserState } from "../gestUserTask/index.js";
 import { loadTasksPage } from "../tasks/index.js";
 import { showUserDetails } from "../modal/index.js";
+import { TaskAssigneeAPIResponse } from "../../api/dto/typesDTO.js";
 
 /* Criar cartão de utilizador */
-export function createUserCard(user: UserClass): HTMLElement {
+export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   const divUserCard = createSection("sectionUserCard") as HTMLElement;
   divUserCard.className = "cardContainer";
 
@@ -67,7 +68,20 @@ export function createUserCard(user: UserClass): HTMLElement {
 
   const tasks = document.createElement("span");
   tasks.className = "tasks";
-  tasks.textContent = `${0} tarefas`;
+  
+  // Contar tarefas atribuídas a este utilizador
+  try {
+    const allTasks = await TaskService.getTasks();
+    const userTaskCount = allTasks.filter((task) => {
+      const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
+      return assignees.some((a: TaskAssigneeAPIResponse) => a.user_id === user.getId());
+    }).length;
+    
+    tasks.textContent = `${userTaskCount} tarefa${userTaskCount !== 1 ? 's' : ''}`;
+  } catch (error) {
+    console.error("Erro ao carregar tarefas para o contador:", error);
+    tasks.textContent = "0 tarefas";
+  }
 
   const eyeOpenIcon = document.createElement("i") as HTMLElement;
   eyeOpenIcon.className = "fa-solid fa-eye fa-lg";
@@ -79,7 +93,31 @@ export function createUserCard(user: UserClass): HTMLElement {
   eyeIcon.style.cursor = "pointer";
   eyeIcon.addEventListener("click", async (event) => {
     event.stopPropagation();
-    await loadTasksPage(user);
+    
+    // Carregar todas as tarefas e filtrar apenas as atribuídas ao utilizador
+    try {
+      const allTasks = await TaskService.getTasks();
+      console.log("📋 Todas as tarefas carregadas:", allTasks.length);
+      
+      // Filtrar tarefas que têm assignees para este utilizador
+      const userAssignedTasks = allTasks.filter((task) => {
+        const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
+        console.log(`Task ${task.getId()}: ${assignees.length} assignees`, assignees);
+        return assignees.some((a: TaskAssigneeAPIResponse) => a.user_id === user.getId());
+      });
+      
+      console.log(`✅ Tarefas filtradas para ${user.getName()} (ID: ${user.getId()}):`, userAssignedTasks.length);
+      userAssignedTasks.forEach(t => console.log(`  - ${t.getId()}: ${t.getTitle()}`));
+      
+      // Carregar página de tarefas com apenas as tarefas atribuídas ao utilizador
+      await loadTasksPage(user, userAssignedTasks);
+    } catch (error) {
+      console.error("Erro ao carregar tarefas do utilizador:", error);
+      showInfoBanner(
+        "Erro ao carregar tarefas do utilizador. Por favor, tente novamente.",
+        "error-banner",
+      );
+    }
   });
 
   viewTask.append(tasks, eyeIcon);
@@ -116,7 +154,7 @@ function userCardBtn(user: UserClass): HTMLElement {
     await toggleUserState(user.getId());
     // TODO: Recarregar lista de utilizadores da API
     const users = await UserService.getUsers();
-    renderUsers(users as UserClass[]);
+    await renderUsers(users as UserClass[]);
     await showUsersCounters("utilizadores");
   });
 
@@ -143,7 +181,7 @@ function userCardBtn(user: UserClass): HTMLElement {
         showInfoBanner("Utilizador removido com sucesso.", "info-banner");
         //atualiza a lista de utilizadores
         const users = await UserService.getUsers();
-        renderUsers(users as UserClass[]);
+        await renderUsers(users as UserClass[]);
         await showUsersCounters("utilizadores");
       } catch (error) {
         showInfoBanner("Erro ao remover utilizador.", "error-banner");

@@ -3,7 +3,7 @@ import { TaskStatus } from "../../tasks/TaskStatus.js";
 import {
   UserService,
   TaskService,
-  AssignmentService,
+  TaskAssigneeService,
 } from "../../services/index.js";
 import { GlobalValidators, StateTransitions } from "../../utils/index.js";
 import {
@@ -66,9 +66,9 @@ function setupEditTaskFormLogic(
     await handleDescriptionChange(task, description, user);
     await handleStatusChange(task, statusValue, user);
     if (userValue === "") {
-      await handleUnassign(task, fields);
+      await handleUnassign(task, fields, user);
     } else {
-      await handleAssign(userValue, task, fields);
+      await handleAssign(userValue, task, fields, user);
     }
     modal.remove();
   };
@@ -76,15 +76,29 @@ function setupEditTaskFormLogic(
 
 async function handleTitleChange(task: ITask, title: string, user?: IUser) {
   if (title !== task.getTitle()) {
-    task.setTitle(title);
-
-    const tasks = user ? [] : [];
-
-    renderDashboard(tasks, user);
-    showInfoBanner(
-      `INFO: O título da tarefa "${task.getTitle()}" foi atualizado.`,
-      "info-banner",
-    );
+    try {
+      // Atualizar tarefa via API
+      const updated = await TaskService.updateTask(task.getId(), { title });
+      if (updated) {
+        const tasks = await TaskService.getTasks();
+        await renderDashboard(tasks, user);
+        showInfoBanner(
+          `INFO: O título da tarefa foi atualizado com sucesso.`,
+          "success-banner",
+        );
+      } else {
+        showInfoBanner(
+          `ERRO: Não foi possível atualizar o título da tarefa.`,
+          "error-banner",
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error);
+      showInfoBanner(
+        `ERRO: Não foi possível atualizar a tarefa. Por favor, tente novamente.`,
+        "error-banner",
+      );
+    }
   }
 }
 
@@ -96,13 +110,29 @@ async function handleDescriptionChange(
   if ((task as ITask).setDescription && (task as ITask).getDescription) {
     const current = (task as ITask).getDescription() ?? "";
     if (description !== current) {
-      (task as ITask).setDescription(description);
-      const tasks = user ? [] : [];
-      renderDashboard(tasks, user);
-      showInfoBanner(
-        `INFO: A descrição da tarefa "${task.getTitle()}" foi atualizada.`,
-        "info-banner",
-      );
+      try {
+        // Atualizar tarefa via API
+        const updated = await TaskService.updateTask(task.getId(), { description });
+        if (updated) {
+          const tasks = await TaskService.getTasks();
+          await renderDashboard(tasks, user);
+          showInfoBanner(
+            `INFO: A descrição da tarefa foi atualizada com sucesso.`,
+            "success-banner",
+          );
+        } else {
+          showInfoBanner(
+            `ERRO: Não foi possível atualizar a descrição da tarefa.`,
+            "error-banner",
+          );
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar tarefa:", error);
+        showInfoBanner(
+          `ERRO: Não foi possível atualizar a tarefa. Por favor, tente novamente.`,
+          "error-banner",
+        );
+      }
     }
   }
 }
@@ -110,50 +140,114 @@ async function handleDescriptionChange(
 async function handleStatusChange(task: ITask, statusValue: string, user?: IUser) {
   const newStatus = (TaskStatus as any)[statusValue] as TaskStatus;
   if (newStatus && newStatus !== task.getStatus()) {
-    if (task.getUser()) {
+    // Verificar se a tarefa está atribuída (através de TaskAssignees)
+    const hasAssignee = await hasTaskAssignee(task.getId());
+    if (hasAssignee) {
       if (StateTransitions.validTransitions(task.getStatus(), newStatus)) {
-        task.moveTo(newStatus);
-        const tasks = user ? [] : [];
-        renderDashboard(tasks, user);
-        showInfoBanner(
-          `INFO: O estado da tarefa "${task.getTitle()}" foi alterado para ${TaskStatus[newStatus]}.`,
-          "info-banner",
-        );
+        try {
+          // Atualizar status da tarefa via API
+          const updated = await TaskService.updateTask(task.getId(), { task_status_id: getStatusId(newStatus) });
+          if (updated) {
+            const tasks = await TaskService.getTasks();
+            await renderDashboard(tasks, user);
+            showInfoBanner(
+              `INFO: O estado da tarefa foi alterado com sucesso.`,
+              "success-banner",
+            );
+          } else {
+            showInfoBanner(
+              `ERRO: Não foi possível atualizar o estado da tarefa.`,
+              "error-banner",
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao atualizar tarefa:", error);
+          showInfoBanner(
+            `ERRO: Não foi possível atualizar a tarefa. Por favor, tente novamente.`,
+            "error-banner",
+          );
+        }
       } else {
         showInfoBanner(
-          `ERRO: Transição da tarefa ${task.getTitle()} do estado ${TaskStatus[task.getStatus()]} -> ${TaskStatus[newStatus]} não é permitida.`,
+          `ERRO: Transição não permitida.`,
           "error-banner",
         );
       }
     } else {
       showInfoBanner(
-        `ERRO: A tarefa "${task.getTitle()}" não pode mudar de status sem estar atribuída a um utilizador.`,
+        `ERRO: A tarefa não pode mudar de status sem estar atribuída a um utilizador.`,
         "error-banner",
       );
     }
   }
 }
 
-async function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }) {
-  const currentUser = task.getUser();
-  if (currentUser) {
-    if (!task.getCompleted()) {
-      fields.status.disabled = true;
-      // TODO: Implementar unassign via API
-      // await AssignmentService.unassignUser(task.getId(), currentUser.getId());
-      const user = task.getUser();
-      const tasks = user ? [] : [];
-      renderDashboard(tasks, user);
-      showInfoBanner(
-        `INFO: A tarefa "${task.getTitle()}" foi desvinculada do utilizador "${currentUser.getName()}" com sucesso.`,
-        "info-banner",
+/** Converter TaskStatus enum para ID */
+function getStatusId(status: TaskStatus): number {
+  const statusMap: { [key in TaskStatus]: number } = {
+    [TaskStatus.CREATED]: 1,
+    [TaskStatus.ASSIGNED]: 2,
+    [TaskStatus.IN_PROGRESS]: 3,
+    [TaskStatus.BLOCKED]: 4,
+    [TaskStatus.COMPLETED]: 5,
+    [TaskStatus.ARCHIVED]: 6,
+  };
+  return statusMap[status] || 1;
+}
+
+/** Verificar se uma tarefa tem pelo menos uma atribuição */
+async function hasTaskAssignee(taskId: number): Promise<boolean> {
+  try {
+    const assignees = await TaskAssigneeService.getTaskAssignees();
+    return assignees.some((a) => a.task_id === taskId);
+  } catch (error) {
+    console.error("Erro ao verificar atribuições:", error);
+    return false;
+  }
+}
+
+async function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }, user?: IUser) {
+  if (!task.getCompleted()) {
+    fields.status.disabled = true;
+    
+    try {
+      // Desatribuir tarefa via TaskAssigneeService API
+      // Obter atribuições atuais da tarefa
+      const assignees = await TaskAssigneeService.getTaskAssignees();
+      const taskAssignees = assignees.filter(
+        (a) => a.task_id === task.getId()
       );
-    } else {
+      
+      if (taskAssignees.length > 0) {
+        // Remover todas as atribuições da tarefa
+        for (const assignee of taskAssignees) {
+          await TaskAssigneeService.deleteTaskAssignee(assignee.id);
+        }
+        
+        const tasks = await TaskService.getTasks();
+        await renderDashboard(tasks, user);
+        showInfoBanner(
+          `INFO: A tarefa foi desvinculada com sucesso.`,
+          "success-banner",
+        );
+      } else {
+        showInfoBanner(
+          `INFO: A tarefa já não estava atribuída.`,
+          "info-banner",
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao desatribuir tarefa:", error);
       showInfoBanner(
-        `ERRO: A tarefa "${task.getTitle()}" não pode ser desvinculada pois já está concluída.`,
+        `ERRO: Não foi possível desatribuir a tarefa. Por favor, tente novamente.`,
         "error-banner",
       );
     }
+  } else {
+    showInfoBanner(
+      `ERRO: A tarefa não pode ser desvinculada pois já está concluída.`,
+      "error-banner",
+    );
   }
 }
 
@@ -161,26 +255,57 @@ async function handleAssign(
   userValue: string,
   task: ITask,
   fields: { status: HTMLSelectElement },
+  user?: IUser,
 ) {
   const userId = parseInt(userValue, 10);
   if (isNaN(userId)) return;
   if (!task.getCompleted()) {
     fields.status.disabled = true;
-    const currentUser = task.getUser();
-    if (!currentUser || currentUser.getId() !== userId) {
-      // TODO: Implementar assign via API
-      // await AssignmentService.assignUser(task.getId(), userId);
-      const user = task.getUser();
-      const tasks = user ? [] : [];
-      renderDashboard(tasks, user);
+    
+    try {
+      // Verificar se já existe uma atribuição para este utilizador
+      const assignees = await TaskAssigneeService.getTaskAssignees();
+      const alreadyAssigned = assignees.some(
+        (a) => a.task_id === task.getId() && a.user_id === userId
+      );
+      
+      if (!alreadyAssigned) {
+        // Atribuir tarefa a utilizador via TaskAssigneeService API
+        const assigneeData = {
+          task_id: task.getId(),
+          user_id: userId,
+        };
+        
+        const assigned = await TaskAssigneeService.createTaskAssignee(assigneeData);
+        if (assigned) {
+          const tasks = await TaskService.getTasks();
+          await renderDashboard(tasks, user);
+          showInfoBanner(
+            `INFO: A tarefa foi atribuída com sucesso.`,
+            "success-banner",
+          );
+        } else {
+          showInfoBanner(
+            `ERRO: Não foi possível atribuir a tarefa.`,
+            "error-banner",
+          );
+        }
+      } else {
+        showInfoBanner(
+          `INFO: A tarefa já estava atribuída a este utilizador.`,
+          "info-banner",
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao atribuir tarefa:", error);
       showInfoBanner(
-        `INFO: A tarefa "${task.getTitle()}" foi atribuída ao utilizador "${user?.getName()}" com sucesso.`,
-        "info-banner",
+        `ERRO: Não foi possível atribuir a tarefa. Por favor, tente novamente.`,
+        "error-banner",
       );
     }
   } else {
     showInfoBanner(
-      `ERRO: A tarefa "${task.getTitle()}" não pode ser atribuída pois já está concluída.`,
+      `ERRO: A tarefa já está concluída e não pode ser atribuída.`,
       "error-banner",
     );
   }
@@ -277,23 +402,31 @@ export async function renderEditTaskLeftPanel(
   defaultOption.textContent = "Nenhum";
   userSelect.appendChild(defaultOption);
 
-  // TODO: Obter usuários ativos da API
+  // Obter usuários ativos que ainda não estão atribuídos a nenhuma tarefa
   try {
     const allUsers = await UserService.getUsers();
+    const allAssignees = await TaskAssigneeService.getTaskAssignees();
+    
+    // Extrair IDs dos utilizadores já atribuídos
+    const assignedUserIds = new Set(allAssignees.map((a) => a.user_id));
+    
+    // Filtrar: utilizadores ativos e não atribuídos a nenhuma tarefa
     const usersActive = allUsers.filter((u) => {
       const isActive = typeof u.isActive === 'function' 
         ? u.isActive() 
         : (u as any).isActive;
-      return isActive;
+      const userId = typeof u.getId === 'function' ? u.getId() : (u as any).id;
+      
+      // Mostrar se está ativo E não está atribuído a nenhuma tarefa
+      return isActive && !assignedUserIds.has(userId);
     });
+    
     usersActive.forEach((u) => {
       const opt = document.createElement("option");
       const id = typeof u.getId === 'function' ? u.getId() : (u as any).id;
       const name = typeof u.getName === 'function' ? u.getName() : (u as any).name;
       opt.value = id.toString();
       opt.textContent = `${name} [ID: ${id}]`;
-      if (task.getUser() && task.getUser()!.getId() === id)
-        opt.selected = true;
       userSelect.appendChild(opt);
     });
   } catch (error) {

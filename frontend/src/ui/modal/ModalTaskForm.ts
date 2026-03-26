@@ -31,7 +31,7 @@ function setupTaskFormLogic(
   modal: HTMLElement,
   user?: IUser,
 ): void {
-  form.onsubmit = (e: Event) => {
+  form.onsubmit = async (e: Event) => {
     e.preventDefault();
 
     //obter os valores dos campos
@@ -92,27 +92,41 @@ function setupTaskFormLogic(
       }
 
       if (newTask) {
-        if (user) {
-         // user.createTask(newTask);
-          // TODO: Implementar criação de tarefa via API
-          // await TaskService.createTask(newTask);
-          renderDashboard([], user);
+        try {
+          // Criar tarefa via API
+          const taskData = {
+            title: newTask.getTitle(),
+            description: newTask.getDescription(),
+            category_id: 1, // TODO: Map category to actual ID
+          };
+          
+          const createdTask = await TaskService.createTask(taskData);
+          
+          if (createdTask) {
+            // Recarregar tarefas da API
+            const tasks = await TaskService.getTasks();
+            await renderDashboard(tasks, user);
+            
+            showInfoBanner(
+              `INFO: A tarefa "${newTask.getTitle()}" foi criada com sucesso.`,
+              "success-banner",
+            );
+          } else {
+            showInfoBanner(
+              `ERRO: Não foi possível criar a tarefa "${title}".`,
+              "error-banner",
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao criar tarefa:", error);
           showInfoBanner(
-            `INFO: A tarefa ${newTask.getTitle()} foi criado ao utilizador ${user.getName()} com sucesso.`,
-            "info-banner",
-          );
-        } else {
-          // TODO: Implementar criação de tarefa via API
-          // await TaskService.createTask(newTask);
-          renderDashboard([] as ITask[]);
-          showInfoBanner(
-            `INFO: A tarefa ${newTask.getTitle()} foi criado com sucesso.`,
-            "info-banner",
+            `ERRO: Não foi possível criar a tarefa. Por favor, tente novamente.`,
+            "error-banner",
           );
         }
       } else {
         showInfoBanner(
-          `ERRO: A tarefa ${title} não foi criado.`,
+          `ERRO: A tarefa ${title} não foi criada.`,
           "error-banner",
         );
       }

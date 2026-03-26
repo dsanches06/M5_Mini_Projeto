@@ -2,7 +2,9 @@ import { get, getById, create, put, remove } from "./index.js";
 import { TagTaskAPIResponse } from "./dto/index.js";
 
 const ENDPOINT = "tags_task";
-/* Função para obter a lista de relações de tags em tarefas */export async function getTagTasks(sort?: string, search?: string): Promise<TagTaskAPIResponse[]> {
+
+/* Função para obter a lista de relações de tags em tarefas */
+export async function getTagTasks(sort?: string, search?: string): Promise<TagTaskAPIResponse[]> {
   return get<TagTaskAPIResponse>(ENDPOINT, sort, search);
 }
 

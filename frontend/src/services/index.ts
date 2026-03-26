@@ -1,4 +1,3 @@
-export * from "./assignmentService.js";
 export * from "./attachmentService.js";
 export * from "./backupService.js";
 export * from "./BusinessRules.js";

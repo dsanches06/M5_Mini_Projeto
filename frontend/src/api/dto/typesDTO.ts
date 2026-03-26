@@ -1,6 +1,6 @@
 import { UserRole } from "../../security/UserRole.js";
 
-/* Type para representar usuário vindo da API */
+/* Type para representar utilizador vindo da API */
 export type UserAPIResponse = {
   id: number;
   name: string;
@@ -9,6 +9,15 @@ export type UserAPIResponse = {
   gender: string;
   active: number;
   role?: UserRole;
+};
+
+/* Type para representar estatísticas de utlizador vindo da API */
+export type UserStatsAPIResponse = {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  activePercentage: string;
+  inactivePercentage: string;
 };
 
 /* Type para representar notificação vindo da API */
@@ -35,6 +44,15 @@ export type TaskAPIResponse = {
   created_at?: string;
   updated_at?: string;
 };
+
+/* Type para representar estatísticas de tarefas vindo da API */
+export type TaskStatsAPIResponse = {
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  completedPercentage: string;
+};
+
 
 /** Type para representar comentário de tarefa vindo da API */
 export type TaskCommentAPIResponse = {
@@ -221,4 +239,11 @@ export type TaskAssigneeAPIResponse = {
   user_id: number;
   assigned_by: number;
   assigned_at?: string;
+};
+
+/** Type para representar categoria vindo da API */
+export type CategoryAPIResponse = {
+  id: number;
+  name: string;
+  description?: string;
 };

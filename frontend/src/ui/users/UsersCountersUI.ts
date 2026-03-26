@@ -1,22 +1,52 @@
 import { UserService } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
+import { UserStatsAPIResponse } from "../../api/dto/index.js";
 
-export async function showUsersCounters(type?: string): Promise<void> {
-  await countAllUsers("#allUsersCounter");
-  await countAtiveUsers("#ativeUsersCounter");
-  await countUnableUsers("#unableUsersCounter");
-  countFilterUsers("#filterUsersCounter", type!);
-  await countAtiveInativePercentage("#ativeUsersPercentageCounter", type!);
-}
+export async function showUsersCounters(
+  type?: string,
+  users?: IUser[],
+): Promise<void> {
+  if (
+    (type === "inativos" || type === "ativos" || type === "filtrados") &&
+    users
+  ) {
+    countAllUsers("#allUsersCounter", users.length);
 
-async function getUserStats(): Promise<any> {
-  return await UserService.getUserStats();
+    if (type === "ativos") {
+      countAtiveUsers("#ativeUsersCounter", users.length);
+      countUnableUsers("#unableUsersCounter", 0);
+    } else if (type === "inativos") {
+      countUnableUsers("#unableUsersCounter", users.length);
+      countAtiveUsers("#ativeUsersCounter", 0);
+    } else {
+      countAtiveUsers("#ativeUsersCounter", users.length);
+      countUnableUsers("#unableUsersCounter", users.length);
+    }
+
+    countFilterUsers("#filterUsersCounter", type!, users.length);
+    await countAtiveInativePercentage("#ativeUsersPercentageCounter", type!);
+  } else {
+    await countAllUsers("#allUsersCounter");
+    await countAtiveUsers("#ativeUsersCounter");
+    await countUnableUsers("#unableUsersCounter");
+    countFilterUsers("#filterUsersCounter", type!);
+    await countAtiveInativePercentage("#ativeUsersPercentageCounter", type!);
+  }
 }
 
 /* Contador de utilizadores ativos */
-async function countAtiveUsers(id: string): Promise<void> {
+async function countAtiveUsers(
+  id: string,
+  overrideValue?: number,
+): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  const stats: any = await getUserStats();
+  if (overrideValue !== undefined) {
+    if (section) {
+      section.textContent = `${overrideValue}`;
+    }
+    return;
+  }
+  const stats: UserStatsAPIResponse = (await UserService.getUserStats())!;
   if (section) {
     section.textContent = `${stats.activeUsers}`;
   } else {
@@ -25,9 +55,18 @@ async function countAtiveUsers(id: string): Promise<void> {
 }
 
 /* Contador de utilizadores inativos */
-async function countUnableUsers(id: string): Promise<void> {
+async function countUnableUsers(
+  id: string,
+  overrideValue?: number,
+): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  const stats: any = await getUserStats();
+  if (overrideValue !== undefined) {
+    if (section) {
+      section.textContent = `${overrideValue}`;
+    }
+    return;
+  }
+  const stats: UserStatsAPIResponse = (await UserService.getUserStats())!;
   if (section) {
     section.textContent = `${stats.inactiveUsers}`;
   } else {
@@ -36,10 +75,12 @@ async function countUnableUsers(id: string): Promise<void> {
 }
 
 /* Contador de utilizadores filtrados por nome */
-function countFilterUsers(id: string, type: string): void {
+function countFilterUsers(id: string, type: string, count?: number): void {
   const section = document.querySelector(`${id}`) as HTMLElement;
   if (section) {
-    if (type === "userFiltered" && section.textContent !== "") {
+    if (count !== undefined) {
+      section.textContent = `${count}`;
+    } else if (type === "userFiltered" && section.textContent !== "") {
       section.textContent = `${0}`;
     } else {
       section.textContent = "0";
@@ -50,9 +91,18 @@ function countFilterUsers(id: string, type: string): void {
 }
 
 /* Contador de utilizadores */
-async function countAllUsers(id: string): Promise<void> {
+async function countAllUsers(
+  id: string,
+  overrideValue?: number,
+): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  const stats: any = await getUserStats();
+  if (overrideValue !== undefined) {
+    if (section) {
+      section.textContent = `${overrideValue}`;
+    }
+    return;
+  }
+  const stats: UserStatsAPIResponse = (await UserService.getUserStats())!;
   if (section) {
     section.textContent = `${stats.totalUsers}`;
   } else {
@@ -61,16 +111,16 @@ async function countAllUsers(id: string): Promise<void> {
 }
 
 /* Percentagem de utilizadores ativos */
-async function countAtiveInativePercentage(id: string, type: string): Promise<void> {
+async function countAtiveInativePercentage(
+  id: string,
+  type: string,
+): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  const stats: any = await getUserStats();
-  let activeInativeUsers = 0;
+  const stats: UserStatsAPIResponse = (await UserService.getUserStats())!;
   if (section) {
     if (type === "inactivos") {
-      activeInativeUsers = stats.inactiveUsers;
       section.textContent = `${stats.inactivePercentage}`;
     } else {
-      activeInativeUsers = stats.activeUsers;
       section.textContent = `${stats.activePercentage}`;
     }
     changeImageAndFigCaption(type!);

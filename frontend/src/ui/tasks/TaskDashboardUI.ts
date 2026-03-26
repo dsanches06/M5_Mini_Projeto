@@ -4,9 +4,12 @@ import { renderModalEditTask } from "../modal/index.js";
 import { getCardBorderColor, setCardBorderColor } from "../../helpers/index.js";
 import { GenericDashboardUI } from "../dashboard/GenericDashboardUI.js";
 import { DashboardColumn } from "../../dashboards/DashboardColumn.js";
+import { UserService } from "../../services/index.js";
+import { TaskAssigneeAPIResponse } from "../../api/dto/typesDTO.js";
 
 export class TaskDashboardUI {
   private dashboard: GenericDashboardUI<ITask>;
+  private usersCache: Map<number, string> = new Map();
 
   constructor(tasks: ITask[]) {
     const taskColumns: DashboardColumn<ITask>[] = [
@@ -50,6 +53,22 @@ export class TaskDashboardUI {
       itemId: (task) => task.getId(),
       itemGroupKey: (task) => task.getStatus(),
     });
+    
+    // Pré-carregar os nomes dos utilizadores
+    this.loadUsersCache();
+  }
+
+  private async loadUsersCache(): Promise<void> {
+    try {
+      const users = await UserService.getUsers();
+      users.forEach((user) => {
+        const id = typeof user.getId === 'function' ? user.getId() : (user as any).id;
+        const name = typeof user.getName === 'function' ? user.getName() : (user as any).name;
+        this.usersCache.set(id, name);
+      });
+    } catch (error) {
+      console.error("Erro ao carregar nomes dos utilizadores:", error);
+    }
   }
 
   render(): HTMLElement {
@@ -67,15 +86,19 @@ export class TaskDashboardUI {
     const meta = document.createElement("div");
     meta.className = "task-meta";
 
+    // Obter assignees da tarefa via TaskAssignees
+    const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
     const userSpan = document.createElement("span");
     userSpan.className = "task-user";
-    if (task.getUser()) {
-      const names =
-        task.getUser()!.getName().split(" ") ||
-        task.getUser()!.getName().split("");
-      userSpan.textContent = names[0];
+    
+    if (assignees.length > 0) {
+      // Obter nomes dos utilizadores atribuídos
+      const userNames = assignees
+        .map((assignee: TaskAssigneeAPIResponse) => this.usersCache.get(assignee.user_id) || `User#${assignee.user_id}`)
+        .join(", ");
+      userSpan.textContent = userNames;
     } else {
-      userSpan.textContent = "";
+      userSpan.textContent = "Não atribuído";
     }
     meta.appendChild(userSpan);
 

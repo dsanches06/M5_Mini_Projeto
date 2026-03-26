@@ -1,4 +1,4 @@
-import { BASE_URL } from "./constants.js";
+import { BASE_URL } from "./utils/index.js";
 
 /* Função genérica para GET - obter lista de recursos */
 export async function get<T>(

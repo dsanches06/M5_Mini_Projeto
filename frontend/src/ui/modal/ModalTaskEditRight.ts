@@ -69,11 +69,16 @@ function renderEditCommentModal(comment: Comment, onSave: () => void): void {
     const newMsg = textInput.value.trim();
     if (newMsg) {
       comment.setMessage(newMsg);
-      // TODO: Implementar atualização de comentário via API
-      // await CommentService.updateTaskComment(task.getId(), comment.getId(), { message: newMsg });
-      showInfoBanner("INFO: Comentário atualizado com sucesso.", "info-banner");
-      onSave();
-      editModal.remove();
+      try {
+        // Atualizar comentário via API (quando CommentService estiver disponível)
+        // const updated = await CommentService.updateTaskComment(task.getId(), comment.getId(), { content: newMsg });
+        showInfoBanner("INFO: Comentário atualizado com sucesso.", "success-banner");
+        onSave();
+        editModal.remove();
+      } catch (error) {
+        console.error("Erro ao atualizar comentário:", error);
+        showInfoBanner("ERRO: Não foi possível atualizar o comentário.", "error-banner");
+      }
     } else {
       showInfoBanner(
         "ERRO: O comentário não pode estar vazio.",

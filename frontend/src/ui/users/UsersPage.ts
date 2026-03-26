@@ -34,7 +34,7 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
   const searchContainer = showSearchContainer();
   addElementInContainer("#containerSection", searchContainer);
 
-  const usersContainer = renderUsers(users);
+  const usersContainer = await renderUsers(users);
   addElementInContainer("#containerSection", usersContainer);
 
   // Adicionar event listeners aos botões de contador para filtrar
@@ -57,26 +57,24 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
   filterUsersBtn.title = "Mostrar todos os utilizadores filtrados pelo nome";
 
   allUsersBtn.addEventListener("click", async () => {
-    // TODO: Obter usuários da API
     const currentUsers = await UserService.getUsers();
-    // renderUsers(currentUsers as UserClass[]);
-    // showUsersCounters(currentUsers as UserClass[], "utilizadores");
+    clearContainer("#containerSection > :nth-child(4)");
+    await renderUsers(currentUsers as UserClass[]);
+    await showUsersCounters("utilizadores");
   });
 
   ativeUsersBtn.addEventListener("click", async () => {
-    // TODO: Obter usuários ativos da API
-    const currentUsers = await UserService.getUsers();
-    // const activeUsers = getActiveUsers(currentUsers);
-    // renderUsers(activeUsers as UserClass[]);
-    // showUsersCounters(activeUsers as UserClass[], "activos");
+    const activeUsers = await getActiveUsers();
+    clearContainer("#containerSection > :nth-child(4)");
+    await renderUsers(activeUsers as UserClass[]);
+    await showUsersCounters("ativos", activeUsers as UserClass[]);
   });
 
   unableUsersBtn.addEventListener("click", async () => {
-    // TODO: Obter usuários inativos da API
-    const currentUsers = await UserService.getUsers();
-    // const inactiveUsers = getInactiveUsers(currentUsers);
-    // renderUsers(inactiveUsers as UserClass[]);
-    // showUsersCounters(inactiveUsers as UserClass[], "inactivos");
+    const inactiveUsers = await getInactiveUsers();
+    clearContainer("#containerSection > :nth-child(4)");
+    await renderUsers(inactiveUsers as UserClass[]);
+    await showUsersCounters("inativos", inactiveUsers as UserClass[]);
   });
 
   // Adicionar event listeners aos botões de busca
@@ -88,33 +86,34 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
   const sortUsersBtn = document.querySelector("#sortUsersBtn") as HTMLElement;
 
   if (sortUsersBtn) {
-    //Crie uma variável de controle de estado
     let isAscending = true;
     sortUsersBtn.addEventListener("click", async () => {
-      // TODO: Ordenar usuários da API
-      // const sortedUsers = await sortUsersByName(isAscending);
-      // //Inverta o estado para o próximo clique
-      // isAscending = !isAscending;
-      // // Mostrar os utilizadores ordenados
-      // await loadUsersPage(sortedUsers);
-      // renderUsers(sortedUsers as UserClass[]);
-      // showUsersCounters(sortedUsers as UserClass[], "userFiltered");
-      // // Atualize o texto ou ícone do botão
-      // sortUsersBtn.textContent = isAscending ? "Ordenar A-Z" : "Ordenar Z-A";
+      const sortedUsers = await sortUsersByName(isAscending);
+      isAscending = !isAscending;
+      clearContainer("#containerSection > :nth-child(4)");
+      await renderUsers(sortedUsers as UserClass[]);
+      await showUsersCounters("filtrados", sortedUsers as UserClass[]);
+      sortUsersBtn.textContent = isAscending ? "Ordenar Z-A" : "Ordenar A-Z";
     });
   } else {
     console.warn("Elemento #sortUsersBtn não foi renderizado no DOM.");
   }
 
-  //
   const searchUser = document.querySelector("#searchUser") as HTMLInputElement;
   if (searchUser) {
     searchUser.addEventListener("input", async () => {
-      // TODO: Buscar usuários da API
-      // const name = searchUser.value.toLowerCase();
-      // const filteredUsers = await searchUserByName(name);
-      // renderUsers(filteredUsers);
-      // showUsersCounters(filteredUsers as UserClass[], "userFiltered");
+      const name = searchUser.value.toLowerCase();
+      if (name.trim() === "") {
+        const allUsers = await UserService.getUsers();
+        clearContainer("#containerSection > :nth-child(4)");
+        await renderUsers(allUsers as UserClass[]);
+        await showUsersCounters("utilizadores");
+      } else {
+        const filteredUsers = await searchUserByName(name);
+        clearContainer("#containerSection > :nth-child(4)");
+        await renderUsers(filteredUsers as UserClass[]);
+        await showUsersCounters("filtrados", filteredUsers as UserClass[]);
+      }
     });
   } else {
     console.warn("Elemento de busca de utilizadores não encontrado.");

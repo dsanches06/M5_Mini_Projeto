@@ -1,37 +1,53 @@
-import * as fetchUsers from "../api/fetchUsers.js";
+import { UserStatsAPIResponse } from "../api/dto/index.js";
 import { IUser } from "../models/index.js";
 import Notifications from "../notifications/Notifications.js";
+import {
+  apiCreateUser,
+  apiGetNotificationsByUser,
+  apiGetUnreadNotifications,
+  apiGetUserById,
+  apiGetUsers,
+  apiGetUserStats,
+  apiMarkNotificationAsRead,
+  apiToggleUserActive,
+  apiUpdateUser,
+  apiDeleteUser,
+} from "../api/index.js";
 
 /* Serviço para gerenciar usuários */
 export class UserService {
   /* Função para obter a lista de usuários */
   static async getUsers(sort?: string, search?: string): Promise<IUser[]> {
-    return await fetchUsers.getUsers(sort, search);
+    return await apiGetUsers(sort, search);
   }
 
   /* Função para obter um usuário por ID da API */
   static async getUserById(id: number): Promise<IUser | null> {
-    return await fetchUsers.getUserById(id);
+    return await apiGetUserById(id);
   }
 
   /* Função para obter estatísticas de usuário */
-  static async getUserStats(): Promise<any> {
-    return await fetchUsers.getUserStats();
+  static async getUserStats(): Promise<UserStatsAPIResponse | null> {
+    return await apiGetUserStats();
   }
 
   /* Função para obter notificações não lidas do usuário */
-  static async getUnreadNotifications(userId: number): Promise<Notifications[]> {
-    return await fetchUsers.getUnreadNotifications(userId);
+  static async getUnreadNotifications(
+    userId: number,
+  ): Promise<Notifications[]> {
+    return await apiGetUnreadNotifications(userId);
   }
 
   /* Função para obter todas as notificações do usuário */
-  static async getNotificationsByUser(userId: number): Promise<Notifications[]> {
-    return await fetchUsers.getNotificationsByUser(userId);
+  static async getNotificationsByUser(
+    userId: number,
+  ): Promise<Notifications[]> {
+    return await apiGetNotificationsByUser(userId);
   }
 
   /* Função para criar um novo usuário */
-  static async createUser(userData: Partial<IUser>): Promise<IUser | null> {
-    return await fetchUsers.createUser(userData);
+  static async createUser(userData: any): Promise<IUser | null> {
+    return await apiCreateUser(userData);
   }
 
   /* Função para atualizar um usuário */
@@ -39,7 +55,7 @@ export class UserService {
     userId: number,
     userData: Partial<IUser>,
   ): Promise<IUser | null> {
-    return await fetchUsers.updateUser(userId, userData);
+    return await apiUpdateUser(userId, userData);
   }
 
   /* Função para alternar ativo/inativo do usuário */
@@ -47,7 +63,7 @@ export class UserService {
     userId: number,
     active: boolean,
   ): Promise<IUser | null> {
-    return await fetchUsers.toggleUserActive(userId, active);
+    return await apiToggleUserActive(userId, active);
   }
 
   /* Função para marcar notificação como lida */
@@ -55,11 +71,11 @@ export class UserService {
     userId: number,
     notificationId: number,
   ): Promise<any> {
-    return await fetchUsers.markNotificationAsRead(userId, notificationId);
+    return await apiMarkNotificationAsRead(userId, notificationId);
   }
 
   /* Função para deletar um usuário */
   static async deleteUser(userId: number): Promise<boolean> {
-    return await fetchUsers.deleteUser(userId);
+    return await apiDeleteUser(userId);
   }
 }

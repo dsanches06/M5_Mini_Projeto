@@ -117,36 +117,43 @@ function setupFormLogic(
       const phone = 111111111;
 
       if (roleUser) {
-        const user: IUser = new UserClass(
-          newId,
+        const userData = {
           name,
           email,
           phone,
           gender,
-          true,
-          roleUser,
-        );
-        //adiciona a lista de utilizadores
-        // TODO: Criar usuário via API
-        // await UserService.createUser(user);
-        //mensagem de sucesso ou erro
-        if (user && user.getName()) {
+          active: true,
+          role: roleUser,
+        };
+        
+        try {
+          // Criar utilizador via API
+          const newUser = await UserService.createUser(userData);
+          
+          if (newUser) {
+            // Recarregar lista de utilizadores da API
+            const users = await UserService.getUsers();
+            await renderUsers(users as UserClass[]);
+            // Atualizar contadores
+            await showUsersCounters("utilizadores");
+            
+            showInfoBanner(
+              `${newUser.getName()} foi adicionado com sucesso.`,
+              "success-banner",
+            );
+          } else {
+            showInfoBanner(
+              `ERRO: ${name} não foi adicionado.`,
+              "error-banner",
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao criar utilizador:", error);
           showInfoBanner(
-            `${user.getName()} foi adicionado com sucesso.`,
-            "info-banner",
-          );
-        } else {
-          showInfoBanner(
-            `ERRO: ${fields.name.value} não foi adicionado.`,
+            `ERRO: Não foi possível criar o utilizador. Por favor, tente novamente.`,
             "error-banner",
           );
         }
-        //mostra todos os utilizadores
-        // TODO: Recarregar lista de usuários da API
-        const users = await UserService.getUsers();
-        renderUsers(users as UserClass[]);
-        // atualizar contadores
-        await showUsersCounters("utilizadores");
         modal.remove();
       }
     } else {

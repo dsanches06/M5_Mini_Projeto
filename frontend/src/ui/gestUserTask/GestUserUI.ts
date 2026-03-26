@@ -1,12 +1,13 @@
 import { showInfoBanner } from "../../helpers/infoBanner.js";
 import { IUser } from "../../models/index.js";
 import {
-  AssignmentService,
   TaskService,
   UserService,
 } from "../../services/index.js";
 import { clearContainer } from "../dom/index.js";
 import { loadUsersPage } from "../users/index.js";
+
+const ENDPOINT = "users";
 
 /* Função principal para carregar utilizadores iniciais */
 export async function loadInitialUsers(): Promise<void> {
@@ -16,12 +17,12 @@ export async function loadInitialUsers(): Promise<void> {
 
     const users = await UserService.getUsers();
     console.log("Utilizadores carregados:", users);
-    
+
     if (!users || users.length === 0) {
       console.warn("Nenhum utilizador foi retornado");
       showInfoBanner("Nenhum utilizador disponível", "warning-banner");
     }
-    
+
     await loadUsersPage(users);
   } catch (error) {
     console.error("Erro ao carregar utilizadores:", error);
@@ -40,8 +41,8 @@ export async function toggleUserState(id: number): Promise<void> {
   try {
     // Obter o estado atual do utilizador da lista em memória
     const allUsers = await UserService.getUsers();
-    const user = allUsers.find(u => u.getId() === id);
-    
+    const user = allUsers.find((u) => u.getId() === id);
+
     if (user) {
       const newState = !user.isActive();
       await UserService.toggleUserActive(id, newState);
@@ -70,15 +71,7 @@ export async function getInactiveUsers(): Promise<IUser[]> {
 /* Procurar utilizador por nome */
 export async function searchUserByName(name: string): Promise<IUser[]> {
   try {
-    const allUsers = await UserService.getUsers();
-    const lowerCaseName = name.toLowerCase();
-    return allUsers.filter((user) => {
-      const userName =
-        typeof user.getName === "function"
-          ? user.getName()
-          : (user as any).name;
-      return userName.toLowerCase().includes(lowerCaseName);
-    });
+    return await UserService.getUsers(undefined, name);
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     return [];
@@ -90,26 +83,8 @@ export async function sortUsersByName(
   ascending: boolean = true,
 ): Promise<IUser[]> {
   try {
-    const allUsers = await UserService.getUsers();
-    const sortedUsers = [...allUsers];
-    if (ascending) {
-      sortedUsers.sort((a, b) => {
-        const nameA =
-          typeof a.getName === "function" ? a.getName() : (a as any).name;
-        const nameB =
-          typeof b.getName === "function" ? b.getName() : (b as any).name;
-        return nameA.localeCompare(nameB);
-      });
-    } else {
-      sortedUsers.sort((a, b) => {
-        const nameA =
-          typeof a.getName === "function" ? a.getName() : (a as any).name;
-        const nameB =
-          typeof b.getName === "function" ? b.getName() : (b as any).name;
-        return nameB.localeCompare(nameA);
-      });
-    }
-    return sortedUsers;
+    const sort = ascending ? "asc" : "desc";
+    return await UserService.getUsers(sort, undefined);
   } catch (error) {
     console.error("Erro ao ordenar usuários:", error);
     return [];

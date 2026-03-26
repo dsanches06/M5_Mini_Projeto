@@ -1,13 +1,37 @@
 import * as fetchTasks from "../api/fetchTasks.js";
+import { mapToTask } from "../api/dto/mapperDTO.js";
 import { ITask } from "../tasks/index.js";
 import { TaskStatus } from "../tasks/TaskStatus.js";
+import { TaskAssigneeService } from "./taskAssigneeService.js";
 
 /* Serviço para gerir tarefas */
 export class TaskService {
   
-  /* Obtém tarefas da API */
+  /* Obtém tarefas da API com os assignees associados */
   static async getTasks(sort?: string, search?: string): Promise<ITask[]> {
-    return await fetchTasks.getTasks(sort, search);
+    const data = await fetchTasks.getTasks(sort, search);
+    const tasks = data.map(mapToTask);
+    
+    console.log(`📦 ${tasks.length} tarefas carregadas da API`);
+    
+    // Carregar assignees e associar a cada tarefa
+    try {
+      const assignees = await TaskAssigneeService.getTaskAssignees();
+      console.log(`👥 ${assignees.length} assignees carregados da API`);
+      
+      // Para cada tarefa, encontrar os assignees correspondentes
+      tasks.forEach((task) => {
+        const taskAssignees = assignees.filter((a) => a.task_id === task.getId());
+        (task as any).setAssignees(taskAssignees);
+        if (taskAssignees.length > 0) {
+          console.log(`  Task ${task.getId()}: ${taskAssignees.length} assignees - ${taskAssignees.map(a => `user_id: ${a.user_id}`).join(', ')}`);
+        }
+      });
+    } catch (error) {
+      console.error("Erro ao carregar assignees para tarefas:", error);
+    }
+    
+    return tasks;
   }
 
   /* Obtém estatísticas de tarefas da API */
@@ -26,7 +50,7 @@ export class TaskService {
   }
 
   /* Cria um nova tarefa na API */
-  static async createTask(taskData: Partial<ITask>): Promise<ITask | null> {
+  static async createTask(taskData: any): Promise<ITask | null> {
     return await fetchTasks.createTask(taskData);
   }
 
@@ -46,7 +70,7 @@ export class TaskService {
   /* Atualiza uma tarefa na API */
   static async updateTask(
     taskId: number,
-    taskData: Partial<ITask>,
+    taskData: any,
   ): Promise<ITask | null> {
     return await fetchTasks.updateTask(taskId, taskData);
   }
@@ -58,5 +82,10 @@ export class TaskService {
     commentData: any,
   ): Promise<any> {
     return await fetchTasks.updateTaskComment(taskId, commentId, commentData);
+  }
+
+  /* Deleta uma tarefa na API */
+  static async deleteTask(taskId: number): Promise<boolean> {
+    return await fetchTasks.deleteTask(taskId);
   }
 }

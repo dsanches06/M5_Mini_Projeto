@@ -4,7 +4,10 @@ import { TagAPIResponse } from "./dto/index.js";
 const ENDPOINT = "tags";
 
 /* Função para obter a lista de tags */
-export async function getTags(sort?: string, search?: string): Promise<TagAPIResponse[]> {
+export async function getTags(
+  sort?: string,
+  search?: string,
+): Promise<TagAPIResponse[]> {
   return get<TagAPIResponse>(ENDPOINT, sort, search);
 }
 
@@ -14,12 +17,17 @@ export async function getTagById(id: number): Promise<TagAPIResponse | null> {
 }
 
 /* Função para criar uma nova tag */
-export async function createTag(tag: Partial<TagAPIResponse>): Promise<TagAPIResponse | null> {
+export async function createTag(
+  tag: Partial<TagAPIResponse>,
+): Promise<TagAPIResponse | null> {
   return create<TagAPIResponse>(ENDPOINT, tag);
 }
 
 /* Função para atualizar uma tag */
-export async function updateTag(id: number, tag: Partial<TagAPIResponse>): Promise<TagAPIResponse | null> {
+export async function updateTag(
+  id: number,
+  tag: Partial<TagAPIResponse>,
+): Promise<TagAPIResponse | null> {
   return put<TagAPIResponse>(ENDPOINT, id, tag);
 }
 

@@ -7,12 +7,17 @@ import {generateRandomColor} from "../../helpers/index.js";
 const usersContainer = createSection("usersContainer") as HTMLElement;
 
 /* Função de renderização */
-export function renderUsers(users: IUser[]): HTMLElement {
+export async function renderUsers(users: IUser[]): Promise<HTMLElement> {
   usersContainer.innerHTML = "";
-  users.forEach((user) =>
-    //Para cada utilizador, cria um cartão HTML.
-    usersContainer.appendChild(createUserCard(user as UserClass)),
+  
+  // Criar todos os cartões de utilizador de forma assíncrona
+  const userCards = await Promise.all(
+    users.map((user) => createUserCard(user as UserClass))
   );
+  
+  // Adicionar todos os cartões ao container
+  userCards.forEach((card) => usersContainer.appendChild(card));
+  
   // Aplicar cores aos cartões
   applyCardColors(usersContainer);
   return usersContainer;

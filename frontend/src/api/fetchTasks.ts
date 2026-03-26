@@ -1,10 +1,12 @@
 import { get, getById, create, put, patch, remove } from "./index.js";
 import { ITask } from "../tasks/index.js";
-import { BASE_URL } from "./index.js";
+import { BASE_URL } from "./utils/index.js";
 import {
   TaskAPIResponse,
   TaskCommentAPIResponse,
   TagAPIResponse,
+  TaskStatsAPIResponse,
+  TagTaskAPIResponse,
 } from "./dto/index.js";
 
 const ENDPOINT = "tasks";
@@ -15,12 +17,12 @@ const ENDPOINT = "tasks";
 export async function getTasks(
   sort?: string,
   search?: string,
-): Promise<ITask[]> {
-  return get<ITask>(ENDPOINT, sort, search);
+): Promise<TaskAPIResponse[]> {
+  return get<TaskAPIResponse>(ENDPOINT, sort, search);
 }
 
 /* Função para obter estatísticas de tarefas */
-export async function getTaskStats(): Promise<any> {
+export async function getTaskStats(): Promise<TaskStatsAPIResponse | null> {
   try {
     const res = await fetch(`${BASE_URL}${ENDPOINT}/stats`);
     if (!res.ok) {
@@ -76,7 +78,7 @@ export async function createTask(
 }
 
 /* Função para adicionar uma tag a uma tarefa */
-export async function addTagToTask(taskId: number, tagData: any): Promise<any> {
+export async function addTagToTask(taskId: number, tagData: Partial<TagTaskAPIResponse>): Promise<TagTaskAPIResponse | null> {
   try {
     const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/tags`, {
       method: "POST",
@@ -99,8 +101,8 @@ export async function addTagToTask(taskId: number, tagData: any): Promise<any> {
 /* Função para criar um comentário em uma tarefa */
 export async function createTaskComment(
   taskId: number,
-  commentData: any,
-): Promise<any> {
+  commentData: Partial<TaskCommentAPIResponse>,
+): Promise<TaskCommentAPIResponse | null> {
   try {
     const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/comments`, {
       method: "POST",
@@ -132,8 +134,8 @@ export async function updateTask(
 export async function updateTaskComment(
   taskId: number,
   commentId: number,
-  commentData: any,
-): Promise<any> {
+  commentData: Partial<TaskCommentAPIResponse>,
+): Promise<TaskCommentAPIResponse | null> {
   try {
     const res = await fetch(
       `${BASE_URL}${ENDPOINT}/${taskId}/comments/${commentId}`,
@@ -169,7 +171,7 @@ export async function markTaskAsCompleted(
 export async function resolveTaskComment(
   taskId: number,
   commentId: number,
-): Promise<any> {
+): Promise<TaskCommentAPIResponse | null> {
   try {
     const res = await fetch(
       `${BASE_URL}${ENDPOINT}/${taskId}/comments/${commentId}`,
