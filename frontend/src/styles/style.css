@@ -169,6 +169,7 @@ main {
 
 .users-counters,
 .tasks-counters,
+.projects-counters,
 #taskCounters,
 #userCountersTask {
   display: flex;
@@ -341,6 +342,42 @@ main {
   width: 80%;
   padding: 30px;
   margin: 40px auto;
+}
+
+#modalProjectForm .modal-content {
+  max-width: 550px;
+  width: 80%;
+  padding: 30px;
+  margin: 40px auto;
+}
+
+#modalProjectForm .form-group input,
+#modalProjectForm .form-group textarea,
+#modalProjectForm .form-group select {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+  box-sizing: border-box;
+}
+
+#modalProjectForm .form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+#modalProjectForm .form-group input:focus,
+#modalProjectForm .form-group textarea:focus,
+#modalProjectForm .form-group select:focus {
+  outline: none;
+  border-color: #007bff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 #modalEditTask .modal-content {

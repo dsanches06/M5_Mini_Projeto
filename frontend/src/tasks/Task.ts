@@ -1,9 +1,10 @@
 import { StateTransitions } from "../utils/index.js";
-import { IUser, BaseEntity } from "../models/index.js";
+import { BaseEntity } from "../models/index.js";
 import { ITask } from "./index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
 import { SystemLogger } from "../logs/SystemLogger.js";
+import { IProject } from "../projects/IProject.js";
 
 /* Implementação da tarefa genérica */
 export class Task extends BaseEntity implements ITask {
@@ -13,16 +14,23 @@ export class Task extends BaseEntity implements ITask {
   private completeDate?: Date;
   private status: TaskStatus;
   private category: TaskCategory;
-  private user: IUser | undefined;
+  private project: IProject;
+  private assignees: any[] = [];
 
-  constructor(id: number, title: string, description: string | undefined, category: TaskCategory) {
+  constructor(
+    id: number,
+    title: string,
+    description: string | undefined,
+    category: TaskCategory,
+    project: IProject,
+  ) {
     super(id);
     this.title = title;
     this.description = description;
     this.completed = false;
     this.status = TaskStatus.CREATED;
     this.category = category;
-    this.user = undefined;
+    this.project = project;
   }
 
   getCreatedAt(): Date {
@@ -61,14 +69,6 @@ export class Task extends BaseEntity implements ITask {
     return "Task";
   }
 
-  getUser(): IUser | undefined {
-    return this.user;
-  }
-
-  setUser(user: IUser | undefined): void {
-    this.user = user;
-  }
-
   getTaskCategory(): TaskCategory {
     return this.category;
   }
@@ -79,6 +79,14 @@ export class Task extends BaseEntity implements ITask {
 
   setCompletedDate(date: Date): void {
     this.completeDate = date;
+  }
+
+  getProject(): IProject {
+    return this.project;
+  }
+
+  setProject(project: IProject): void {
+    this.project = project;
   }
 
   markCompleted(): void {
@@ -108,5 +116,15 @@ export class Task extends BaseEntity implements ITask {
         `ERRO: Transição de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]} não é permitida. ${error}`,
       );
     }
+  }
+
+  /* Obter lista de assignees desta tarefa */
+  getAssignees(): any[] {
+    return this.assignees;
+  }
+
+  /* Definir lista de assignees desta tarefa */
+  setAssignees(assignees: any[]): void {
+    this.assignees = assignees;
   }
 }

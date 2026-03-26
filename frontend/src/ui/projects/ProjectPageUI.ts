@@ -1,17 +1,23 @@
-import { IProject, Project } from "../../projects/index.js";
-import { showInfoBanner } from "../../helpers/index.js";
+import { IProject } from "../../projects/index.js";
 import { ProjectService } from "../../services/index.js";
-import { renderProjectModal } from "../modal/ModalProjectForm.js";
+import { renderProjectModal } from "../modal/index.js";
+import { showProjectsCounters } from "./ProjectsCountersUI.js";
 import {
   addElementInContainer,
   createHeadingTitle,
   createSearchContainer,
+  createStatisticsCounter,
+  createSection,
   clearContainer,
 } from "../dom/index.js";
-import { createGanttStructure, renderGantt } from "./index.js";
+import {
+  createGanttStructure,
+  renderGantt,
+  renderProjectsCards,
+} from "./index.js";
 
 /* Lista de projetos */
-export function loadProjectsPage(projects: IProject[]): void {
+export async function loadProjectsPage(projects: IProject[]): Promise<void> {
   clearContainer("#containerSection");
 
   addElementInContainer(
@@ -19,11 +25,53 @@ export function loadProjectsPage(projects: IProject[]): void {
     createHeadingTitle("h2", "GESTÃO DE PROJETOS"),
   );
 
+  const projectCounterSection = createProjectCounter("projectCounters");
+  addElementInContainer("#containerSection", projectCounterSection);
+
+  await showProjectsCounters("projetos");
+
   const searchContainer = showSearchProjectContainer();
   addElementInContainer("#containerSection", searchContainer);
 
   // renderizar projetos em cards
   renderProjectsCards(projects);
+
+  // Adicionar event listeners aos botões de contador para filtrar
+  const allProjectsBtn = projectCounterSection.querySelector(
+    "#allProjectsBtn",
+  ) as HTMLElement | null;
+  if (allProjectsBtn) {
+    allProjectsBtn.title = "Mostrar todos os projetos";
+    allProjectsBtn.addEventListener("click", async () => {
+    const currentProjects = await ProjectService.getProjects();
+    renderProjectsCards(currentProjects);
+    await showProjectsCounters("projetos");
+  });
+
+  activeProjectsBtn.addEventListener("click", async () => {
+    const allProjects = await ProjectService.getProjects();
+    const activeProjects = allProjects.filter((p) => p.getStatus() === "Ativo");
+    renderProjectsCards(activeProjects);
+    await showProjectsCounters("ativos", activeProjects);
+  });
+
+  finishedProjectsBtn.addEventListener("click", async () => {
+    const allProjects = await ProjectService.getProjects();
+    const finishedProjects = allProjects.filter(
+      (p) => p.getStatus() === "Terminado",
+    );
+    renderProjectsCards(finishedProjects);
+    await showProjectsCounters("concluidos", finishedProjects);
+  });
+
+  inDevelopmentProjectsBtn.addEventListener("click", async () => {
+    const allProjects = await ProjectService.getProjects();
+    const devProjects = allProjects.filter(
+      (p) => p.getStatus() === "Em Desenvolvimento",
+    );
+    renderProjectsCards(devProjects);
+    await showProjectsCounters("desenvolvimento", devProjects);
+  });
 
   // Event listener para busca
   const searchProjectInput = document.querySelector(
@@ -38,15 +86,13 @@ export function loadProjectsPage(projects: IProject[]): void {
       );
       renderProjectsCards(searchedProjects);
     });
-  } else {
-    console.warn("Elemento de busca de projetos não encontrado.");
   }
 
   // Event listener para adicionar projeto
   const addProjectBtn = document.querySelector("#addProjectBtn") as HTMLElement;
   if (addProjectBtn) {
-    addProjectBtn.addEventListener("click", () => {
-      renderProjectModal();
+    addProjectBtn.addEventListener("click", async () => {
+      await renderProjectModal();
     });
   }
 
@@ -80,80 +126,65 @@ function showSearchProjectContainer(): HTMLElement {
   return searchProjectContainer;
 }
 
-/* Renderiza os projetos em cards */
-export function renderProjectsCards(projects: IProject[]): void {
-  let gridContainer = document.querySelector(
-    "#projectsGridContainer",
+/* Cria o container de contadores de projetos */
+function createProjectCounter(id: string): HTMLElement {
+  const allProjectsBtn = createStatisticsCounter(
+    "allProjectsSection",
+    "allProjectsBtn",
+    "./src/assets/projeto.png",
+    "projetos",
+    "allProjectsCounter",
   ) as HTMLElement;
 
-  if (!gridContainer) {
-    gridContainer = document.createElement("div");
-    gridContainer.id = "projectsGridContainer";
-    gridContainer.className = "projects-grid-container";
-    addElementInContainer("#containerSection", gridContainer);
-  }
+  const activeProjectsBtn = createStatisticsCounter(
+    "activeProjectsSection",
+    "activeProjectsBtn",
+    "./src/assets/projeto_ative.png",
+    "ativos",
+    "activeProjectsCounter",
+  ) as HTMLElement;
 
-  gridContainer.innerHTML = "";
+  const inDevelopmentProjectsBtn = createStatisticsCounter(
+    "inDevelopmentProjectsSection",
+    "inDevelopmentProjectsBtn",
+    "./src/assets/projeto_on_going.png",
+    "desenvolvimento",
+    "inDevelopmentProjectsCounter",
+  ) as HTMLElement;
 
-  projects.forEach((p) => {
-    const card = createProjectCard(p as Project) as HTMLElement;
-    card.style.cursor = "pointer";
-    card.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const ganttElement = createGanttStructure(p as Project);
-      clearContainer("#containerSection");
-      addElementInContainer("#containerSection", ganttElement);
-      renderGantt(ganttElement, p as Project);
-    });
-    gridContainer.appendChild(card);
-  });
-}
+  const finishedProjectsBtn = createStatisticsCounter(
+    "finishedProjectsSection",
+    "finishedProjectsBtn",
+    "./src/assets/projeto_finished.png",
+    "concluídos",
+    "finishedProjectsCounter",
+  ) as HTMLElement;
 
-/* Cria um card de projeto */
-function createProjectCard(project: Project): HTMLElement {
-  const card = document.createElement("div");
-  card.className = "project-card";
+  const filterProjectsBtn = createStatisticsCounter(
+    "filterProjectsSection",
+    "filterProjectsBtn",
+    "./src/assets/filter.png",
+    "filtrados",
+    "filterProjectsCounter",
+  ) as HTMLElement;
 
-  // HEADER
-  const header = document.createElement("div");
-  header.className = "card-header";
+  const activeProjectsPercentageBtn = createStatisticsCounter(
+    "activeProjectsPercentage",
+    "activeProjectsPercentageBtn",
+    "./src/assets/projeto_graph.png",
+    "ativos %",
+    "activeProjectsPercentageCounter",
+  ) as HTMLElement;
 
-  const title = document.createElement("h3");
-  title.textContent = project.getName();
-
-  header.appendChild(title);
-
-  // STATUS
-  const status = document.createElement("span");
-  status.className = "project-status";
-  status.textContent = project.getStatus();
-
-  // DESCRIPTION
-  const desc = document.createElement("p");
-  desc.className = "project-desc";
-  desc.textContent = project.getDescription() || "Sem descrição";
-
-  // DATES
-  const datesContainer = document.createElement("div");
-  datesContainer.className = "project-dates";
-
-  const startDate = document.createElement("span");
-  startDate.className = "start-date";
-  startDate.textContent = `Inicio: ${new Date(project.getStartDate()).toLocaleDateString("pt-BR")}`;
-
-  const endDate = document.createElement("span");
-  endDate.className = "end-date";
-  endDate.textContent = `Fim: ${new Date(project.getEndDateExpected()).toLocaleDateString("pt-BR")}`;
-
-  datesContainer.appendChild(startDate);
-  datesContainer.appendChild(endDate);
-
-  // Montar card
-  card.appendChild(header);
-  card.appendChild(status);
-  card.appendChild(desc);
-  card.appendChild(datesContainer);
-
-  return card;
+  const sectionProjectsCounter = createSection(`${id}`) as HTMLElement;
+  sectionProjectsCounter.classList.add("projects-counters");
+  sectionProjectsCounter.append(
+    allProjectsBtn,
+    activeProjectsBtn,
+    inDevelopmentProjectsBtn,
+    finishedProjectsBtn,
+    filterProjectsBtn,
+    activeProjectsPercentageBtn,
+  );
+  return sectionProjectsCounter;
 }

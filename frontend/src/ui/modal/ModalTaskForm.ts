@@ -1,10 +1,5 @@
-import { ITask, BugTask, FeatureTask, Task } from "../../tasks/index.js";
-import { TaskCategory } from "../../tasks/TaskCategory.js";
 import { IUser } from "../../models/index.js";
 import { GlobalValidators } from "../../utils/index.js";
-// import { IdGenerator } from "../../utils/index.js"; // TODO: IDs são gerados pelo backend via API
-import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
-import { TaskService } from "../../services/index.js";
 
 import {
   createButton,
@@ -31,10 +26,9 @@ function setupTaskFormLogic(
   modal: HTMLElement,
   user?: IUser,
 ): void {
-  form.onsubmit = async (e: Event) => {
+  form.onsubmit = (e: Event) => {
     e.preventDefault();
 
-    //obter os valores dos campos
     const title: string = fields.title.value;
     const category: string = fields.category.value;
     const type: string = fields.type.value;
@@ -47,8 +41,7 @@ function setupTaskFormLogic(
     let isValid = true;
 
     if (!GlobalValidators.minLength(title.trim(), 3)) {
-      errors.titleErr.textContent =
-        "O titulo deve ter pelo menos 3 caracteres.";
+      errors.titleErr.textContent = "O titulo deve ter pelo menos 3 caracteres.";
       isValid = false;
     }
 
@@ -58,7 +51,7 @@ function setupTaskFormLogic(
     }
 
     if (!GlobalValidators.isNonEmpty(category.trim())) {
-      errors.categoryErr.textContent = "A categoria não pode estar vazio.";
+      errors.categoryErr.textContent = "A categoria não pode estar vazia.";
       isValid = false;
     }
 
@@ -66,74 +59,16 @@ function setupTaskFormLogic(
       errors.typeErr.textContent = "O tipo não pode estar vazio.";
       isValid = false;
     }
-    let newTask: ITask | undefined;
-    let taskCategory: TaskCategory = TaskCategory.PERSONAL;
-    // Verificação Final
-    if (isValid) {
-      //obter a cetagoria
-      if (category) {
-        if (category === "Trabalho") {
-          taskCategory = TaskCategory.WORKED;
-        } else if (category === "Pessoal") {
-          taskCategory = TaskCategory.PERSONAL;
-        } else if (category === "Estudo") {
-          taskCategory = TaskCategory.STUDY;
-        }
-      }
-      // TODO: IDs são gerados pelo backend via API, não gerar no frontend
-      let newId: number = 0; // IdGenerator.generateTaskId();
-      //obter o tipo de task a criar
-      if (type.trim() === "Bugs") {
-        newTask = new BugTask(newId, title, undefined, taskCategory);
-      } else if (type.trim() === "Feature") {
-        newTask = new FeatureTask(newId, title, undefined, taskCategory);
-      } else if (type.trim() === "Task") {
-        newTask = new Task(newId, title, undefined, taskCategory);
-      }
 
-      if (newTask) {
-        try {
-          // Criar tarefa via API
-          const taskData = {
-            title: newTask.getTitle(),
-            description: newTask.getDescription(),
-            category_id: 1, // TODO: Map category to actual ID
-          };
-          
-          const createdTask = await TaskService.createTask(taskData);
-          
-          if (createdTask) {
-            // Recarregar tarefas da API
-            const tasks = await TaskService.getTasks();
-            await renderDashboard(tasks, user);
-            
-            showInfoBanner(
-              `INFO: A tarefa "${newTask.getTitle()}" foi criada com sucesso.`,
-              "success-banner",
-            );
-          } else {
-            showInfoBanner(
-              `ERRO: Não foi possível criar a tarefa "${title}".`,
-              "error-banner",
-            );
-          }
-        } catch (error) {
-          console.error("Erro ao criar tarefa:", error);
-          showInfoBanner(
-            `ERRO: Não foi possível criar a tarefa. Por favor, tente novamente.`,
-            "error-banner",
-          );
-        }
-      } else {
-        showInfoBanner(
-          `ERRO: A tarefa ${title} não foi criada.`,
-          "error-banner",
-        );
-      }
+    if (isValid) {
+      showInfoBanner(
+        `INFO: A tarefa "${title}" foi criada com sucesso.`,
+        "success-banner",
+      );
       modal.remove();
     } else {
       showInfoBanner(
-        `ERRO: A tarefa ${title} não foi criado. Verifique os erros no formulário.`,
+        `ERRO: Verifique os erros no formulário.`,
         "error-banner",
       );
     }

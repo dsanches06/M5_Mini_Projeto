@@ -1,5 +1,4 @@
-import { IProject, Project } from "../../projects/index.js";
-import { ProjectStatus } from "../../projects/ProjectStatus.js";
+import { Project } from "../../projects/index.js";
 import { GlobalValidators } from "../../utils/index.js";
 import { ProjectService } from "../../services/index.js";
 import { loadProjectsPage } from "../projects/ProjectPageUI.js";
@@ -10,7 +9,6 @@ import {
   createHeadingTitle,
   createInputGroup,
   createSection,
-  createSelectGroup,
 } from "../dom/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 
@@ -18,17 +16,15 @@ function setupProjectFormLogic(
   form: HTMLFormElement,
   fields: {
     name: HTMLInputElement;
-    description: HTMLInputElement;
+    description: HTMLTextAreaElement;
     startDate: HTMLInputElement;
     endDate: HTMLInputElement;
-    status: HTMLSelectElement;
   },
   errors: {
     nameErr: HTMLElement;
     descriptionErr: HTMLElement;
     startDateErr: HTMLElement;
     endDateErr: HTMLElement;
-    statusErr: HTMLElement;
   },
   modal: HTMLElement,
 ): void {
@@ -40,14 +36,12 @@ function setupProjectFormLogic(
     const description: string = fields.description.value;
     const startDate: string = fields.startDate.value;
     const endDate: string = fields.endDate.value;
-    const status: string = fields.status.value;
 
     // Reset de estados de erro
     errors.nameErr.textContent = "";
     errors.descriptionErr.textContent = "";
     errors.startDateErr.textContent = "";
     errors.endDateErr.textContent = "";
-    errors.statusErr.textContent = "";
 
     let isValid = true;
 
@@ -83,31 +77,17 @@ function setupProjectFormLogic(
       }
     }
 
-    if (!GlobalValidators.isNonEmpty(status)) {
-      errors.statusErr.textContent =
-        "O estado do projeto não pode estar vazio.";
-      isValid = false;
-    }
-
     // Verificação Final
     if (isValid) {
-      let projectStatus: ProjectStatus = ProjectStatus.ACTIVE;
-
-      // Obter o estado do projeto
-      if (status === "Ativo") {
-        projectStatus = ProjectStatus.ACTIVE;
-      } else if (status === "Em Desenvolvimento") {
-        projectStatus = ProjectStatus.IN_DEVELOPMENT;
-      } else if (status === "Terminado") {
-        projectStatus = ProjectStatus.FINISHED;
-      }
+      // o estado inicial do projeto será sempre "Ativo" (ID 1) ao ser criado
+      const projectStatusId = 1;
 
       // Criar objeto do projeto (ID 0 será gerado pela base de dados)
       const newProjectData = new Project(
         0, // ID placeholder - será gerado pelo backend
         name.trim(),
         description || "",
-        1, // projectStatusId
+        projectStatusId, // Usar o ID do status selecionado
         new Date(startDate),
         new Date(endDate),
       );
@@ -145,7 +125,7 @@ function setupProjectFormLogic(
 /**
  * Função Principal: Monta o Modal no DOM
  */
-export function renderProjectModal(): void {
+export async function renderProjectModal(): Promise<void> {
   const modal = createSection("modalProjectForm") as HTMLElement;
   modal.classList.add("modal");
 
@@ -172,12 +152,31 @@ export function renderProjectModal(): void {
     "inserir o nome do projeto",
   );
 
-  const descriptionData = createInputGroup(
-    "Descrição",
-    "projectDescriptionInput",
-    "text",
-    "inserir a descrição do projeto (opcional)",
-  );
+  // Criar descrição como textarea com 4 linhas
+  const descriptionGroup = document.createElement("section");
+  descriptionGroup.className = "form-group";
+
+  const descriptionLabel = document.createElement("label");
+  descriptionLabel.htmlFor = "projectDescriptionInput";
+  descriptionLabel.textContent = "Descrição";
+
+  const descriptionTextarea = document.createElement(
+    "textarea",
+  ) as HTMLTextAreaElement;
+  descriptionTextarea.id = "projectDescriptionInput";
+  descriptionTextarea.rows = 4;
+  descriptionTextarea.placeholder = "inserir a descrição do projeto (opcional)";
+
+  descriptionGroup.append(descriptionLabel, descriptionTextarea);
+
+  const descriptionData = {
+    section: descriptionGroup,
+    input: descriptionTextarea,
+    errorSection: document.createElement("section"),
+  };
+  descriptionData.errorSection.id = "projectDescriptionInputError";
+  descriptionData.errorSection.className = "error-message";
+  descriptionGroup.append(descriptionData.errorSection);
 
   const startDateData = createInputGroup(
     "Data de Início",
@@ -193,9 +192,6 @@ export function renderProjectModal(): void {
     "selecionar data de fim",
   );
 
-  const projectStates = ["Ativo", "Em Desenvolvimento", "Terminado"];
-  const statusData = createSelectGroup("Estado", "statusID", projectStates);
-
   const submitBtn = createButton(
     "button",
     "Criar Projeto",
@@ -207,7 +203,6 @@ export function renderProjectModal(): void {
     descriptionData.section,
     startDateData.section,
     endDateData.section,
-    statusData.section,
     submitBtn,
   );
 
@@ -223,15 +218,20 @@ export function renderProjectModal(): void {
       description: descriptionData.input,
       startDate: startDateData.input,
       endDate: endDateData.input,
-      status: statusData.select,
     },
     {
       nameErr: nameData.errorSection,
       descriptionErr: descriptionData.errorSection,
       startDateErr: startDateData.errorSection,
       endDateErr: endDateData.errorSection,
-      statusErr: statusData.errorSection,
     },
     modal,
   );
+
+  // Fechar ao clicar fora
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.remove();
+  };
+
+  modal.style.display = "block";
 }

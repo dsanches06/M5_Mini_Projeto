@@ -11,7 +11,7 @@ import { ProjectService } from "./src/services/index.js";
 //inicializar a aplicação
 window.onload = async () => {
   activateMenu("#menuProjects");
-  loadInitialProjects();
+  await loadInitialProjects();
 };
 
 //obter o menu task
@@ -41,9 +41,9 @@ const allMenuProjects = document.querySelectorAll(
   "#menuProjects",
 ) as NodeListOf<HTMLAnchorElement>;
 allMenuProjects.forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     activateMenu("#menuProjects");
-    loadInitialProjects();
+    await loadInitialProjects();
   });
 });
 

@@ -28,6 +28,37 @@ export const getAllTasks = async (search, sort) => {
   return tasks;
 };
 
+/* Função para buscar tarefas de um projeto específico */
+export const getTasksByProjectId = async (projectId, search, sort) => {
+  let [tasks] = await db.query(
+    "SELECT t.*, ta.user_id FROM task t LEFT JOIN task_assignees ta ON t.id = ta.task_id WHERE t.project_id = ?",
+    [projectId]
+  );
+
+  if (search) {
+    tasks = tasks.filter(
+      (t) =>
+        t.title.toLowerCase().includes(search.toLowerCase()) ||
+        t.description.toLowerCase().includes(search.toLowerCase()),
+    );
+  }
+
+  if (sort && (sort === "asc" || sort === "desc")) {
+    tasks.sort((a, b) => {
+      const titleA = a.title.toLowerCase();
+      const titleB = b.title.toLowerCase();
+
+      if (sort === "asc") {
+        return titleA.localeCompare(titleB);
+      } else {
+        return titleB.localeCompare(titleA);
+      }
+    });
+  }
+
+  return tasks;
+};
+
 /* Função para criar tarefa */
 export const createTask = async (data) => {
   const [result] = await db.query(

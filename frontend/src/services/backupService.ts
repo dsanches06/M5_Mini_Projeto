@@ -12,7 +12,7 @@ export class BackupService {
   async exportAssignments() {
     const assignments = (await TaskService.getTasks()).map((task) => ({
       taskId: task.getId(),
-      assignedTo: task.getUser()?.getId() ?? null,
+      assignedTo: task.getAssignees?.()[0]?.user_id ?? null,
     }));
     return JSON.stringify(assignments);
   }

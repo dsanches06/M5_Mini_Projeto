@@ -21,6 +21,32 @@ export async function getTasks(
   return get<TaskAPIResponse>(ENDPOINT, sort, search);
 }
 
+/* Função para obter tarefas de um projeto específico */
+export async function getTasksByProject(
+  projectId: number,
+  sort?: string,
+  search?: string,
+): Promise<TaskAPIResponse[]> {
+  try {
+    let url = `${BASE_URL}${ENDPOINT}/project/${projectId}`;
+    if (sort || search) {
+      const params = new URLSearchParams();
+      if (sort) params.append("sort", sort);
+      if (search) params.append("search", search);
+      url += `?${params.toString()}`;
+    }
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("ERRO: Não foi possível obter tarefas do projeto " + res.status);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao obter tarefas do projeto:", error);
+    return [];
+  }
+}
+
 /* Função para obter estatísticas de tarefas */
 export async function getTaskStats(): Promise<TaskStatsAPIResponse | null> {
   try {

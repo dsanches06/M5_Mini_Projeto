@@ -11,3 +11,6 @@ export async function loadInitialProjects(): Promise<void> {
   console.log("Projetos carregados:", projects);
   loadProjectsPage(projects);
 }
+
+
+

@@ -4,8 +4,9 @@ import { ITask } from "./index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
 import { SystemLogger } from "../logs/SystemLogger.js";
+import { IProject } from "../projects/IProject.js";
 
-/* Implementação da tarefa do tipo Feature */
+/* Implementação da tarefa Feature */
 export class FeatureTask extends BaseEntity implements ITask {
   private title: string;
   private description?: string;
@@ -13,13 +14,16 @@ export class FeatureTask extends BaseEntity implements ITask {
   private completeDate?: Date;
   private status: TaskStatus;
   private category: TaskCategory;
-  private user: IUser | undefined;
+  private project: IProject;
+  private assignees: any[] = [];
+  private user?: IUser;
 
   constructor(
     id: number,
     title: string,
     description: string | undefined,
     category: TaskCategory,
+    project: IProject,
   ) {
     super(id);
     this.title = title;
@@ -27,8 +31,9 @@ export class FeatureTask extends BaseEntity implements ITask {
     this.completed = false;
     this.status = TaskStatus.CREATED;
     this.category = category;
-    this.user = undefined;
+    this.project = project;
   }
+
   getCreatedAt(): Date {
     return super.getCreatedAt();
   }
@@ -65,14 +70,6 @@ export class FeatureTask extends BaseEntity implements ITask {
     return "Feature";
   }
 
-  getUser(): IUser | undefined {
-    return this.user;
-  }
-
-  setUser(user: IUser | undefined): void {
-    this.user = user;
-  }
-
   getTaskCategory(): TaskCategory {
     return this.category;
   }
@@ -83,6 +80,14 @@ export class FeatureTask extends BaseEntity implements ITask {
 
   setCompletedDate(date: Date): void {
     this.completeDate = date;
+  }
+
+  getProject(): IProject {
+    return this.project;
+  }
+
+  setProject(project: IProject): void {
+    this.project = project;
   }
 
   markCompleted(): void {
@@ -99,7 +104,7 @@ export class FeatureTask extends BaseEntity implements ITask {
       // Validar transição
       if (canTransition) {
         SystemLogger.log(
-          `Transição permitida de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]}.`,
+          `INFO: Transição permitida de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]}.`,
         );
         this.setStatus(status);
         if (status === TaskStatus.COMPLETED) {
@@ -109,8 +114,42 @@ export class FeatureTask extends BaseEntity implements ITask {
       }
     } catch (error) {
       SystemLogger.log(
-        `Transição de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]} não é permitida. ${error}`,
+        `ERRO: Transição de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]} não é permitida. ${error}`,
       );
     }
+  }
+
+  /* Obter lista de assignees desta tarefa */
+  getAssignees(): any[] {
+    return this.assignees;
+  }
+
+  /* Definir lista de assignees desta tarefa */
+  setAssignees(assignees: any[]): void {
+    this.assignees = assignees;
+  }
+
+  /* Obter usuário associado à tarefa */
+  getUser(): IUser | undefined {
+    return this.user;
+  }
+
+  /* Definir usuário associado à tarefa */
+  setUser(user?: IUser): void {
+    this.user = user;
+  }
+
+  /* Criar projeto dummy para uso quando projeto não é fornecido */
+  private createDummyProject(): IProject {
+    return {
+      getId: () => 0,
+      getName: () => "Default Project",
+      getDescription: () => "Default project",
+      getProjectStatusId: () => 0,
+      getStartDate: () => new Date(),
+      getEndDateExpected: () => new Date(),
+      getStatus: () => "Ativo" as any,
+      setStatus: () => {},
+    } as IProject;
   }
 }

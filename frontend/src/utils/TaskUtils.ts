@@ -13,7 +13,7 @@ import {Buffer} from "../helpers/index.js";
 /* Processa a tarefa com base no seu tipo e registra logs e notificações */
 export function processTask(task: ITask) {
   const type = task.getType();
-  const user = task.getUser() as UserClass | undefined;
+  const user = task.getAssignees?.()[0] ? undefined : undefined;
   const currentStatus = task.getStatus();
   const nextStatus = StateTransitions.getNextStatus(currentStatus);
 

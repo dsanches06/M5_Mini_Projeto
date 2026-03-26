@@ -1,3 +1,4 @@
+import { IProject } from "../projects/index.js";
 import { IUser } from "../models/index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
@@ -13,11 +14,13 @@ export interface ITask {
   getCompleted(): boolean;
   getStatus(): TaskStatus;
   setStatus(status: TaskStatus): void;
-  getUser(): IUser | undefined;
-  setUser(user: IUser | undefined): void;
   getType(): string;
   getCompletedDate(): Date;
+  getProject(): IProject;
+  setProject(project: IProject): void;
   getTaskCategory(): TaskCategory;
   markCompleted(): void;
   moveTo(status: TaskStatus): void;
+  getAssignees?(): any[];
+  setAssignees?(assignees: any[]): void;
 }

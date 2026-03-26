@@ -1,5 +1,7 @@
 import * as fetchProjects from "../api/fetchProjects.js";
+import * as fetchProjectStatus from "../api/fetchProjectStatus.js";
 import { IProject, Project } from "../projects/index.js";
+import { ProjectStatusAPIResponse } from "../api/dto/index.js";
 
 /* Serviço para gerenciar projetos */
 export class ProjectService {
@@ -29,5 +31,10 @@ export class ProjectService {
   /* Função para excluir um projeto */
   static async deleteProject(id: number): Promise<boolean> {
     return await fetchProjects.deleteProject(id);
+  }
+
+  /* Função para obter os status disponíveis dos projetos */
+  static async getProjectStatuses(): Promise<ProjectStatusAPIResponse[]> {
+    return await fetchProjectStatus.getProjectStatuses();
   }
 }

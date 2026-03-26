@@ -99,7 +99,7 @@ export async function loadTasksPage(user?: IUser, filteredTasks?: ITask[]): Prom
   const addTasksBtn = document.querySelector("#addTasksBtn") as HTMLElement;
   if (addTasksBtn) {
     addTasksBtn.addEventListener("click", () => {
-      renderTaskModal();
+      renderTaskModal(user);
     });
   } else {
     console.warn("Elemento #addTasksBtn não foi renderizado no DOM.");

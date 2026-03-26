@@ -7,6 +7,7 @@ const router = express.Router();
 //Taks routes
 router.get("/", taskController.getTasks);
 router.get("/stats", taskController.getStats);
+router.get("/project/:projectId", taskController.getTasksByProject);
 router.post("/", validateTaskData, taskController.createTask);
 router.put("/:id", validateTaskData, taskController.updateTask);
 router.patch("/:id", taskController.taskMarkedAsCompleted);

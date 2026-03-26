@@ -36,11 +36,13 @@ export type TaskAPIResponse = {
   description?: string;
   status_id?: number;
   priority_id?: number;
+  category_id?: number;
   assigned_to?: number;
-  project_id?: number;
+  project_id: number;
   sprint_id?: number;
   start_date?: string;
   due_date?: string;
+  completed_at?: string;
   created_at?: string;
   updated_at?: string;
 };

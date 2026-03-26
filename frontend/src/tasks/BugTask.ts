@@ -4,8 +4,9 @@ import { ITask } from "./index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
 import { SystemLogger } from "../logs/SystemLogger.js";
+import { IProject } from "../projects/IProject.js";
 
-/* Implementação da tarefa do tipo Bug */
+/* Implementação da tarefa de bug */
 export class BugTask extends BaseEntity implements ITask {
   private title: string;
   private description?: string;
@@ -13,16 +14,23 @@ export class BugTask extends BaseEntity implements ITask {
   private completeDate?: Date;
   private status: TaskStatus;
   private category: TaskCategory;
-  private user: IUser | undefined;
+  private project: IProject;
+  private assignees: any[] = [];
 
-  constructor(id: number, title: string, description: string | undefined, category: TaskCategory) {
+  constructor(
+    id: number,
+    title: string,
+    description: string | undefined,
+    category: TaskCategory,
+    project: IProject,
+  ) {
     super(id);
     this.title = title;
     this.description = description;
     this.completed = false;
     this.status = TaskStatus.CREATED;
     this.category = category;
-    this.user = undefined;
+    this.project = project;
   }
 
   getCreatedAt(): Date {
@@ -37,14 +45,13 @@ export class BugTask extends BaseEntity implements ITask {
     this.title = title;
   }
 
-    getDescription(): string | undefined {
+  getDescription(): string | undefined {
     return this.description;
   }
 
   setDescription(description: string): void {
     this.description = description;
   }
-
 
   getCompleted(): boolean {
     return this.completed;
@@ -59,15 +66,7 @@ export class BugTask extends BaseEntity implements ITask {
   }
 
   getType(): string {
-    return "Bugs";
-  }
-
-  getUser(): IUser | undefined {
-    return this.user;
-  }
-
-  setUser(user: IUser | undefined): void {
-    this.user = user;
+    return "Bug";
   }
 
   getTaskCategory(): TaskCategory {
@@ -80,6 +79,14 @@ export class BugTask extends BaseEntity implements ITask {
 
   setCompletedDate(date: Date): void {
     this.completeDate = date;
+  }
+
+  getProject(): IProject {
+    return this.project;
+  }
+
+  setProject(project: IProject): void {
+    this.project = project;
   }
 
   markCompleted(): void {
@@ -96,7 +103,7 @@ export class BugTask extends BaseEntity implements ITask {
       // Validar transição
       if (canTransition) {
         SystemLogger.log(
-          `Transição permitida de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]}.`,
+          `INFO: Transição permitida de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]}.`,
         );
         this.setStatus(status);
         if (status === TaskStatus.COMPLETED) {
@@ -106,8 +113,18 @@ export class BugTask extends BaseEntity implements ITask {
       }
     } catch (error) {
       SystemLogger.log(
-        `Transição de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]} não é permitida. ${error}`,
+        `ERRO: Transição de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]} não é permitida. ${error}`,
       );
     }
+  }
+
+  /* Obter lista de assignees desta tarefa */
+  getAssignees(): any[] {
+    return this.assignees;
+  }
+
+  /* Definir lista de assignees desta tarefa */
+  setAssignees(assignees: any[]): void {
+    this.assignees = assignees;
   }
 }

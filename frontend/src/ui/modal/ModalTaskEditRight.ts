@@ -153,7 +153,7 @@ export function renderEditTaskRightPanel(task: ITask): HTMLDivElement {
   sendBtn.onclick = () => {
     const msg = commentInput.value.trim();
     if (msg) {
-      const userId = task.getUser() ? task.getUser()!.getId() : 0;
+      const userId = task.getAssignees?.()[0]?.user_id ?? 0;
       // TODO: Implementar criação de comentário via API
       // await CommentService.createTaskComment(task.getId(), { userId, message: msg });
       commentInput.value = "";
