@@ -1,4 +1,3 @@
-import Notifications from "../notifications/Notifications.js";
 import { UserRole } from "../security/UserRole.js";
 
 /* Interface que define o contrato para um utilizador */

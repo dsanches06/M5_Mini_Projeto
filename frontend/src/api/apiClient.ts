@@ -134,7 +134,6 @@ export async function remove(
       );
     }
 
-    console.log(`${endpoint}/${id} deletado com sucesso`);
     return true;
   } catch (error) {
     console.error(`Erro ao deletar ${endpoint}/${id}:`, error);

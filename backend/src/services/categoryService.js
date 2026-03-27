@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapCategoryAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllCategories = async () => {
   const [categories] = await db.query("SELECT * FROM category");
-  return categories;
+  return categories.map(mapCategoryAPIResponse);
 };
 
 export const createCategory = async (data) => {
@@ -10,7 +11,7 @@ export const createCategory = async (data) => {
     "INSERT INTO category (name, description) VALUES (?, ?)",
     [data.name, data.description]
   );
-  return { id: result.insertId, ...data };
+  return mapCategoryAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateCategory = async (id, data) => {

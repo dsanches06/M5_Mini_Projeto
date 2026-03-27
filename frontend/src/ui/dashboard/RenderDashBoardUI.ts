@@ -1,26 +1,22 @@
+import { UsersDashboard } from "../users/index.js";
 import { ITask } from "../../tasks/index.js";
 import { IUser } from "../../models/index.js";
-import { TaskDashboardUI } from "../tasks/index.js";
 import { addElementInContainer } from "../dom/index.js";
-import { showTasksCounters } from "../tasks/index.js";
 
-/* Renderiza o dashboard de tarefas */
 export async function renderDashboard(
   tasks: ITask[],
-  user?: IUser,
-  type?: string,
+  user: IUser,
 ): Promise<void> {
-  // Nota: showTasksCounters já foi chamada em TaskPageUI.ts
-  // NÃO chamar novamente aqui para evitar recarregar todas as tasks
-  showTaskDashboardUI(tasks, user);
-}
+  // 1. Cria a instância da classe
+  const dashboard = new UsersDashboard(user, tasks);
 
-function showTaskDashboardUI(tasks: ITask[], user?: IUser): void {
+  // 2. Gera o HTML do dashboard
+  const renderedElement = dashboard.render();
+
+  // 3. Adiciona ao ecrã (verifica se já não existe para não duplicar)
   const existing = document.querySelector("#dashBoardContainer");
-  // Sempre usa TaskDashboardUI e passa as tasks, independentemente de ter user
-  const dashboard = new TaskDashboardUI(tasks);
-  const rendered = dashboard.render();
   if (!existing) {
-    addElementInContainer("#containerSection", rendered);
+    // Usa a tua função auxiliar para inserir no DOM
+    addElementInContainer("#containerSection", renderedElement);
   }
 }

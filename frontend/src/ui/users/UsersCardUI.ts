@@ -7,6 +7,8 @@ import { removeUserByID, toggleUserState } from "../gestUserTask/index.js";
 import { loadTasksPage } from "../tasks/index.js";
 import { showUserDetails } from "../modal/index.js";
 import { TaskAssigneeAPIResponse } from "../../api/dto/typesDTO.js";
+import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
+import { loadUserTasksPage } from "./index.js";
 
 /* Criar cartão de utilizador */
 export async function createUserCard(user: UserClass): Promise<HTMLElement> {
@@ -97,20 +99,16 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
     // Carregar todas as tarefas e filtrar apenas as atribuídas ao utilizador
     try {
       const allTasks = await TaskService.getTasks();
-      console.log("📋 Todas as tarefas carregadas:", allTasks.length);
       
       // Filtrar tarefas que têm assignees para este utilizador
       const userAssignedTasks = allTasks.filter((task) => {
         const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
-        console.log(`Task ${task.getId()}: ${assignees.length} assignees`, assignees);
         return assignees.some((a: TaskAssigneeAPIResponse) => a.user_id === user.getId());
       });
       
-      console.log(`✅ Tarefas filtradas para ${user.getName()} (ID: ${user.getId()}):`, userAssignedTasks.length);
-      userAssignedTasks.forEach(t => console.log(`  - ${t.getId()}: ${t.getTitle()}`));
-      
       // Carregar página de tarefas com apenas as tarefas atribuídas ao utilizador
-      await loadTasksPage(user, userAssignedTasks);
+      await loadUserTasksPage(user, userAssignedTasks);
+
     } catch (error) {
       console.error("Erro ao carregar tarefas do utilizador:", error);
       showInfoBanner(

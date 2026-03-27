@@ -22,6 +22,7 @@ export function createFigureWithImage(
   id: string,
   src: string,
   label: string,
+  captionId?: string,
 ): HTMLElement {
   const figure = document.createElement("figure");
 
@@ -34,14 +35,15 @@ export function createFigureWithImage(
   img.classList.add("counters-img");
 
   const figCaption = document.createElement("figcaption");
-  if (label === "ativos %") {
+  if (captionId) {
+    figCaption.id = captionId;
+  } else if (label === "ativos %") {
     let ativeLabel = label.split(" ");
-    figCaption.id = `${ativeLabel[0].trim()}PercentangeCaption`;
-    figCaption.textContent = `${label}`;
+    figCaption.id = `${ativeLabel[0].trim()}PercentageCaption`;
   } else {
     figCaption.id = `${label}Caption`;
-    figCaption.textContent = `${label}`;
   }
+  figCaption.textContent = `${label}`;
 
   // Adiciona a imagem e a legenda à figure
   figure.append(img, figCaption);

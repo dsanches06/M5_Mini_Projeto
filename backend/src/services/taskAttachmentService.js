@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTaskAttachmentAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskAttachments = async () => {
   const [attachments] = await db.query("SELECT * FROM task_attachment");
-  return attachments;
+  return attachments.map(mapTaskAttachmentAPIResponse);
 };
 
 export const createTaskAttachment = async (data) => {
@@ -10,7 +11,7 @@ export const createTaskAttachment = async (data) => {
     "INSERT INTO task_attachment (task_id, file_name, file_path) VALUES (?, ?, ?)",
     [data.task_id, data.file_name, data.file_path]
   );
-  return { id: result.insertId, ...data };
+  return mapTaskAttachmentAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskAttachment = async (id, data) => {

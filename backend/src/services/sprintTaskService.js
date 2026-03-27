@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapSprintTaskAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllSprintTasks = async () => {
   const [tasks] = await db.query("SELECT * FROM sprint_task");
-  return tasks;
+  return tasks.map(mapSprintTaskAPIResponse);
 };
 
 export const createSprintTask = async (data) => {
@@ -10,7 +11,7 @@ export const createSprintTask = async (data) => {
     "INSERT INTO sprint_task (sprint_id, task_id) VALUES (?, ?)",
     [data.sprint_id, data.task_id]
   );
-  return { id: result.insertId, ...data };
+  return mapSprintTaskAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateSprintTask = async (id, data) => {

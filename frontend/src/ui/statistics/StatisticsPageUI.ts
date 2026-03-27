@@ -6,7 +6,6 @@
  */
 
 import { StatisticPageUI } from "./StatisticUI.js";
-import { clearContainer, addElementInContainer } from "../dom/index.js";
 
 // ============================================
 // EXEMPLO 1: Inicialização básica
@@ -17,8 +16,7 @@ export function initializeStatisticsPage(): void {
   
   // Renderizar todos os gráficos
   ui.render();
-  
-  console.log("📊 Página de estatísticas inicializada com sucesso!");
+
 }
 
 // ============================================
@@ -27,7 +25,6 @@ export function initializeStatisticsPage(): void {
 export function setupAutoUpdate(ui: StatisticPageUI, intervalMs: number = 5000): void {
   setInterval(() => {
     ui.updateAllCharts();
-    console.log("🔄 Gráficos atualizados");
   }, intervalMs);
 }
 
@@ -37,7 +34,6 @@ export function setupAutoUpdate(ui: StatisticPageUI, intervalMs: number = 5000):
 export function updateSpecificChart(ui: StatisticPageUI, chartName: string): void {
   // Possíveis valores: "overview", "status", "completion", "comparison"
   ui.updateChart(chartName);
-  console.log(`✅ Gráfico "${chartName}" atualizado`);
 }
 
 // ============================================
@@ -45,11 +41,9 @@ export function updateSpecificChart(ui: StatisticPageUI, chartName: string): voi
 // ============================================
 export function exportStatisticsData(ui: StatisticPageUI) {
   const data = ui.exportChartData();
-  console.log("📥 Dados exportados:", data);
   
   // Converter para JSON e salvar/enviar
   const jsonData = JSON.stringify(data, null, 2);
-  console.log(jsonData);
   
   return data;
 }
@@ -137,7 +131,6 @@ function downloadJSON(data: object, filename: string): void {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
-  console.log(`📄 Arquivo ${filename} baixado`);
 }
 
 // ============================================
@@ -146,17 +139,14 @@ function downloadJSON(data: object, filename: string): void {
 export function setupEventListeners(ui: StatisticPageUI): void {
   // Atualizar gráficos quando uma tarefa é criada/atualizada
   document.addEventListener("taskCreated", () => {
-    console.log("✨ Nova tarefa criada - atualizando gráficos");
     ui.updateAllCharts();
   });
   
   document.addEventListener("taskCompleted", () => {
-    console.log("✅ Tarefa completada - atualizando gráficos");
     ui.updateAllCharts();
   });
   
   document.addEventListener("taskDeleted", () => {
-    console.log("🗑️ Tarefa deletada - atualizando gráficos");
     ui.updateAllCharts();
   });
 }
@@ -197,7 +187,6 @@ export function setupCompleteStatisticsPage(): void {
     // Configurar event listeners
     setupEventListeners(ui);
     
-    console.log("✅ Dashboard de estatísticas totalmente configurado!");
   } catch (error) {
     console.error("❌ Erro ao configurar dashboard:", error);
   }

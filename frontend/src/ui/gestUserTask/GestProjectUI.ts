@@ -8,7 +8,6 @@ export async function loadInitialProjects(): Promise<void> {
   clearContainer("#containerSection");
   // carrega a pagina dinamica de projetos
   const projects = await ProjectService.getProjects();
-  console.log("Projetos carregados:", projects);
   loadProjectsPage(projects);
 }
 

@@ -2,41 +2,20 @@ import {
   ProjectService,
   TaskService,
   UserService,
+  TeamService,
+  TeamMemberService,
 } from "../../services/index.js";
 import { ITask } from "../../tasks/index.js";
 import { IUser } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/infoBanner.js";
-import { Project } from "../../projects/index.js";
-
-interface LegendItem {
-  name: string;
-  color: string;
-}
-
-interface ActivityBar {
-  label: string;
-  name: string;
-  start: number;
-  duration: number;
-  color: string;
-}
-
-interface GanttTask {
-  name: string;
-  activities: ActivityBar[];
-}
-
-// =======================
-// CORES
-// =======================
-const GANTT_COLORS: LegendItem[] = [
-  { name: "Engineering", color: "#e6a38a" },
-  { name: "Research", color: "#d97b7b" },
-  { name: "Product", color: "#9b6c7a" },
-  { name: "Marketing", color: "#5c5366" },
-  { name: "Copywriting", color: "#6d8199" },
-  { name: "Business", color: "#4f6a7a" },
-];
+import {
+  ActivityBar,
+  formatDate,
+  GanttTask,
+  generateTeamColors,
+  LegendItem,
+  DEFAULT_COLORS,
+} from "../../api/utils/index.js";
 
 // =======================
 // INIT
@@ -63,7 +42,6 @@ async function createGantt(projectId: number): Promise<HTMLElement> {
   const topContainer = document.createElement("div");
   topContainer.className = "gantt-top";
   topContainer.appendChild(await createHeader(projectId));
-  topContainer.appendChild(createLegend());
 
   wrapper.appendChild(topContainer);
   wrapper.appendChild(createTimeline(6));
@@ -73,6 +51,41 @@ async function createGantt(projectId: number): Promise<HTMLElement> {
     const tasks = await TaskService.getTasksByProject(projectId);
     const users = await UserService.getUsers();
 
+    // Carregar teams e team_members com tratamento de erro
+    let teams = [];
+    let teamMembers = [];
+    try {
+      teams = await TeamService.getTeams();
+      teamMembers = await TeamMemberService.getTeamMembers();
+    } catch (dataError) {
+      console.warn(`⚠️ Aviso ao carregar times e membros:`, dataError);
+    }
+
+    // Obter todos os user_ids dos assignees
+    const assigneeUserIds = new Set<number>();
+    tasks.forEach((task: ITask) => {
+      const assignees = (task as any).getAssignees?.() || [];
+      assignees.forEach((assignee: any) => {
+        assigneeUserIds.add(assignee.user_id);
+      });
+    });
+
+    // Filtrar teams que têm members nos assignees
+    const filteredTeams = teams.filter((team: any) => {
+      return teamMembers.some(
+        (member: any) =>
+          member.team_id === team.id && assigneeUserIds.has(member.user_id)
+      );
+    });
+
+    // Gerar cores baseadas nos times filtrados
+    const ganttColors = generateTeamColors(filteredTeams);
+
+    // Adicionar legenda se houver times
+    if (ganttColors.length > 0) {
+      topContainer.appendChild(createLegend(ganttColors));
+    }
+
     // Mapear usuários por ID
     const userMap = new Map<number, string>();
     users.forEach((user: IUser) => {
@@ -80,14 +93,13 @@ async function createGantt(projectId: number): Promise<HTMLElement> {
     });
 
     // Transformar dados
-    const ganttTasks = transformTasksToGantt(tasks, 6, userMap);
+    const ganttTasks = transformTasksToGantt(tasks, 6, userMap, ganttColors);
 
     // Renderizar tarefas
     wrapper.appendChild(createTasks(ganttTasks, 6));
   } catch (error) {
-    console.error("Erro ao carregar tarefas:", error);
     const errorMsg = document.createElement("p");
-    errorMsg.textContent = "Erro ao carregar tarefas";
+    errorMsg.textContent = `Erro ao carregar tarefas: ${error instanceof Error ? error.message : String(error)}`;
     errorMsg.style.color = "#e74c3c";
     errorMsg.style.padding = "20px";
     wrapper.appendChild(errorMsg);
@@ -103,7 +115,12 @@ function transformTasksToGantt(
   tasks: ITask[],
   weeks: number,
   userMap: Map<number, string>,
+  ganttColors: LegendItem[],
 ): GanttTask[] {
+  // Usar cores dos times, ou as cores padrão se não houver times
+  const colors =
+    ganttColors.length > 0 ? ganttColors.map((c) => c.color) : DEFAULT_COLORS;
+
   return tasks.map((task, taskIndex) => {
     const assignees = (task as any).getAssignees?.() || [];
 
@@ -114,7 +131,7 @@ function transformTasksToGantt(
             name: userMap.get(assignee.user_id) || `User ${assignee.user_id}`,
             start: assigneeIndex % weeks,
             duration: Math.min(2, weeks - (assigneeIndex % weeks)),
-            color: GANTT_COLORS[assigneeIndex % GANTT_COLORS.length].color,
+            color: colors[assigneeIndex % colors.length],
           }))
         : [
             {
@@ -122,7 +139,7 @@ function transformTasksToGantt(
               name: "Unassigned",
               start: 0,
               duration: 1,
-              color: GANTT_COLORS[0].color,
+              color: colors[0],
             },
           ];
 
@@ -136,31 +153,25 @@ function transformTasksToGantt(
 // =======================
 // HEADER
 // =======================
-
 async function createHeader(projectId: number): Promise<HTMLElement> {
   const header = document.createElement("div");
   header.className = "gantt-header";
 
   try {
-    const project: Project | null =
-      await ProjectService.getProjectById(projectId);
+    const project = await ProjectService.getProjectById(projectId);
 
-    // Verifica se o projeto existe antes de tentar ler as propriedades
     if (project) {
-      // Se a tua API devolve "name" e "start_date" (ajusta os nomes se forem diferentes)
       const name = project.getName() || "Sem Título";
-      const startDate = project.getStartDate() || "Data não definida";
+      const startDate = formatDate(project.getStartDate());
+      const endDate = formatDate(project.getEndDateExpected());
 
-      header.innerHTML = `
-        <h1>${name}</h1>
-        <p>${startDate}</p>
-      `;
+      header.innerHTML = `<h1>${name}</h1><p>De ${startDate} até ${endDate}</p>`;
     } else {
       header.innerHTML = `<h1>Projeto ${projectId} não encontrado</h1>`;
     }
   } catch (error) {
     console.error("Erro ao carregar o header:", error);
-    header.innerHTML = "";
+    header.innerHTML = `<h1>Erro ao carregar o projeto</h1>`;
     showInfoBanner("Erro ao carregar informações do projeto", "error");
   }
 
@@ -170,19 +181,17 @@ async function createHeader(projectId: number): Promise<HTMLElement> {
 // =======================
 // LEGEND
 // =======================
-function createLegend(): HTMLElement {
+function createLegend(ganttColors: LegendItem[]): HTMLElement {
   const legend = document.createElement("div");
   legend.className = "legend";
 
-  GANTT_COLORS.forEach((item) => {
+  ganttColors.forEach((item) => {
     const row = document.createElement("div");
     row.className = "legend-item";
-
     row.innerHTML = `
       <span>${item.name}</span>
-      <div style="background:${item.color}"></div>
+      <div style="background-color: ${item.color}; width: 50px; height: 4px;"></div>
     `;
-
     legend.appendChild(row);
   });
 

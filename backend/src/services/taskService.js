@@ -1,62 +1,42 @@
 import { db } from "../db.js";
+import { mapTaskAPIResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todas as tarefas */
 export const getAllTasks = async (search, sort) => {
-  let [tasks] = await db.query("SELECT * FROM task");
+  let query = "SELECT * FROM task";
+  const params = [];
 
   if (search) {
-    tasks = tasks.filter(
-      (t) =>
-        t.title.toLowerCase().includes(search.toLowerCase()) ||
-        t.description.toLowerCase().includes(search.toLowerCase()),
-    );
+    query += " WHERE (title LIKE ? OR description LIKE ?)";
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm);
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
-    tasks.sort((a, b) => {
-      const titleA = a.title.toLowerCase();
-      const titleB = b.title.toLowerCase();
-
-      if (sort === "asc") {
-        return titleA.localeCompare(titleB);
-      } else {
-        return titleB.localeCompare(titleA);
-      }
-    });
+    query += ` ORDER BY title ${sort.toUpperCase()}`;
   }
 
-  return tasks;
+  const [tasks] = await db.query(query, params);
+  return tasks.map(mapTaskAPIResponse);
 };
 
 /* Função para buscar tarefas de um projeto específico */
 export const getTasksByProjectId = async (projectId, search, sort) => {
-  let [tasks] = await db.query(
-    "SELECT t.*, ta.user_id FROM task t LEFT JOIN task_assignees ta ON t.id = ta.task_id WHERE t.project_id = ?",
-    [projectId]
-  );
+  let query = "SELECT t.*, ta.user_id FROM task t LEFT JOIN task_assignees ta ON t.id = ta.task_id WHERE t.project_id = ?";
+  const params = [projectId];
 
   if (search) {
-    tasks = tasks.filter(
-      (t) =>
-        t.title.toLowerCase().includes(search.toLowerCase()) ||
-        t.description.toLowerCase().includes(search.toLowerCase()),
-    );
+    query += " AND (t.title LIKE ? OR t.description LIKE ?)";
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm);
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
-    tasks.sort((a, b) => {
-      const titleA = a.title.toLowerCase();
-      const titleB = b.title.toLowerCase();
-
-      if (sort === "asc") {
-        return titleA.localeCompare(titleB);
-      } else {
-        return titleB.localeCompare(titleA);
-      }
-    });
+    query += ` ORDER BY t.title ${sort.toUpperCase()}`;
   }
 
-  return tasks;
+  const [tasks] = await db.query(query, params);
+  return tasks.map(mapTaskAPIResponse);
 };
 
 /* Função para criar tarefa */
@@ -74,7 +54,16 @@ export const createTask = async (data) => {
       data.due_date || null,
     ],
   );
-  return { id: result.insertId, ...data };
+  return mapTaskAPIResponse({ id: result.insertId, ...data });
+};
+
+/* Função para alterar o status da tarefa */
+export const updateStatus = async (taskId, data) => {
+  const [result] = await db.query(
+    "UPDATE task SET task_status_id = ? WHERE id = ?",
+    [data.task_status_id, taskId],
+  );
+  return result.affectedRows;
 };
 
 /* Função para atualizar tarefa */
@@ -116,10 +105,6 @@ export const updateTask = async (taskId, data) => {
     values.push(data.completed_at);
   }
 
-  if (fieldsToUpdate.length === 0) {
-    throw new Error("Nenhum campo para atualizar");
-  }
-
   values.push(taskId);
 
   const [result] = await db.query(
@@ -138,7 +123,7 @@ export const deleteTask = async (taskId) => {
 /* Função para buscar tarefa por ID */
 export const getTaskById = async (taskId) => {
   const [tasks] = await db.query("SELECT * FROM task WHERE id = ?", [taskId]);
-  return tasks[0];
+  return tasks[0] ? mapTaskAPIResponse(tasks[0]) : null;
 };
 
 /* Função para adicionar etiqueta à tarefa */

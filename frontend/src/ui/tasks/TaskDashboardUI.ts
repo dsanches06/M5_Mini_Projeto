@@ -1,119 +1,194 @@
 import { ITask } from "../../tasks/index.js";
-import { TaskStatus } from "../../tasks/TaskStatus.js";
-import { renderModalEditTask } from "../modal/index.js";
+import { IProject } from "../../projects/index.js";
+import { IUser } from "../../models/index.js";
 import { getCardBorderColor, setCardBorderColor } from "../../helpers/index.js";
-import { GenericDashboardUI } from "../dashboard/GenericDashboardUI.js";
-import { DashboardColumn } from "../../dashboards/DashboardColumn.js";
-import { UserService } from "../../services/index.js";
-import { TaskAssigneeAPIResponse } from "../../api/dto/typesDTO.js";
+import { renderModalEditTask } from "../modal/index.js";
+import { ProjectService, TaskService, UserService } from "../../services/index.js";
 
 export class TaskDashboardUI {
-  private dashboard: GenericDashboardUI<ITask>;
-  private usersCache: Map<number, string> = new Map();
+  private container: HTMLElement;
+  private projects: IProject[] = [];
+  private tasksByProject: Map<number, ITask[]> = new Map();
+  private userMap: Map<number, IUser> = new Map();
 
-  constructor(tasks: ITask[]) {
-    const taskColumns: DashboardColumn<ITask>[] = [
-      {
-        id: TaskStatus.CREATED,
-        label: "CREATED",
-        filterFn: (task) => task.getStatus() === TaskStatus.CREATED,
-      },
-      {
-        id: TaskStatus.ASSIGNED,
-        label: "ASSIGNED",
-        filterFn: (task) => task.getStatus() === TaskStatus.ASSIGNED,
-      },
-      {
-        id: TaskStatus.BLOCKED,
-        label: "BLOCKED",
-        filterFn: (task) => task.getStatus() === TaskStatus.BLOCKED,
-      },
-      {
-        id: TaskStatus.IN_PROGRESS,
-        label: "IN_PROGRESS",
-        filterFn: (task) => task.getStatus() === TaskStatus.IN_PROGRESS,
-      },
-      {
-        id: TaskStatus.COMPLETED,
-        label: "COMPLETED",
-        filterFn: (task) => task.getStatus() === TaskStatus.COMPLETED,
-      },
-      {
-        id: TaskStatus.ARCHIVED,
-        label: "ARCHIVED",
-        filterFn: (task) => task.getStatus() === TaskStatus.ARCHIVED,
-      },
-    ];
-
-    this.dashboard = new GenericDashboardUI(tasks, {
-      containerId: "dashBoardContainer",
-      columns: taskColumns,
-      cardRenderer: this.createTaskCard.bind(this),
-      onCardClick: (task) => renderModalEditTask(task),
-      itemId: (task) => task.getId(),
-      itemGroupKey: (task) => task.getStatus(),
-    });
-    
-    // Pré-carregar os nomes dos utilizadores
-    this.loadUsersCache();
+  constructor() {
+    this.container = document.createElement("div");
+    this.container.id = "taskDashboardContainer";
+    this.container.className = "task-dashboard-container";
   }
 
-  private async loadUsersCache(): Promise<void> {
+  /**
+   * Carrega dados da API e renderiza
+   */
+  public async loadAndRender(): Promise<HTMLElement> {
     try {
-      const users = await UserService.getUsers();
-      users.forEach((user) => {
-        const id = typeof user.getId === 'function' ? user.getId() : (user as any).id;
-        const name = typeof user.getName === 'function' ? user.getName() : (user as any).name;
-        this.usersCache.set(id, name);
-      });
+      await this.loadProjectsAndTasks();
+      this.render();
     } catch (error) {
-      console.error("Erro ao carregar nomes dos utilizadores:", error);
+      console.error("Erro ao carregar dados:", error);
+      this.container.innerHTML = `
+        <div class="empty-state">
+          <p>Erro ao carregar tarefas</p>
+        </div>
+      `;
+    }
+    return this.container;
+  }
+
+  /**
+   * Carrega projetos e tarefas da API
+   */
+  private async loadProjectsAndTasks(): Promise<void> {
+    try {
+      // Carregar todos os usuários uma única vez
+      const allUsers = await UserService.getUsers();
+      this.userMap.clear();
+      allUsers.forEach((user: IUser) => {
+        this.userMap.set(user.getId(), user);
+      });
+
+      // Buscar todos os projetos
+      const projectsData = await ProjectService.getProjects();
+      this.projects = projectsData;
+
+      // Para cada projeto, buscar suas tarefas
+      for (const project of this.projects) {
+        try {
+          const tasks = await TaskService.getTasksByProject(project.getId());
+          this.tasksByProject.set(project.getId(), tasks);
+        } catch (error) {
+          console.warn(`Erro ao buscar tarefas do projeto ${project.getId()}:`, error);
+          this.tasksByProject.set(project.getId(), []);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar projetos:", error);
+      this.projects = [];
     }
   }
 
-  render(): HTMLElement {
-    return this.dashboard.render();
+  /**
+   * Renderiza as tarefas em um container com cards agrupadas por projeto
+   */
+  private render(): void {
+    this.container.innerHTML = "";
+    
+    if (this.projects.length === 0) {
+      this.container.innerHTML = `
+        <div class="empty-state">
+          <p>Nenhum projeto encontrado</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Renderizar cada projeto com suas tarefas
+    this.projects.forEach(project => {
+      const tasks = this.tasksByProject.get(project.getId()) || [];
+      const projectSection = this.createProjectSection(project, tasks);
+      this.container.appendChild(projectSection);
+    });
+
+    this.attachEventListeners();
   }
 
+  /**
+   * Cria uma seção de projeto com suas tarefas
+   */
+  private createProjectSection(project: IProject, tasks: ITask[]): HTMLElement {
+    const section = document.createElement("div");
+    section.className = "project-task-section";
+
+    // Cabeçalho do projeto
+    const header = document.createElement("div");
+    header.className = "project-task-header";
+    header.innerHTML = `<h2>${project.getName()}</h2><div class="project-separator"></div>`;
+
+    // Wrapper dos cards
+    const tasksWrapper = document.createElement("div");
+    tasksWrapper.className = "tasks-cards-wrapper";
+
+    if (tasks.length === 0) {
+      tasksWrapper.innerHTML = `
+        <div class="empty-project-state">
+          <p>Nenhuma tarefa neste projeto</p>
+        </div>
+      `;
+    } else {
+      // Renderizar cards das tarefas
+      tasks.forEach(task => {
+        const taskCard = this.createTaskCard(task);
+        tasksWrapper.appendChild(taskCard);
+      });
+    }
+
+    section.appendChild(header);
+    section.appendChild(tasksWrapper);
+
+    return section;
+  }
+
+  /**
+   * Cria um card individual para uma tarefa
+   */
   private createTaskCard(task: ITask): HTMLElement {
     const card = document.createElement("div");
     card.className = "task-card";
+    card.setAttribute("data-task-id", task.getId().toString());
 
-    const title = document.createElement("h3");
-    title.className = "task-title";
-    title.textContent = task.getTitle();
-
-    const meta = document.createElement("div");
-    meta.className = "task-meta";
-
-    // Obter assignees da tarefa via TaskAssignees
-    const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
-    const userSpan = document.createElement("span");
-    userSpan.className = "task-user";
+    // Obter assignee da tarefa (objetos com user_id)
+    const assignees = task.getAssignees?.() || [];
+    let assigneeName = "Sem atribuição";
     
     if (assignees.length > 0) {
-      // Obter nomes dos utilizadores atribuídos
-      const userNames = assignees
-        .map((assignee: TaskAssigneeAPIResponse) => this.usersCache.get(assignee.user_id) || `User#${assignee.user_id}`)
-        .join(", ");
-      userSpan.textContent = userNames;
-    } else {
-      userSpan.textContent = "Não atribuído";
+      const firstAssignee = assignees[0];
+      // Obter nome do usuário usando o mapa
+      const user = this.userMap.get(firstAssignee.user_id);
+      if (user) {
+        assigneeName = user.getName().split(" ")[0];
+      }
     }
-    meta.appendChild(userSpan);
+    
+    card.innerHTML = `
+      <h3 class="task-title">${task.getTitle()}</h3>
+      <div class="task-meta">
+        <span class="task-user">${assigneeName}</span>
+        <span class="task-status">${task.getStatus()}</span>
+      </div>
+    `;
 
-    const status = document.createElement("span");
-    status.className = "task-status";
-    status.textContent = task.getStatus();
-    meta.appendChild(status);
-
-    card.appendChild(title);
-    card.appendChild(meta);
-
-    // Aplicar cor do border baseada no status
-    const borderColor = getCardBorderColor(task.getStatus());
-    setCardBorderColor(card, borderColor);
-
+    setCardBorderColor(card, getCardBorderColor(task.getStatus()));
     return card;
+  }
+
+  /**
+   * Adicionar event listeners aos cards
+   */
+  private attachEventListeners(): void {
+    this.container.addEventListener("click", (event: MouseEvent) => {
+      const card = (event.target as HTMLElement).closest(".task-card");
+      if (!card) return;
+
+      const taskId = card.getAttribute("data-task-id");
+      
+      // Procurar a tarefa em todos os projetos
+      let foundTask: ITask | undefined;
+      for (const tasks of this.tasksByProject.values()) {
+        foundTask = tasks.find(t => t.getId().toString() === taskId);
+        if (foundTask) break;
+      }
+
+      if (foundTask) {
+        // Obter o primeiro assignee
+        const assignees = foundTask.getAssignees?.() || [];
+        if (assignees.length > 0) {
+          const assigneeUser = this.userMap.get(assignees[0].user_id);
+          // Abre o modal de edição da tarefa
+          if (assigneeUser) {
+            renderModalEditTask(foundTask, assigneeUser);
+          }
+        }
+      }
+    });
   }
 }

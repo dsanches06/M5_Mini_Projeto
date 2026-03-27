@@ -1,5 +1,4 @@
 import { IProject } from "../projects/index.js";
-import { IUser } from "../models/index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
 

@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTaskStatusAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskStatuses = async () => {
   const [statuses] = await db.query("SELECT * FROM task_status");
-  return statuses;
+  return statuses.map(mapTaskStatusAPIResponse);
 };
 
 export const createTaskStatus = async (data) => {
@@ -10,7 +11,7 @@ export const createTaskStatus = async (data) => {
     "INSERT INTO task_status (name, description) VALUES (?, ?)",
     [data.name, data.description]
   );
-  return { id: result.insertId, ...data };
+  return mapTaskStatusAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskStatus = async (id, data) => {

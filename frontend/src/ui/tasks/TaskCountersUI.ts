@@ -9,7 +9,6 @@ export async function showTasksCounters(
     (type === "tarefas" || type === "pendentes" || type === "concluídas" || type === "filtradas") &&
     tasks
   ) {
-    console.log(`📊 Atualizando contadores: type="${type}", tasks.length=${tasks.length}`);
     
     await countAllTasks("#allTasksCounter", tasks.length);
 
@@ -17,7 +16,6 @@ export async function showTasksCounters(
       // Para "tarefas" de um utilizador, contar pending vs completed correctamente
       const pendingCount = tasks.filter((t) => !t.getCompleted()).length;
       const completedCount = tasks.filter((t) => t.getCompleted()).length;
-      console.log(`  📋 Tarefas: ${pendingCount} pendentes, ${completedCount} completas`);
       await countPendingTasks("#pendingTasksCounter", pendingCount);
       await countCompletedTasks("#completedTaskCounter", completedCount);
     } else if (type === "pendentes") {

@@ -3,7 +3,6 @@ import { IUser, BaseEntity } from "../models/index.js";
 import { ITask } from "./index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
-import { SystemLogger } from "../logs/SystemLogger.js";
 import { IProject } from "../projects/IProject.js";
 
 /* Implementação da tarefa Feature */
@@ -103,9 +102,6 @@ export class FeatureTask extends BaseEntity implements ITask {
       );
       // Validar transição
       if (canTransition) {
-        SystemLogger.log(
-          `INFO: Transição permitida de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]}.`,
-        );
         this.setStatus(status);
         if (status === TaskStatus.COMPLETED) {
           this.markCompleted();
@@ -113,7 +109,7 @@ export class FeatureTask extends BaseEntity implements ITask {
         }
       }
     } catch (error) {
-      SystemLogger.log(
+      console.error(
         `ERRO: Transição de ${TaskStatus[this.getStatus()]} para ${TaskStatus[status]} não é permitida. ${error}`,
       );
     }

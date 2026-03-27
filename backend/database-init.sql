@@ -333,17 +333,27 @@ CREATE TABLE time_logs (
 use clickup_db;
 
 /* 1. Users */
-INSERT INTO users (name, email, phone, gender, active, created_at) VALUES 
-('Ana Martins','ana@email.com','910000001', 'Female', 1, '2026-01-10 09:00:00'),
-('Bruno Alves','bruno@email.com','910000002', 'Male', 1, '2026-01-11 09:00:00'),
-('Catarina Dias','catarina@email.com','910000003', 'Female', 1, '2026-01-12 09:00:00'),
-('Diogo Rocha','diogo@email.com','910000004', 'Male', 1, '2026-01-13 09:00:00'),
-('Eduarda Gomes','eduarda@email.com','910000005', 'Female', 1, '2026-01-14 09:00:00'),
-('Fabio Lopes','fabio@email.com','910000006', 'Male', 1, '2026-01-15 09:00:00'),
-('Gabriela Vaz', 'gabriela.vaz@email.pt', '910000007', 'Female', 1, DATE_ADD(NOW(), INTERVAL 2 DAY)),
-('Hugo Neves', 'hugo.neves@email.com', '910000008', 'Male', 1, DATE_ADD(NOW(), INTERVAL 5 DAY)),
-('Inês Duarte', 'ines.duarte@email.com', '910000009', 'Female', 1, DATE_ADD(NOW(), INTERVAL 4 DAY)),
-('Jorge Mota', 'jorge.mota@email.pt', '910000010', 'Male', 1, DATE_ADD(NOW(), INTERVAL 7 DAY));
+INSERT INTO users (id, name, email, phone, gender, active, created_at) VALUES 
+(1, 'Ana Martins','ana@email.com','910000001', 'Female', 1, '2026-01-10 09:00:00'),
+(2, 'Bruno Alves','bruno@email.com','910000002', 'Male', 1, '2026-01-11 09:00:00'),
+(3, 'Catarina Dias','catarina@email.com','910000003', 'Female', 1, '2026-01-12 09:00:00'),
+(4, 'Diogo Rocha','diogo@email.com','910000004', 'Male', 1, '2026-01-13 09:00:00'),
+(5, 'Eduarda Gomes','eduarda@email.com','910000005', 'Female', 1, '2026-01-14 09:00:00'),
+(6, 'Fabio Lopes','fabio@email.com','910000006', 'Male', 1, '2026-01-15 09:00:00'),
+(7, 'Gabriela Vaz','gabriela.vaz@email.pt','910000007', 'Female', 1, NOW()),
+(8, 'Hugo Neves','hugo.neves@email.com','910000008', 'Male', 1, NOW()),
+(9, 'Inês Duarte','ines.duarte@email.com','910000009', 'Female', 1, NOW()),
+(10, 'Jorge Mota','jorge.mota@email.pt','910000010', 'Male', 1, NOW()),
+(11, 'Laura Pinto','laura@email.com','910000011', 'Female', 1, NOW()),
+(12, 'Marco Silva','marco@email.com','910000012', 'Male', 1, NOW()),
+(13, 'Nuno Costa','nuno@email.com','910000013', 'Male', 1, NOW()),
+(14, 'Olga Ferreira','olga@email.com','910000014', 'Female', 1, NOW()),
+(15, 'Paulo Ribeiro','paulo@email.com','910000015', 'Male', 1, NOW()),
+(16, 'Rita Carvalho','rita@email.com','910000016', 'Female', 1, NOW()),
+(17, 'Sofia Teixeira','sofia@email.com','910000017', 'Female', 1, NOW()),
+(18, 'Tiago Monteiro','tiago@email.com','910000018', 'Male', 1, NOW()),
+(19, 'Vera Batista','vera@email.com','910000019', 'Female', 1, NOW()),
+(20, 'Zé Santos','ze@email.com','910000020', 'Male', 1, NOW());
 
 /* 2. Project Status & Projects (Todos os 9) */
 INSERT INTO project_status (name, flow_order) VALUES 
@@ -368,7 +378,8 @@ INSERT INTO task_status (name, flow_order) VALUES
 ('Pendente',2), 
 ('Em Progresso',3), 
 ('Revisão',4), 
-('Concluída',5);
+('Concluida',5),
+('Arquivado',6);
 
 INSERT INTO priorities (name, flow_order) VALUES 
 ('Baixa', 1), 
@@ -381,58 +392,81 @@ INSERT INTO categories (name, flow_order) VALUES
 ('Frontend',2), 
 ('Infraestrutura',3);
 
-/* 4. Tasks (As 15 tarefas) */
-INSERT INTO task (title, description, task_status_id, priority_id, category_id, project_id, due_date, completed_at, estimated_hours, created_at) VALUES
-('Módulo de Notas', 'Desenvolvimento do boletim escolar', 2, 4, 1, 1, '2026-03-15', NULL, 15.00, '2026-02-01'),
-('Integração de Mapas', 'API Google Maps para estafetas', 2, 4, 2, 2, '2026-04-10', NULL, 20.00, '2026-02-01'),
-('Checkout Transacional', 'Configuração de pagamento e frete', 1, 4, 1, 3, '2026-05-20', NULL, 12.00, NOW()),
-('Catálogo de Produtos', 'Upload de imagens e descrições', 1, 3, 2, 3, '2026-05-10', NULL, 8.00, NOW()),
-('Filtro de ONGs', 'Sistema de busca por categoria', 1, 2, 1, 4, '2026-06-15', NULL, 10.00, NOW()),
-('Perfil do Voluntário', 'Criação de dashboard de usuário', 1, 3, 2, 4, '2026-06-30', NULL, 14.00, NOW()),
-('Configuração de Hub IoT', 'Setup inicial do hardware', 2, 4, 3, 5, '2026-12-20', NULL, 25.00, NOW()),
-('Gráficos de Consumo', 'Visualização de dados em tempo real', 1, 3, 1, 5, '2027-01-15', NULL, 18.00, NOW()),
-('Mapeamento de Tabelas', 'De/Para de campos antigos', 5, 4, 1, 6, '2023-11-01', '2023-10-28', 10.00, '2023-10-01'),
-('Limpeza de Dados', 'Remover duplicados na migração', 5, 3, 1, 6, '2023-11-15', '2023-11-10', 12.00, '2023-10-10'),
-('Implementação de CSS', 'Estilização conforme mockups', 5, 2, 2, 7, '2024-02-15', '2024-02-14', 20.00, '2024-01-15'),
-('Auditoria de Logs', 'Verificação de acessos indevidos', 5, 4, 3, 8, '2023-06-05', '2023-06-04', 5.00, '2023-05-25'),
-('Update SSL', 'Renovação de certificados', 5, 3, 3, 8, '2023-06-08', '2023-06-07', 2.00, '2023-06-01'),
-('Bloqueio de IPs Externos', 'Configuração de regras deny-all', 5, 4, 3, 9, '2024-02-25', '2024-02-24', 4.00, '2024-02-15'),
-('Testes de Intrusão', 'Validar eficácia das regras', 5, 4, 3, 9, '2024-02-28', '2024-02-28', 8.00, '2024-02-20');
+/* 4. Tasks (Expandido para 30 tarefas) */
+INSERT INTO task (id, title, description, task_status_id, priority_id, category_id, project_id, due_date, completed_at, estimated_hours, created_at) VALUES
+(1, 'Módulo de Notas', 'Boletim escolar', 2, 4, 1, 1, '2026-03-15', NULL, 15.0, '2026-02-01'),
+(11, 'Implementação de CSS', 'Estilização mockups', 5, 2, 2, 7, '2024-02-15', '2024-02-14', 20.0, '2024-01-15'),
+(2, 'Integração de Mapas', 'API Google Maps', 2, 4, 2, 2, '2026-04-10', NULL, 20.0, '2026-02-01'),
+(3, 'Checkout Transacional', 'Pagamento e frete', 1, 4, 1, 3, '2026-05-20', NULL, 12.0, NOW()),
+(4, 'Catálogo de Produtos', 'Upload de imagens', 1, 3, 2, 3, '2026-05-10', NULL, 8.0, NOW()),
+(5, 'Filtro de ONGs', 'Busca por categoria', 1, 2, 1, 4, '2026-06-15', NULL, 10.0, NOW()),
+(9, 'Mapeamento de Tabelas', 'De/Para de campos', 5, 4, 1, 6, '2023-11-01', '2023-10-28', 10.0, '2023-10-01'),
+(10, 'Limpeza de Dados', 'Remover duplicados', 5, 3, 1, 6, '2023-11-15', '2023-11-10', 12.0, '2023-10-10'),
+(6, 'Perfil do Voluntário', 'Dashboard de usuário', 1, 3, 2, 4, '2026-06-30', NULL, 14.0, NOW()),
+(7, 'Configuração de Hub IoT', 'Setup hardware', 2, 4, 3, 5, '2026-12-20', NULL, 25.0, NOW()),
+(8, 'Gráficos de Consumo', 'Dados em tempo real', 1, 3, 1, 5, '2027-01-15', NULL, 18.0, NOW()),
+(12, 'Auditoria de Logs', 'Verificação acessos', 5, 4, 3, 8, '2023-06-05', '2023-06-04', 5.0, '2023-05-25'),
+(13, 'Update SSL', 'Certificados', 5, 3, 3, 8, '2023-06-08', '2023-06-07', 2.0, '2023-06-01'),
+(14, 'Bloqueio de IPs Externos', 'Regras deny-all', 5, 4, 3, 9, '2024-02-25', '2024-02-24', 4.0, '2024-02-15'),
+(15, 'Testes de Intrusão', 'Validar regras', 5, 4, 3, 9, '2024-02-28', '2024-02-28', 8.0, '2024-02-20'),
+(16, 'Menu Responsivo', 'Adaptação para tablets', 1, 2, 2, 1, '2026-03-20', NULL, 6.0, NOW()),
+(17, 'Otimização de SVGs', 'Reduzir peso das imagens', 2, 1, 2, 7, '2026-04-01', NULL, 4.0, NOW()),
+(18, 'Fix: Erro de Login', 'Corrigir timeout no mobile', 1, 4, 2, 1, '2026-03-10', NULL, 3.0, NOW()),
+(19, 'Nova Rota de API', 'Endpoint para histórico', 1, 3, 1, 2, '2026-04-15', NULL, 8.0, NOW()),
+(20, 'Indexação de Banco', 'Melhorar busca de produtos', 2, 4, 1, 3, '2026-05-05', NULL, 10.0, NOW()),
+(21, 'Migração v2', 'Upgrade da lib de Stripe', 1, 3, 1, 3, '2026-05-25', NULL, 12.0, NOW()),
+(22, 'Documentação PDF', 'Gerar manual do usuário', 1, 2, 1, 4, '2026-07-10', NULL, 20.0, NOW()),
+(23, 'Análise de Custos', 'Levantamento para Proj 6', 1, 4, 1, 6, '2026-08-01', NULL, 15.0, NOW()),
+(24, 'Ata de Sprint', 'Revisão da sprint 4', 5, 1, 1, 4, '2026-02-20', '2026-02-20', 2.0, '2026-02-19'),
+(25, 'Redesign Logo', 'Nova versão vetorial', 1, 2, 2, 4, '2026-07-15', NULL, 10.0, NOW()),
+(26, 'Dark Mode Specs', 'Definição de cores dark', 2, 3, 2, 4, '2026-07-20', NULL, 8.0, NOW()),
+(27, 'Stress Test', 'Teste de carga no Hub', 1, 4, 3, 5, '2026-12-30', NULL, 16.0, NOW()),
+(28, 'Patch de Kernel', 'Atualização segurança OS', 5, 4, 3, 8, '2023-07-01', '2023-06-30', 4.0, '2023-06-25'),
+(29, 'Firewall Policy', 'Review de portas abertas', 1, 3, 3, 9, '2026-04-10', NULL, 6.0, NOW()),
+(30, 'Simulação de Invasão', 'Phishing interno teste', 2, 4, 3, 9, '2026-05-01', NULL, 20.0, NOW());
 
-/* 5. Assignees, Comments & Labels (Tudo o que enviou) */
+/* 5. Assignees (Ajustados para as Equipas) */
+/* 5. Task Assignees (Sincronização Final com Time Logs e Users 1-20) */
 INSERT INTO task_assignees (task_id, user_id, assigned_at) VALUES
-(1, 1, '2026-02-02'), 
-(2, 2, '2026-02-03'), 
-(3, 3, '2026-02-04'), 
-(4, 4, '2026-02-05'), 
-(5, 5, '2026-02-06'), 
-(6, 6, '2026-02-07'), 
-(7, 7, '2026-02-08'), 
-(8, 8, '2026-02-09'), 
-(9, 9, '2026-02-10'), 
-(10, 10, '2026-02-11'),
-(11, 1, '2026-02-12'), 
-(12, 2, '2026-02-13'), 
-(13, 3, '2026-02-14'), 
-(14, 4, '2026-02-15'), 
-(15, 5, '2026-02-16');
+-- Bloco 1: Frontend (Equipa 1: Ana, Bruno, Catarina, Laura, Marco)
+(1, 1, '2026-02-01'),   -- Ana Martins
+(10, 1, '2023-10-01'),  -- Ana Martins (Limpeza DB)
+(11, 2, '2024-01-15'),  -- Bruno Alves
+(16, 11, '2026-03-01'), -- Laura Pinto
+(17, 12, '2026-03-15'), -- Marco Silva
+(18, 3, '2026-02-25'),  -- Catarina Dias
 
-INSERT INTO comment (content, task_id, user_id, created_at, resolved) VALUES 
-('Análise inicial da tarefa 1', 1, 1, '2026-02-02 10:00:00', 0), 
-('Documentação da tarefa 2 pronta', 2, 2, '2026-02-03 11:30:00', 0), 
-('Iniciando desenvolvimento da tarefa 3', 3, 3, '2026-02-04 09:15:00', 0), 
-('Aguardando feedback na tarefa 4', 4, 4, '2026-02-05 14:00:00', 0), 
-('Tarefa 5 em fase de testes', 5, 5, '2026-02-06 16:45:00', 0), 
-('Problema técnico na tarefa 6 reportado', 6, 6, '2026-02-07 10:20:00', 0), 
-('Tarefa 7 validada pelo QA', 7, 7, '2026-02-08 11:00:00', 0), 
-('Revisão de código da tarefa 8 concluída', 8, 8, '2026-02-09 17:30:00', 0), 
-('Tarefa 9 enviada para homologação', 9, 9, '2026-02-10 13:00:00', 0), 
-('Tarefa 10 finalizada e resolvida', 10, 10, '2026-02-11 18:00:00', 1), 
-('Ajustes finos na tarefa 11', 11, 1, '2026-02-12 10:00:00', 0), 
-('Tarefa 12 aguardando deploy', 12, 2, '2026-02-13 09:00:00', 0), 
-('Início do mapeamento na tarefa 13', 13, 3, '2026-02-14 15:20:00', 0), 
-('Tarefa 14 com dependências externas', 14, 4, '2026-02-15 11:45:00', 0), 
-('Tarefa 15 pronta para revisão final', 15, 5, '2026-02-16 14:10:00', 0);
+-- Bloco 2: Backend (Equipa 2: Diogo, Eduarda, Fabio, Nuno, Olga)
+(2, 4, '2026-02-01'),   -- Diogo Rocha
+(3, 13, '2026-02-02'),  -- Nuno Costa
+(4, 14, '2026-02-05'),  -- Olga Ferreira
+(19, 5, '2026-04-01'),  -- Eduarda Gomes
+(20, 6, '2026-04-15'),  -- Fabio Lopes
+(21, 13, '2026-05-01'), -- Nuno Costa
+
+-- Bloco 3: QA & Segurança (Equipa 3: Gabriela, Hugo, Paulo, Rita)
+(7, 15, '2026-11-20'),  -- Paulo Ribeiro (Hub IoT)
+(8, 16, '2026-12-01'),  -- Rita Carvalho (Gráficos)
+(12, 7, '2023-05-25'),  -- Gabriela Vaz
+(13, 8, '2023-06-01'),  -- Hugo Neves
+(14, 15, '2024-02-15'), -- Paulo Ribeiro
+(15, 16, '2024-02-20'), -- Rita Carvalho
+(27, 7, '2026-12-15'),  -- Gabriela Vaz (Stress Test)
+(28, 8, '2023-06-20'),  -- Hugo Neves
+(29, 15, '2026-03-20'), -- Paulo Ribeiro
+(30, 16, '2026-04-10'), -- Rita Carvalho
+
+-- Bloco 4: Design (Equipa 4: Inês, Sofia, Tiago)
+(6, 9, '2026-06-01'),   -- Inês Duarte
+(25, 17, '2026-07-01'), -- Sofia Teixeira
+(26, 18, '2026-07-05'), -- Tiago Monteiro
+
+-- Bloco 5: Gestão (Equipa 5: Jorge, Vera, Zé)
+(5, 19, '2026-06-01'),  -- Vera Batista
+(9, 10, '2023-10-01'),  -- Jorge Mota
+(22, 10, '2026-06-15'), -- Jorge Mota
+(23, 19, '2026-07-20'), -- Vera Batista
+(24, 20, '2026-02-18'); -- Zé Santos
 
 INSERT INTO tags (id, name, color) VALUES
 (1, 'Urgente', 'Vermelho'),
@@ -459,7 +493,12 @@ INSERT INTO tags_task (task_id, tag_id) VALUES
 (12, 4),        -- Tarefa 12: Bug
 (13, 3),        -- Tarefa 13: Backend
 (14, 1),        -- Tarefa 14: Urgente
-(15, 5);        -- Tarefa 15: Melhoria
+(15, 5),        -- Tarefa 15: Melhoria
+(16, 2), (17, 2), (18, 4), -- Frontend e Bug
+(19, 3), (20, 3), (21, 3), -- Backend
+(22, 5), (23, 1),          -- Melhoria e Urgente
+(25, 2), (26, 2),          -- Design/Frontend
+(27, 4), (28, 1), (30, 1); -- Bugs e Urgente
 
 /* 6. Task Attachments (Os 22 anexos) */
 INSERT INTO task_attachments (task_id, file_name, file_type, size_kb) VALUES 
@@ -486,51 +525,83 @@ INSERT INTO task_attachments (task_id, file_name, file_type, size_kb) VALUES
 (11, 'codigo_antigo.bak', 'bak', 50), 
 (11, 'teste_unitario.py', 'py', 8);
 
-/* 7. Notifications & Teams */
+/* 5. Comments (Ajustados para os membros das equipas certas) */
+INSERT INTO comment (content, task_id, user_id, created_at, resolved) VALUES 
+-- Tarefas 1-10 (Desenvolvimento e Gestão inicial)
+('Análise inicial do módulo concluída.', 1, 1, '2026-02-02 10:00:00', 0), 
+('API de mapas configurada com sucesso.', 2, 4, '2026-02-03 11:30:00', 0), 
+('Iniciando integração com a gateway de pagamento.', 3, 13, '2026-02-04 09:15:00', 0), 
+('Aguardando imagens finais do cliente.', 4, 14, '2026-02-05 14:00:00', 0), 
+('Filtros testados em ambiente de staging.', 5, 19, '2026-02-06 16:45:00', 0), 
+('Mockups do dashboard aprovados.', 6, 9, '2026-02-07 10:20:00', 0), 
+('Hardware IoT calibrado e pronto.', 7, 15, '2026-02-08 11:00:00', 0), 
+('Gráficos a renderizar em < 100ms.', 8, 16, '2026-02-09 17:30:00', 0), 
+('Mapeamento enviado para validação do DBA.', 9, 10, '2023-10-10 13:00:00', 0), 
+('Duplicados removidos. Base limpa.', 10, 1, '2023-11-12 18:00:00', 1), 
+-- Tarefas 11-20 (Frontend, QA e Bugs)
+('CSS atualizado conforme novas fontes.', 11, 2, '2024-02-12 10:00:00', 0), 
+('Logs de acesso sem anomalias detetadas.', 12, 7, '2023-06-01 09:00:00', 0), 
+('Certificado SSL renovado por 1 ano.', 13, 8, '2023-06-05 15:20:00', 1), 
+('Regras de IP aplicadas no router principal.', 14, 15, '2024-02-20 11:45:00', 0), 
+('Relatório de vulnerabilidades gerado.', 15, 16, '2024-02-27 14:10:00', 1), 
+('Menu corrigido para iPhone SE.', 16, 11, NOW(), 0), 
+('SVGs minificados (ganho de 40% no bundle).', 17, 12, NOW(), 0), 
+('Crash no login era devido ao token expirado.', 18, 3, NOW(), 1), 
+('Rota /history a devolver JSON correto.', 19, 5, NOW(), 0), 
+('Índice criado na coluna user_email.', 20, 6, NOW(), 0), 
+-- Tarefas 21-30 (Novos Membros e Segurança)
+('Webhook do Stripe v2 validado.', 21, 13, NOW(), 0), 
+('Capítulo 1 do manual finalizado.', 22, 10, NOW(), 0), 
+('Budget excedeu em 5% a previsão inicial.', 23, 19, NOW(), 0), 
+('Reunião de sprint gravada e ata anexada.', 24, 20, NOW(), 1), 
+('Versão dark da logo finalizada.', 25, 17, NOW(), 0), 
+('Contraste de cores validado pela acessibilidade.', 26, 18, NOW(), 0), 
+('Servidor aguentou 5000 requests/segundo.', 27, 7, NOW(), 0), 
+('Kernel atualizado para a versão 6.1 LTS.', 28, 8, '2023-06-29 11:00:00', 1), 
+('Porta 8080 fechada por segurança.', 29, 15, NOW(), 0), 
+('Simulação de phishing iniciada com a equipa.', 30, 16, NOW(), 0);
+
+/* 7. Notifications */
 INSERT INTO notification (user_id, title, message, is_read) VALUES 
-(1, 'Nova Tarefa', 'Atribuída a tarefa 1: Sistema Gestão Escolar.', 0),
-(2, 'Nova Tarefa', 'Atribuída a tarefa 2: App Delivery.', 0),
-(3, 'Nova Tarefa', 'Atribuída a tarefa 3: Checkout Transacional.', 0),
-(4, 'Nova Tarefa', 'Atribuída a tarefa 4: Filtro de ONGs.', 0),
-(5, 'Nova Tarefa', 'Atribuída a tarefa 5: Configuração Hub IoT.', 0),
-(6, 'Nova Tarefa', 'Atribuída a tarefa 6: Mapeamento de Tabelas.', 1),
-(7, 'Nova Tarefa', 'Atribuída a tarefa 7: Implementação CSS.', 1),
-(8, 'Nova Tarefa', 'Atribuída a tarefa 8: Auditoria de Logs.', 0),
-(9, 'Nova Tarefa', 'Atribuída a tarefa 9: Bloqueio de IPs.', 0),
-(10, 'Nova Tarefa', 'Atribuída a tarefa 10: Testes de Intrusão.', 0),
-(1, 'Nova Tarefa', 'Atribuída a tarefa 11: Ajustes Finos.', 1),
-(2, 'Nova Tarefa', 'Atribuída a tarefa 12: Aguardando Deploy.', 0),
-(3, 'Nova Tarefa', 'Atribuída a tarefa 13: Início do Mapeamento.', 0),
-(4, 'Nova Tarefa', 'Atribuída a tarefa 14: Dependências Externas.', 1),
-(5, 'Nova Tarefa', 'Atribuída a tarefa 15: Revisão Final.', 0);
+(1,'Tarefa','Tarefa 1: Notas',0), (4,'Tarefa','Tarefa 2: Mapas',0), 
+(13,'Tarefa','Tarefa 3: Checkout',0), (14,'Tarefa','Tarefa 4: Catálogo',0),
+(19,'Tarefa','Tarefa 5: ONGs',0), (9,'Tarefa','Tarefa 6: Perfil',1), 
+(15,'Tarefa','Tarefa 7: IoT',1), (16,'Tarefa','Tarefa 8: Gráficos',0),
+ (10,'Tarefa','Tarefa 9: Tabelas',0), (1,'Tarefa','Tarefa 10: Limpeza',0),
+(2,'Tarefa','Tarefa 11: CSS',1), (7,'Tarefa','Tarefa 12: Logs',0), 
+(8,'Tarefa','Tarefa 13: SSL',0), (15,'Tarefa','Tarefa 14: IPs',1), 
+(16,'Tarefa','Tarefa 15: Pentest',0), (11,'Tarefa','Tarefa 16: Menu',0),
+(12,'Tarefa','Tarefa 17: SVGs',0),
+(3,'Tarefa','Tarefa 18: Login',1), 
+(5,'Tarefa','Tarefa 19: API',0),
+(6,'Tarefa','Tarefa 20: Index',0),
+(13,'Tarefa','Tarefa 21: Stripe',0), 
+(10,'Tarefa','Tarefa 22: Manual',0), 
+(19,'Tarefa','Tarefa 23: Custos',0),
+(20,'Tarefa','Tarefa 24: Sprint',1),
+(17,'Tarefa','Tarefa 25: Logo',0),
+(18,'Tarefa','Tarefa 26: DarkMode',0), 
+(7,'Tarefa','Tarefa 27: Stress',0),
+(8,'Tarefa','Tarefa 28: Kernel',1),
+ (15,'Tarefa','Tarefa 29: Firewall',0), 
+ (16,'Tarefa','Tarefa 30: Invasão',0);
 
-INSERT INTO teams (name, description) VALUES 
-('Frontend Devs', 'Interface UI/UX.'), 
-('Backend Ops', 'APIs e DB.'), 
-('QA & Testes', 'Qualidade.'), 
-('Design Criativo', 'Visual.'), 
-('Gestão de Produto', 'Requisitos.');
+/* Equipa */
+INSERT INTO teams (id, name, description, created_at) VALUES 
+(1, 'Frontend Devs', 'UI/UX', NOW()), 
+(2, 'Backend Ops', 'API/DB', NOW()), 
+(3, 'QA & Testes', 'Qualidade', NOW()), 
+(4, 'Design Criativo', 'Visual', NOW()), 
+(5, 'Gestão', 'Requisitos', NOW());
 
-/* 1. Membros das Equipas (Completar as 5 equipas que inserimos no passo anterior) */
+/* Membros de equipa */
 INSERT INTO team_members (team_id, user_id, role) VALUES 
--- Equipa 1: Frontend Devs (User 1 como Admin + 2 Membros)
-(1, 1, 'admin'),
-(1, 2, 'member'),
-(1, 3, 'member'),
--- Equipa 2: Backend Ops (User 4 como Admin + 2 Membros)
-(2, 4, 'admin'),
-(2, 5, 'member'), 
-(2, 6, 'member'), 
--- Equipa 3: QA & Testes (User 7 como Admin + 1 Membro)
-(3, 7, 'admin'), 
-(3, 8, 'member'),               
--- Equipa 4: Design Criativo (User 9 como Admin)
-(4, 9, 'admin'),                                  
--- Equipa 5: Gestão de Produto (User 10 como Admin)
-(5, 10, 'admin'),
--- Adicionando um segundo membro à equipa de Gestão para balancear
-(5, 1, 'member'); 
-                                
+(1,1,'admin'), (1,2,'member'), (1,3,'member'), (1,11,'member'), (1,12,'member'),
+(2,4,'admin'), (2,5,'member'), (2,6,'member'), (2,13,'member'), (2,14,'member'),
+(3,7,'admin'), (3,8,'member'), (3,15,'member'), (3,16,'member'),
+(4,9,'admin'), (4,17,'member'), (4,18,'member'),
+(5,10,'admin'), (5,19,'member'), (5,20,'member');
+
 /* 2. Permissões de Projeto */
 INSERT INTO project_permissions (project_id, user_id, can_edit, can_delete) VALUES 
 (1, 1, 1, 1), 
@@ -581,18 +652,36 @@ INSERT INTO task_status_history (task_id, previous_status_id, new_status_id, cha
 
 /* 8. Registo de Tempo (Time Logs) */
 INSERT INTO time_logs (task_id, user_id, hours, description, logged_at) VALUES 
+-- Tarefas 1-10
 (1, 1, 4.50, 'Desenvolvimento inicial do módulo de notas.', '2026-02-05 10:00:00'),
-(2, 2, 6.00, 'Configuração da API de mapas e testes de rota.', '2026-02-06 14:30:00'),
-(3, 3, 3.00, 'Configuração inicial do Stripe para checkout.', '2026-02-07 09:00:00'),
-(4, 4, 5.50, 'Criação dos filtros de pesquisa por categoria.', '2026-02-08 11:15:00'),
-(5, 5, 8.00, 'Montagem e calibração do hardware IoT.', '2026-02-09 16:00:00'),
-(6, 6, 4.00, 'Mapeamento de campos da base legado para nova.', '2023-10-05 10:00:00'),
-(7, 7, 7.25, 'Ajustes de CSS para mobile e responsividade.', '2024-01-20 13:00:00'),
-(8, 8, 2.00, 'Análise de logs de acesso do servidor legado.', '2023-05-25 15:45:00'),
-(9, 9, 3.50, 'Configuração de regras de bloqueio no firewall.', '2024-02-18 09:30:00'),
-(10, 10, 4.00, 'Execução de pentest e relatório de vulnerabilidades.', '2026-02-15 17:00:00'),
-(11, 1, 2.50, 'Refatoração de código após code review.', '2026-02-14 11:00:00'),
-(12, 2, 1.50, 'Preparação de scripts de deploy em produção.', '2026-02-16 10:30:00'),
-(13, 3, 5.00, 'Finalização do De/Para das tabelas críticas.', '2026-02-17 14:00:00'),
-(14, 4, 6.00, 'Resolução de conflitos de dependências NPM.', '2026-02-18 16:20:00'),
-(15, 5, 4.00, 'Revisão final de interface e testes unitários.', '2026-02-19 09:00:00');
+(2, 4, 6.00, 'Configuração da API de mapas e testes de rota.', '2026-02-06 14:30:00'),
+(3, 13, 3.00, 'Configuração inicial do Stripe para checkout.', '2026-02-07 09:00:00'), -- Nuno Costa (13)
+(4, 14, 5.50, 'Criação do catálogo e upload de imagens.', '2026-02-08 11:15:00'), -- Olga Ferreira (14)
+(5, 19, 8.00, 'Análise de requisitos para filtros de ONGs.', '2026-02-09 16:00:00'), -- Vera Batista (19)
+(6, 9, 4.00, 'Design das interfaces do dashboard do utilizador.', '2026-06-10 10:00:00'),
+(7, 15, 7.25, 'Montagem e calibração do hardware IoT.', '2026-12-05 13:00:00'), -- Paulo Ribeiro (15)
+(8, 16, 2.00, 'Desenvolvimento dos gráficos de consumo real.', '2026-12-15 15:45:00'), -- Rita Carvalho (16)
+(9, 10, 3.50, 'Mapeamento de campos da base legado para nova.', '2023-10-05 09:30:00'),
+(10, 1, 4.00, 'Execução de scripts para limpeza de duplicados.', '2023-11-05 17:00:00'),
+-- Tarefas 11-20
+(11, 2, 2.50, 'Implementação de CSS e responsividade.', '2024-02-01 11:00:00'),
+(12, 7, 1.50, 'Análise de logs de segurança do servidor.', '2023-05-30 10:30:00'),
+(13, 8, 5.00, 'Renovação e teste de certificados SSL.', '2023-06-05 14:00:00'),
+(14, 15, 6.00, 'Configuração de regras deny-all no firewall.', '2024-02-20 16:20:00'), -- Paulo Ribeiro (15)
+(15, 16, 4.00, 'Execução de pentest e relatório final.', '2024-02-28 09:00:00'), -- Rita Carvalho (16)
+(16, 11, 3.00, 'Ajustes de media queries no menu.', '2026-03-05 09:00:00'), -- Laura Pinto (11)
+(17, 12, 2.00, 'Compressão e limpeza de ficheiros SVG.', '2026-03-20 11:00:00'), -- Marco Silva (12)
+(18, 3, 1.50, 'Debugging de crash no login Android.', '2026-03-01 15:30:00'),
+(19, 5, 4.00, 'Implementação do endpoint GET /history.', '2026-04-05 10:00:00'),
+(20, 6, 6.50, 'Criação de índices na tabela de produtos.', '2026-04-20 14:00:00'),
+-- Tarefas 21-30
+(21, 13, 8.00, 'Refatoração da integração com Stripe v2.', '2026-05-15 09:00:00'), -- Nuno Costa (13)
+(22, 10, 5.00, 'Redação do manual de ajuda ao utilizador.', '2026-06-20 10:00:00'),
+(23, 19, 2.50, 'Cálculo de orçamento para infraestrutura.', '2026-07-25 16:00:00'), -- Vera Batista (19)
+(24, 20, 1.00, 'Escrita de ata e envio por email.', '2026-02-20 10:00:00'), -- Zé Santos (20)
+(25, 17, 6.00, 'Esboços e vetorização da nova marca.', '2026-07-05 14:30:00'), -- Sofia Teixeira (17)
+(26, 18, 3.00, 'Definição da paleta de cores para modo escuro.', '2026-07-10 09:00:00'), -- Tiago Monteiro (18)
+(27, 7, 10.00, 'Execução de testes de carga contínuos.', '2026-12-25 18:00:00'),
+(28, 8, 3.00, 'Aplicação de patches de segurança ao Linux.', '2023-06-28 11:00:00'),
+(29, 15, 2.50, 'Revisão das políticas de tráfego de entrada.', '2026-03-25 15:00:00'), -- Paulo Ribeiro (15)
+(30, 16, 12.00, 'Preparação de ambiente de phishing controlado.', '2026-04-15 10:00:00'); -- Rita Carvalho (16)

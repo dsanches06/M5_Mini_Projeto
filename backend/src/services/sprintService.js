@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import { mapSprintAPIResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todas as sprints */
 export const getAllSprints = async (search, sort) => {
@@ -23,7 +24,7 @@ export const getAllSprints = async (search, sort) => {
     });
   }
 
-  return sprints;
+  return sprints.map(mapSprintAPIResponse);
 };
 
 /* Função para criar sprint */
@@ -32,7 +33,7 @@ export const createSprint = async (data) => {
     "INSERT INTO sprints (name, start_date, end_date) VALUES (?, ?, ?)",
     [data.name, data.start_date, data.end_date],
   );
-  return { id: result.insertId, ...data };
+  return mapSprintAPIResponse({ id: result.insertId, ...data });
 };
 
 /* Função para atualizar sprint */

@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTaskAssigneeAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskAssignees = async () => {
   const [assignees] = await db.query("SELECT * FROM task_assignees");
-  return assignees;
+  return assignees.map(mapTaskAssigneeAPIResponse);
 };
 
 export const createTaskAssignee = async (data) => {
@@ -10,7 +11,7 @@ export const createTaskAssignee = async (data) => {
     "INSERT INTO task_assignees (task_id, user_id) VALUES (?, ?)",
     [data.task_id, data.user_id]
   );
-  return { id: result.insertId, ...data };
+  return mapTaskAssigneeAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskAssignee = async (id, data) => {

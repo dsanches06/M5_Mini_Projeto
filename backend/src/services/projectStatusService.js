@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapProjectStatusAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllProjectStatuses = async () => {
   const [statuses] = await db.query("SELECT * FROM project_status");
-  return statuses;
+  return statuses.map(mapProjectStatusAPIResponse);
 };
 
 export const createProjectStatus = async (data) => {
@@ -10,7 +11,7 @@ export const createProjectStatus = async (data) => {
     "INSERT INTO project_status (name, description) VALUES (?, ?)",
     [data.name, data.description]
   );
-  return { id: result.insertId, ...data };
+  return mapProjectStatusAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateProjectStatus = async (id, data) => {

@@ -10,7 +10,7 @@ router.get("/stats", taskController.getStats);
 router.get("/project/:projectId", taskController.getTasksByProject);
 router.post("/", validateTaskData, taskController.createTask);
 router.put("/:id", validateTaskData, taskController.updateTask);
-router.patch("/:id", taskController.taskMarkedAsCompleted);
+router.patch("/:id", taskController.updateStatus);
 router.delete("/:id", taskController.deleteTask);
 
 // Tags routes (must come before /:id routes)

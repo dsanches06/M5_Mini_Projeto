@@ -26,20 +26,17 @@ export async function createNotificationsUI(user: IUser): Promise<HTMLButtonElem
   // Tentar obter notificações não lidas do utilizador
   try {
     const userId = user.getId();
-    console.log("Obtendo notificações para userId:", userId);
     
     if (!userId) {
       throw new Error("UserId inválido");
     }
     
     const unreadNotifications = await UserService.getUnreadNotifications(userId);
-    console.log("Notificações recebidas:", unreadNotifications);
     
     if (unreadNotifications) {
       // Contar apenas notificações não lidas
       const notifyCount = unreadNotifications.filter(n => !n.isNotificationRead()).length;
       spanBadge.textContent = notifyCount.toString();
-      console.log("Badge atualizado com:", notifyCount);
     }
   } catch (error) {
     console.error("Erro ao obter notificações da API:", error);

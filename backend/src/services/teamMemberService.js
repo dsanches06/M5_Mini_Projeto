@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTeamMemberAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTeamMembers = async () => {
   const [members] = await db.query("SELECT * FROM team_members");
-  return members;
+  return members.map(mapTeamMemberAPIResponse);
 };
 
 export const createTeamMember = async (data) => {
@@ -10,7 +11,7 @@ export const createTeamMember = async (data) => {
     "INSERT INTO team_members (team_id, user_id) VALUES (?, ?)",
     [data.team_id, data.user_id]
   );
-  return { id: result.insertId, ...data };
+  return mapTeamMemberAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTeamMember = async (id, data) => {

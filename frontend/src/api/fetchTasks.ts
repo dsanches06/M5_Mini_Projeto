@@ -37,13 +37,13 @@ export async function getTasksByProject(
     }
     const res = await fetch(url);
     if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter tarefas do projeto " + res.status);
+      throw new Error(`HTTP ${res.status}: Não foi possível obter tarefas do projeto`);
     }
     const data = await res.json();
     return data;
   } catch (error) {
-    console.error("Erro ao obter tarefas do projeto:", error);
-    return [];
+    console.error("❌ Erro ao obter tarefas do projeto:", error);
+    throw error;
   }
 }
 
@@ -186,11 +186,12 @@ export async function updateTaskComment(
   }
 }
 
-/* Função para marcar uma tarefa como concluída */
-export async function markTaskAsCompleted(
+/* Função para atualizar o status de uma tarefa */
+export async function changeTaskStatus(
   taskId: number,
+  statusId: number,
 ): Promise<ITask | null> {
-  return patch<ITask>(ENDPOINT, taskId, {});
+  return patch<ITask>(ENDPOINT, taskId, { statusId });
 }
 
 /* Função para resolver um comentário */

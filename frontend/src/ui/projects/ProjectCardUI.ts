@@ -1,9 +1,17 @@
 import { IProject, Project } from "../../projects/index.js";
 import { addElementInContainer, clearContainer } from "../dom/index.js";
 import { renderProjectDashboard } from "./index.js";
+import {
+  ProjectPermissionService,
+  UserService,
+  TaskService,
+  TimeLogService,
+} from "../../services/index.js";
+import { IUser } from "../../models/index.js";
+import { ITask } from "../../tasks/index.js";
 
 /* Renderiza os projetos em cards na Grid principal */
-export function renderProjectsCards(projects: IProject[]): void {
+export async function renderProjectsCards(projects: IProject[]): Promise<void> {
   let gridContainer = document.querySelector(
     "#projectsGridContainer",
   ) as HTMLElement;
@@ -17,8 +25,8 @@ export function renderProjectsCards(projects: IProject[]): void {
 
   gridContainer.innerHTML = "";
 
-  projects.forEach((p) => {
-    const card = createProjectCard(p as Project);
+  for (const p of projects) {
+    const card = await createProjectCard(p as Project);
     card.style.cursor = "pointer";
 
     card.addEventListener("click", async (event) => {
@@ -30,11 +38,11 @@ export function renderProjectsCards(projects: IProject[]): void {
     });
 
     gridContainer.appendChild(card);
-  });
+  }
 }
 
 /* Cria a estrutura individual de cada card de projeto */
-function createProjectCard(project: Project): HTMLElement {
+async function createProjectCard(project: Project): Promise<HTMLElement> {
   const card = document.createElement("div");
   card.className = "project-card";
 
@@ -70,30 +78,74 @@ function createProjectCard(project: Project): HTMLElement {
   datesContainer.appendChild(startDate);
   datesContainer.appendChild(endDate);
 
-  // FOOTER COM AVATARES (O que pediste)
   const footer = document.createElement("div");
   footer.className = "project-card-footer";
 
   const avatarStack = document.createElement("div");
   avatarStack.className = "avatar-stack";
 
-  // Simulação de membros (Idealmente: project.getMembers())
-  const members = [1, 2, 3, 4];
-  const displayLimit = 3; // Quantos mostrar antes do "+"
+  let tasks: ITask[] = [];
 
-  members.slice(0, displayLimit).forEach((_, index) => {
-    const img = document.createElement("img");
-    img.className = "avatar-img";
-    // Corrigido: URL do pravatar com template literals
-    img.src = `https://i.pravatar.cc{project.getId()}-${index}`;
-    avatarStack.appendChild(img);
-  });
+  try {
+    // Carregar tasks do projeto
+    tasks = await TaskService.getTasksByProject(project.getId());
 
-  if (members.length > displayLimit) {
-    const more = document.createElement("span");
-    more.className = "avatar-more";
-    more.textContent = `${members.length - displayLimit}+`;
-    avatarStack.appendChild(more);
+    // Extrair todos os user_ids únicos dos assignees
+    const userIdsSet = new Set<number>();
+    tasks.forEach((task: ITask) => {
+      const assignees = task.getAssignees?.() || [];
+      assignees.forEach((assignee: any) => {
+        if (assignee.user_id) {
+          userIdsSet.add(assignee.user_id);
+        }
+      });
+    });
+
+    // Carregar todos os users para pegar gender
+    const allUsers = await UserService.getUsers();
+    const userMap = new Map<number, IUser>();
+    allUsers.forEach((user: IUser) => {
+      userMap.set(user.getId(), user);
+    });
+
+    // Construir array de membros com gender
+    const members: Array<{ userId: number; gender: string; user: IUser }> = [];
+    userIdsSet.forEach((userId) => {
+      const user = userMap.get(userId);
+      if (user) {
+        members.push({
+          userId,
+          gender: (user as any).getGender?.() || "Male",
+          user,
+        });
+      }
+    });
+
+    // Renderizar avatares (máximo 4)
+    const displayLimit = 4;
+    members.slice(0, displayLimit).forEach((member, index) => {
+      const img = document.createElement("img");
+      img.className = "avatar-img";
+
+      // Selecionar pasta baseado no gender
+      const folder = member.gender === "Female" ? "woman" : "man";
+      const randomValue = (index % 4) + 1; // 1-4
+      img.src = `./src/assets/${folder}-${randomValue}.png`;
+      img.alt = member.user.getName();
+      img.title = member.user.getName();
+
+      avatarStack.appendChild(img);
+    });
+
+    // Mostrar "+X" se houver mais membros
+    if (members.length > displayLimit) {
+      const more = document.createElement("span");
+      more.className = "avatar-more";
+      more.textContent = `+${members.length - displayLimit}`;
+      avatarStack.appendChild(more);
+    }
+  } catch (error) {
+    console.error("Erro ao carregar membros do projeto:", error);
   }
 
   footer.appendChild(avatarStack);
@@ -105,9 +157,8 @@ function createProjectCard(project: Project): HTMLElement {
   const progressBar = document.createElement("div");
   progressBar.className = "project-progress-bar";
 
-  // Aqui podes usar um valor real da API (ex: project.getProgress())
-  // ou um valor fixo para teste como 40%
-  const progressValue = 40;
+  // Calcular progresso baseado nas horas de time logs
+  const progressValue = await calculateProgressFromTimeLogs(project, tasks);
 
   const progressFill = document.createElement("div");
   progressFill.className = "project-progress-fill";
@@ -125,4 +176,53 @@ function createProjectCard(project: Project): HTMLElement {
   card.appendChild(footer);
 
   return card;
+}
+
+/* Calcula o progresso do projeto baseado nas horas de time logs */
+async function calculateProgressFromTimeLogs(
+  project: Project,
+  tasks: any[],
+): Promise<number> {
+  try {
+    // Obter todos os time logs
+    const allTimeLogs = await TimeLogService.getTimeLogs();
+
+    // Filtrar time logs para as tasks do projeto
+    const taskIds = tasks.map((t: any) => t.getId?.() || t.id);
+    const projectTimeLogs = allTimeLogs.filter((log: any) =>
+      taskIds.includes(log.task_id),
+    );
+
+    // Calcular total de horas registadas
+    const totalHours = projectTimeLogs.reduce((sum: number, log: any) => {
+      return sum + (log.hours || 0);
+    }, 0);
+
+    // Calcular total de horas estimadas das tasks
+    const totalEstimatedHours = tasks.reduce((sum: number, task: any) => {
+      const estimated = task.getEstimatedHours?.() || task.estimated_hours || 0;
+      return sum + estimated;
+    }, 0);
+
+    // Calcular progress percentage
+    if (totalEstimatedHours > 0) {
+      const progress = Math.min((totalHours / totalEstimatedHours) * 100, 100);
+      return Math.round(progress);
+    }
+
+    // Se não há horas estimadas, usar um limite padrão de 8 horas por task
+    const defaultEstimatedHours = tasks.length * 8;
+    if (defaultEstimatedHours > 0) {
+      const progress = Math.min(
+        (totalHours / defaultEstimatedHours) * 100,
+        100,
+      );
+      return Math.round(progress);
+    }
+
+    return 0;
+  } catch (error) {
+    console.error("Erro ao calcular progresso do projeto:", error);
+    return 0;
+  }
 }

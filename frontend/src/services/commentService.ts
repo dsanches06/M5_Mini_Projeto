@@ -1,6 +1,4 @@
 import * as fetchTasks from "../api/fetchTasks.js";
-import Comment from "../comments/Comment.js";
-import { TaskService } from "./index.js";
 
 /* Serviço para gerir comentários associados a tarefas */
 export class CommentService {

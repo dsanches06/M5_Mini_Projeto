@@ -58,7 +58,6 @@ async function renderNotifications(user: IUser): Promise<void> {
   // Buscar notificações da API
   try {
     const notifications = await UserService.getNotificationsByUser(user.getId());
-    console.log("Notificações carregadas:", notifications);
 
     // Atualizar título com contagem
     const h2 = box.querySelector("h2");

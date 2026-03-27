@@ -1,9 +1,10 @@
 import { db } from "../db.js";
+import { mapTagAPIResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todas as etiquetas */
 export const getAllTags = async () => {
   const [tags] = await db.query("SELECT * FROM tags");
-  return tags;
+  return tags.map(mapTagAPIResponse);
 };
 
 /* Função para criar etiqueta */
@@ -12,13 +13,13 @@ export const createTag = async (data) => {
     "INSERT INTO tags (name) VALUES (?)",
     [data.name.trim()],
   );
-  return { id: result.insertId, name: data.name.trim() };
+  return mapTagAPIResponse({ id: result.insertId, name: data.name.trim() });
 };
 
 /* Função para buscar etiqueta por ID */
 export const getTagById = async (tagId) => {
   const [tags] = await db.query("SELECT * FROM tags WHERE id = ?", [tagId]);
-  return tags[0];
+  return tags[0] ? mapTagAPIResponse(tags[0]) : null;
 };
 
 /* Função para deletar etiqueta */

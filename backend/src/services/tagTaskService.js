@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTagTaskAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTagTasks = async () => {
   const [tagTasks] = await db.query("SELECT * FROM tag_task");
-  return tagTasks;
+  return tagTasks.map(mapTagTaskAPIResponse);
 };
 
 export const createTagTask = async (data) => {
@@ -10,7 +11,7 @@ export const createTagTask = async (data) => {
     "INSERT INTO tag_task (task_id, tag_id) VALUES (?, ?)",
     [data.task_id, data.tag_id]
   );
-  return { id: result.insertId, ...data };
+  return mapTagTaskAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTagTask = async (id, data) => {

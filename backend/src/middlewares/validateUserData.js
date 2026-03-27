@@ -2,10 +2,22 @@
 
 export const validateUserData = async (req, res, next) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, phone } = req.body;
     const isUpdate = Boolean(req.params.id || req.user?.id);
 
     if (isUpdate) {
+      // Verificar se pelo menos um campo válido foi fornecido
+      const fieldsToUpdate = [];
+      
+      if (name !== undefined) fieldsToUpdate.push("name");
+      if (email !== undefined) fieldsToUpdate.push("email");
+      if (phone !== undefined) fieldsToUpdate.push("phone");
+
+      if (fieldsToUpdate.length === 0) {
+        return res.status(400).json({ message: "Nenhum campo para atualizar" });
+      }
+
+      // Validar campos fornecidos
       if (name !== undefined && (typeof name !== "string" || name.length < 3)) {
         return res
           .status(400)
@@ -17,6 +29,10 @@ export const validateUserData = async (req, res, next) => {
         (typeof email !== "string" || !email.includes("@"))
       ) {
         return res.status(400).json({ message: "Invalid email" });
+      }
+
+      if (phone !== undefined && typeof phone !== "string") {
+        return res.status(400).json({ message: "Phone must be a string" });
       }
     } else {
       if (!name || typeof name !== "string" || name.length < 3) {

@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTaskStatusHistoryAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskStatusHistories = async () => {
   const [histories] = await db.query("SELECT * FROM task_status_history");
-  return histories;
+  return histories.map(mapTaskStatusHistoryAPIResponse);
 };
 
 export const createTaskStatusHistory = async (data) => {
@@ -10,7 +11,7 @@ export const createTaskStatusHistory = async (data) => {
     "INSERT INTO task_status_history (task_id, status_id, changed_at) VALUES (?, ?, ?)",
     [data.task_id, data.status_id, new Date()]
   );
-  return { id: result.insertId, ...data };
+  return mapTaskStatusHistoryAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskStatusHistory = async (id, data) => {

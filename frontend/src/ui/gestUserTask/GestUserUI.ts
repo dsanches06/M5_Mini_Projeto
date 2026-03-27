@@ -16,7 +16,6 @@ export async function loadInitialUsers(): Promise<void> {
     clearContainer("#containerSection");
 
     const users = await UserService.getUsers();
-    console.log("Utilizadores carregados:", users);
 
     if (!users || users.length === 0) {
       console.warn("Nenhum utilizador foi retornado");

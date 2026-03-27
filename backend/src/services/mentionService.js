@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapMentionAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllMentions = async () => {
   const [mentions] = await db.query("SELECT * FROM mention");
-  return mentions;
+  return mentions.map(mapMentionAPIResponse);
 };
 
 export const createMention = async (data) => {
@@ -10,7 +11,7 @@ export const createMention = async (data) => {
     "INSERT INTO mention (task_id, user_id, mentioned_at) VALUES (?, ?, ?)",
     [data.task_id, data.user_id, new Date()]
   );
-  return { id: result.insertId, ...data };
+  return mapMentionAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateMention = async (id, data) => {

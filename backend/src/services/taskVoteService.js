@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTaskVoteAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskVotes = async () => {
   const [votes] = await db.query("SELECT * FROM task_vote");
-  return votes;
+  return votes.map(mapTaskVoteAPIResponse);
 };
 
 export const createTaskVote = async (data) => {
@@ -10,7 +11,7 @@ export const createTaskVote = async (data) => {
     "INSERT INTO task_vote (task_id, user_id, vote_type) VALUES (?, ?, ?)",
     [data.task_id, data.user_id, data.vote_type]
   );
-  return { id: result.insertId, ...data };
+  return mapTaskVoteAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskVote = async (id, data) => {

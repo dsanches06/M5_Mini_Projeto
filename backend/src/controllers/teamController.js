@@ -5,7 +5,7 @@ export const getTeams = async (req, res) => {
     const teams = await teamService.getAllTeams();
     res.json(teams);
   } catch (error) {
-    res.status(500).json({ error: `Error fetching teams: ${error.message}` });
+    res.status(500).json({ error: `Error fetching teams` });
   }
 };
 
@@ -18,7 +18,7 @@ export const createTeam = async (req, res) => {
     const team = await teamService.createTeam(req.body);
     res.status(201).json(team);
   } catch (error) {
-    res.status(400).json({ error: `Error creating team: ${error.message}` });
+    res.status(400).json({ error: `Error creating team` });
   }
 };
 
@@ -31,7 +31,7 @@ export const updateTeam = async (req, res) => {
     }
     res.json({ message: "Team updated successfully" });
   } catch (error) {
-    res.status(400).json({ error: `Error updating team: ${error.message}` });
+    res.status(400).json({ error: `Error updating team` });
   }
 };
 
@@ -44,6 +44,6 @@ export const deleteTeam = async (req, res) => {
     }
     res.json({ message: "Team deleted successfully" });
   } catch (error) {
-    res.status(400).json({ error: `Error deleting team: ${error.message}` });
+    res.status(400).json({ error: `Error deleting team` });
   }
 };

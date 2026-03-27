@@ -1,36 +1,29 @@
 import { db } from "../db.js";
+import { mapUserAPIResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todos os utilizadores */
 export const getAllUsers = async (search, sort) => {
-  let [users] = await db.query("SELECT * FROM users");
+  let query = "SELECT * FROM users";
+  const params = [];
 
   if (search) {
-    users = users.filter(
-      (u) =>
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()),
-    );
+    query += " WHERE (name LIKE ? OR email LIKE ?)";
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm);
   }
 
   if (sort && (sort === "asc" || sort === "desc")) {
-    users.sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-
-      if (sort === "asc") {
-        return nameA.localeCompare(nameB);
-      } else {
-        return nameB.localeCompare(nameA);
-      }
-    });
+    query += ` ORDER BY name ${sort.toUpperCase()}`;
   }
-  return users;
+
+  const [users] = await db.query(query, params);
+  return users.map(mapUserAPIResponse);
 };
 
 /* Função para buscar utilizador por ID */
 export const getUserById = async (userId) => {
   const [users] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
-  return users[0] || null;
+  return users[0] ? mapUserAPIResponse(users[0]) : null;
 };
 
 /* Função para criar utilizador */
@@ -39,7 +32,7 @@ export const createUser = async (data) => {
     "INSERT INTO users (name, email, phone, gender) VALUES (?, ?, ?, ?)",
     [data.name, data.email, data.phone || null, data.gender || "Male"],
   );
-  return { id: result.insertId, ...data };
+  return mapUserAPIResponse({ id: result.insertId, ...data });
 };
 
 /* Função para atualizar utilizador */
@@ -58,10 +51,6 @@ export const updateUser = async (userId, data) => {
   if (data.phone !== undefined) {
     fieldsToUpdate.push("phone = ?");
     values.push(data.phone);
-  }
-
-  if (fieldsToUpdate.length === 0) {
-    throw new Error("Nenhum campo para atualizar");
   }
 
   values.push(userId);

@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapTaskDependencyAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskDependencies = async () => {
   const [dependencies] = await db.query("SELECT * FROM task_dependency");
-  return dependencies;
+  return dependencies.map(mapTaskDependencyAPIResponse);
 };
 
 export const createTaskDependency = async (data) => {
@@ -10,7 +11,7 @@ export const createTaskDependency = async (data) => {
     "INSERT INTO task_dependency (task_id, depends_on_task_id) VALUES (?, ?)",
     [data.task_id, data.depends_on_task_id]
   );
-  return { id: result.insertId, ...data };
+  return mapTaskDependencyAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskDependency = async (id, data) => {

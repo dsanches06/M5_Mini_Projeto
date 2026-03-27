@@ -13,7 +13,6 @@ import {
   createSection,
 } from "../dom/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
-import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 import { IUser } from "../../models/index.js";
 
 function setupEditTaskFormLogic(
@@ -68,7 +67,7 @@ function setupEditTaskFormLogic(
     if (userValue === "") {
       await handleUnassign(task, fields, user);
     } else {
-      await handleAssign(userValue, task, fields, user);
+      await handleAssign(userValue, task, { ...fields, userAssign: fields.userAssign }, user);
     }
     modal.remove();
   };
@@ -81,7 +80,7 @@ async function handleTitleChange(task: ITask, title: string, user?: IUser) {
       const updated = await TaskService.updateTask(task.getId(), { title });
       if (updated) {
         const tasks = await TaskService.getTasks();
-        await renderDashboard(tasks, user);
+        // await renderDashboard(tasks, user);
         showInfoBanner(
           `INFO: O título da tarefa foi atualizado com sucesso.`,
           "success-banner",
@@ -115,7 +114,7 @@ async function handleDescriptionChange(
         const updated = await TaskService.updateTask(task.getId(), { description });
         if (updated) {
           const tasks = await TaskService.getTasks();
-          await renderDashboard(tasks, user);
+        //  await renderDashboard(tasks, user);
           showInfoBanner(
             `INFO: A descrição da tarefa foi atualizada com sucesso.`,
             "success-banner",
@@ -146,10 +145,10 @@ async function handleStatusChange(task: ITask, statusValue: string, user?: IUser
       if (StateTransitions.validTransitions(task.getStatus(), newStatus)) {
         try {
           // Atualizar status da tarefa via API
-          const updated = await TaskService.updateTask(task.getId(), { task_status_id: getStatusId(newStatus) });
+          const updated = await TaskService.updateTaskStatus(task.getId(), getStatusId(newStatus));
           if (updated) {
             const tasks = await TaskService.getTasks();
-            await renderDashboard(tasks, user);
+            // await renderDashboard(tasks, user);
             showInfoBanner(
               `INFO: O estado da tarefa foi alterado com sucesso.`,
               "success-banner",
@@ -225,7 +224,7 @@ async function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }
         }
         
         const tasks = await TaskService.getTasks();
-        await renderDashboard(tasks, user);
+        // await renderDashboard(tasks, user);
         showInfoBanner(
           `INFO: A tarefa foi desvinculada com sucesso.`,
           "success-banner",
@@ -254,7 +253,7 @@ async function handleUnassign(task: ITask, fields: { status: HTMLSelectElement }
 async function handleAssign(
   userValue: string,
   task: ITask,
-  fields: { status: HTMLSelectElement },
+  fields: { status: HTMLSelectElement; userAssign?: HTMLSelectElement },
   user?: IUser,
 ) {
   const userId = parseInt(userValue, 10);
@@ -278,10 +277,14 @@ async function handleAssign(
         
         const assigned = await TaskAssigneeService.createTaskAssignee(assigneeData);
         if (assigned) {
+          // Get the assigned user name from the select field
+          const selectedOption = fields.userAssign?.options[fields.userAssign.selectedIndex];
+          const assignedUserName = selectedOption?.textContent || "";
+          
           const tasks = await TaskService.getTasks();
-          await renderDashboard(tasks, user);
+          // await renderDashboard(tasks, user);
           showInfoBanner(
-            `INFO: A tarefa foi atribuída com sucesso.`,
+            `INFO: A tarefa foi atribuída para ${assignedUserName} com sucesso.`,
             "success-banner",
           );
         } else {
@@ -410,15 +413,19 @@ export async function renderEditTaskLeftPanel(
     // Extrair IDs dos utilizadores já atribuídos
     const assignedUserIds = new Set(allAssignees.map((a) => a.user_id));
     
-    // Filtrar: utilizadores ativos e não atribuídos a nenhuma tarefa
+    // Verificar se esta tarefa tem atribuição
+    const taskAssignee = allAssignees.find((a) => a.task_id === task.getId());
+    const taskAssignedUserId = taskAssignee?.user_id;
+    
+    // Filtrar: utilizadores ativos e não atribuídos a nenhuma tarefa, OU utilizador já atribuído a esta tarefa
     const usersActive = allUsers.filter((u) => {
       const isActive = typeof u.isActive === 'function' 
         ? u.isActive() 
         : (u as any).isActive;
       const userId = typeof u.getId === 'function' ? u.getId() : (u as any).id;
       
-      // Mostrar se está ativo E não está atribuído a nenhuma tarefa
-      return isActive && !assignedUserIds.has(userId);
+      // Mostrar se está ativo E (não está atribuído a nenhuma tarefa OU está atribuído a esta tarefa)
+      return isActive && (!assignedUserIds.has(userId) || userId === taskAssignedUserId);
     });
     
     usersActive.forEach((u) => {
@@ -427,6 +434,12 @@ export async function renderEditTaskLeftPanel(
       const name = typeof u.getName === 'function' ? u.getName() : (u as any).name;
       opt.value = id.toString();
       opt.textContent = `${name} [ID: ${id}]`;
+      
+      // Se esta tarefa está atribuída a este utilizador, selecionar
+      if (id === taskAssignedUserId) {
+        opt.selected = true;
+      }
+      
       userSelect.appendChild(opt);
     });
   } catch (error) {

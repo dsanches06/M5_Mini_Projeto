@@ -77,7 +77,6 @@ export async function removeAllCompletedTask(): Promise<ITask[]> {
     const deletePromises = completedTasks.map((task) =>
       TaskService.deleteTask(task.getId())
         .then(() => {
-          console.log(`Tarefa "${task.getTitle()}" deletada com sucesso`);
         })
         .catch((error) => {
           console.error(`Erro ao deletar tarefa "${task.getTitle()}":`, error);

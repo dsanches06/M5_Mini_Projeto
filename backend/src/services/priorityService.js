@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapPriorityAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllPriorities = async () => {
   const [priorities] = await db.query("SELECT * FROM priority");
-  return priorities;
+  return priorities.map(mapPriorityAPIResponse);
 };
 
 export const createPriority = async (data) => {
@@ -10,7 +11,7 @@ export const createPriority = async (data) => {
     "INSERT INTO priority (name, priority_level) VALUES (?, ?)",
     [data.name, data.priority_level]
   );
-  return { id: result.insertId, ...data };
+  return mapPriorityAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updatePriority = async (id, data) => {

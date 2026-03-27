@@ -190,6 +190,7 @@ function createProjectCounter(id: string): HTMLElement {
     "./src/assets/projeto_graph.png",
     "ativos %",
     "activeProjectsPercentageCounter",
+    "projectsPercentageCaption",
   ) as HTMLElement;
 
   const sectionProjectsCounter = createSection(`${id}`) as HTMLElement;

@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import { mapTaskCommentAPIResponse } from "../dto/mapDTO.js";
 import * as taskService from "./taskService.js";
 import * as userService from "./userService.js";
 
@@ -8,7 +9,7 @@ export const getCommentsByTaskId = async (taskId) => {
     "SELECT * FROM comment WHERE task_id = ? ORDER BY created_at DESC",
     [taskId],
   );
-  return comments;
+  return comments.map(mapTaskCommentAPIResponse);
 };
 
 /* Função para criar comentário */
@@ -31,13 +32,13 @@ export const createComment = async (taskId, data) => {
     [taskId, data.userId, data.content.trim(), mysqlDateTime],
   );
 
-  return {
+  return mapTaskCommentAPIResponse({
     id: result.insertId,
-    taskId: taskId,
-    userId: data.userId,
+    task_id: taskId,
+    user_id: data.userId,
     content: data.content.trim(),
-    date: mysqlDateTime,
-  };
+    created_at: mysqlDateTime,
+  });
 };
 
 /* Função para deletar comentário */

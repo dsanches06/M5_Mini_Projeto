@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapReminderAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllReminders = async () => {
   const [reminders] = await db.query("SELECT * FROM reminder");
-  return reminders;
+  return reminders.map(mapReminderAPIResponse);
 };
 
 export const createReminder = async (data) => {
@@ -10,7 +11,7 @@ export const createReminder = async (data) => {
     "INSERT INTO reminder (task_id, user_id, remind_at) VALUES (?, ?, ?)",
     [data.task_id, data.user_id || null, data.remind_at]
   );
-  return { id: result.insertId, ...data };
+  return mapReminderAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateReminder = async (id, data) => {

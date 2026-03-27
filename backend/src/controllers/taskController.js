@@ -85,13 +85,13 @@ export const updateTask = async (req, res) => {
 };
 
 /* Função para marcar tarefa como concluída */
-export const taskMarkedAsCompleted = async (req, res) => {
+export const updateStatus = async (req, res) => {
   try {
-    const task = await taskService.markTaskAsCompleted(Number(req.params.id));
-    res.json({ message: "Tarefa marcada como concluída com sucesso", task });
+    const task = await taskService.updateStatus(Number(req.params.id), req.body);
+    res.json({ message: "Status da tarefa atualizado com sucesso", task });
   } catch (error) {
     res.status(400).json({
-      error: `Erro ao marcar tarefa como concluída: ${error.message}`,
+      error: `Erro ao atualizar status da tarefa: ${error.message}`,
     });
   }
 };

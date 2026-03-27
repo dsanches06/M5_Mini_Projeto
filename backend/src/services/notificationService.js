@@ -1,9 +1,10 @@
 import { db } from "../db.js";
+import { mapNotificationAPIResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todas as notificações */
 export const getAllNotifications = async () => {
   const [notifications] = await db.query("SELECT * FROM notification");
-  return notifications;
+  return notifications.map(mapNotificationAPIResponse);
 };
 
 /* Função para buscar notificação por ID */
@@ -12,7 +13,7 @@ export const getNotificationById = async (notificationId) => {
     "SELECT * FROM notification WHERE id = ?",
     [notificationId],
   );
-  return notifications[0] || null;
+  return notifications[0] ? mapNotificationAPIResponse(notifications[0]) : null;
 };
 
 /* Função para buscar notificações por ID do usuário */
@@ -21,7 +22,7 @@ export const getNotificationsByUser = async (userId) => {
     "SELECT * FROM notification WHERE user_id = ? ORDER BY sent_at DESC",
     [userId],
   );
-  return notifications;
+  return notifications.map(mapNotificationAPIResponse);
 };
 
 /* Função para buscar notificações não lidas de um usuário */
@@ -30,7 +31,7 @@ export const getUnreadNotifications = async (userId) => {
     "SELECT * FROM notification WHERE user_id = ? AND is_read = FALSE ORDER BY sent_at DESC",
     [userId],
   );
-  return notifications;
+  return notifications.map(mapNotificationAPIResponse);
 };
 
 /* Função para criar notificação */
@@ -47,7 +48,7 @@ export const createNotification = async (data) => {
       mysqlDateTime,
     ],
   );
-  return { id: result.insertId, ...data };
+  return mapNotificationAPIResponse({ id: result.insertId, ...data });
 };
 
 /* Função para atualizar notificação */

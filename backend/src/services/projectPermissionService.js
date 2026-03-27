@@ -1,8 +1,9 @@
 import { db } from "../db.js";
+import { mapProjectPermissionAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllProjectPermissions = async () => {
   const [permissions] = await db.query("SELECT * FROM project_permission");
-  return permissions;
+  return permissions.map(mapProjectPermissionAPIResponse);
 };
 
 export const createProjectPermission = async (data) => {
@@ -10,7 +11,7 @@ export const createProjectPermission = async (data) => {
     "INSERT INTO project_permission (project_id, user_id, permission) VALUES (?, ?, ?)",
     [data.project_id, data.user_id, data.permission]
   );
-  return { id: result.insertId, ...data };
+  return mapProjectPermissionAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateProjectPermission = async (id, data) => {

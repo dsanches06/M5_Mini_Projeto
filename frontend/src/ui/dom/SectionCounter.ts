@@ -14,8 +14,9 @@ export function createStatisticsCounter(
   src: string,
   label: string,
   counterId: string,
+  captionId?: string,
 ): HTMLElement {
-  const figure = createFigureWithImage(imgId, `${src}`, label) as HTMLElement;
+  const figure = createFigureWithImage(imgId, `${src}`, label, captionId) as HTMLElement;
 
   const counterSection = createSection(counterId) as HTMLElement;
   counterSection.classList.add("counter-item");
