@@ -3,76 +3,96 @@ import { mapToTask } from "../api/dto/mapperDTO.js";
 import { ITask } from "../tasks/index.js";
 import { TaskStatus } from "../tasks/TaskStatus.js";
 import { TaskAssigneeService } from "./taskAssigneeService.js";
+import {
+  TagAPIResponse,
+  TaskCommentAPIResponse,
+  TaskStatsAPIResponse,
+} from "../api/dto/index.js";
 
 /* Serviço para gerir tarefas */
 export class TaskService {
-  
   /* Obtém tarefas da API com os assignees associados */
   static async getTasks(sort?: string, search?: string): Promise<ITask[]> {
     const data = await fetchTasks.getTasks(sort, search);
     const tasks = data.map(mapToTask);
-    
+
     console.log(`📦 ${tasks.length} tarefas carregadas da API`);
-    
+
     // Carregar assignees e associar a cada tarefa
     try {
       const assignees = await TaskAssigneeService.getTaskAssignees();
       console.log(`👥 ${assignees.length} assignees carregados da API`);
-      
+
       // Para cada tarefa, encontrar os assignees correspondentes
       tasks.forEach((task) => {
-        const taskAssignees = assignees.filter((a) => a.task_id === task.getId());
+        const taskAssignees = assignees.filter(
+          (a) => a.task_id === task.getId(),
+        );
         (task as any).setAssignees(taskAssignees);
         if (taskAssignees.length > 0) {
-          console.log(`  Task ${task.getId()}: ${taskAssignees.length} assignees - ${taskAssignees.map(a => `user_id: ${a.user_id}`).join(', ')}`);
+          console.log(
+            `  Task ${task.getId()}: ${taskAssignees.length} assignees - ${taskAssignees.map((a) => `user_id: ${a.user_id}`).join(", ")}`,
+          );
         }
       });
     } catch (error) {
       console.error("Erro ao carregar assignees para tarefas:", error);
     }
-    
+
     return tasks;
   }
 
   /* Obtém tarefas de um projeto específico */
-  static async getTasksByProject(projectId: number, sort?: string, search?: string): Promise<ITask[]> {
+  static async getTasksByProject(
+    projectId: number,
+    sort?: string,
+    search?: string,
+  ): Promise<ITask[]> {
     const data = await fetchTasks.getTasksByProject(projectId, sort, search);
     const tasks = data.map(mapToTask);
-    
-    console.log(`📦 ${tasks.length} tarefas do projeto ${projectId} carregadas da API`);
-    
+
+    console.log(
+      `📦 ${tasks.length} tarefas do projeto ${projectId} carregadas da API`,
+    );
+
     // Carregar assignees e associar a cada tarefa
     try {
       const assignees = await TaskAssigneeService.getTaskAssignees();
       console.log(`👥 ${assignees.length} assignees carregados da API`);
-      
+
       // Para cada tarefa, encontrar os assignees correspondentes
       tasks.forEach((task) => {
-        const taskAssignees = assignees.filter((a) => a.task_id === task.getId());
+        const taskAssignees = assignees.filter(
+          (a) => a.task_id === task.getId(),
+        );
         (task as any).setAssignees(taskAssignees);
         if (taskAssignees.length > 0) {
-          console.log(`  Task ${task.getId()}: ${taskAssignees.length} assignees - ${taskAssignees.map(a => `user_id: ${a.user_id}`).join(', ')}`);
+          console.log(
+            `  Task ${task.getId()}: ${taskAssignees.length} assignees - ${taskAssignees.map((a) => `user_id: ${a.user_id}`).join(", ")}`,
+          );
         }
       });
     } catch (error) {
       console.error("Erro ao carregar assignees para tarefas:", error);
     }
-    
+
     return tasks;
   }
 
   /* Obtém estatísticas de tarefas da API */
-  static async getTaskStats(): Promise<any> {
+  static async getTaskStats(): Promise<TaskStatsAPIResponse | null> {
     return await fetchTasks.getTaskStats();
   }
 
   /* Obtém tags de uma tarefa da API */
-  static async getTaskTags(taskId: number): Promise<any[]> {
+  static async getTaskTags(taskId: number): Promise<TagAPIResponse[]> {
     return await fetchTasks.getTaskTags(taskId);
   }
 
   /* Obtém comentários de uma tarefa da API */
-  static async getTaskComments(taskId: number): Promise<any[]> {
+  static async getTaskComments(
+    taskId: number,
+  ): Promise<TaskCommentAPIResponse[]> {
     return await fetchTasks.getTaskComments(taskId);
   }
 

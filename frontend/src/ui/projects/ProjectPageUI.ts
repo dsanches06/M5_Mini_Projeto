@@ -11,8 +11,6 @@ import {
   clearContainer,
 } from "../dom/index.js";
 import {
-  createGanttStructure,
-  renderGantt,
   renderProjectsCards,
 } from "./index.js";
 
@@ -40,38 +38,56 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
   const allProjectsBtn = projectCounterSection.querySelector(
     "#allProjectsBtn",
   ) as HTMLElement | null;
+  const activeProjectsBtn = projectCounterSection.querySelector(
+    "#activeProjectsBtn",
+  ) as HTMLElement | null;
+  const finishedProjectsBtn = projectCounterSection.querySelector(
+    "#finishedProjectsBtn",
+  ) as HTMLElement | null;
+  const inDevelopmentProjectsBtn = projectCounterSection.querySelector(
+    "#inDevelopmentProjectsBtn",
+  ) as HTMLElement | null;
+  
+
   if (allProjectsBtn) {
     allProjectsBtn.title = "Mostrar todos os projetos";
     allProjectsBtn.addEventListener("click", async () => {
-    const currentProjects = await ProjectService.getProjects();
-    renderProjectsCards(currentProjects);
-    await showProjectsCounters("projetos");
-  });
+      const currentProjects = await ProjectService.getProjects();
+      renderProjectsCards(currentProjects);
+      await showProjectsCounters("projetos");
+    });
+  }
 
-  activeProjectsBtn.addEventListener("click", async () => {
-    const allProjects = await ProjectService.getProjects();
-    const activeProjects = allProjects.filter((p) => p.getStatus() === "Ativo");
-    renderProjectsCards(activeProjects);
-    await showProjectsCounters("ativos", activeProjects);
-  });
+  if (activeProjectsBtn) {
+    activeProjectsBtn.addEventListener("click", async () => {
+      const allProjects = await ProjectService.getProjects();
+      const activeProjects = allProjects.filter((p) => p.getStatus() === "Ativo");
+      renderProjectsCards(activeProjects);
+      await showProjectsCounters("ativos", activeProjects);
+    });
+  }
 
-  finishedProjectsBtn.addEventListener("click", async () => {
-    const allProjects = await ProjectService.getProjects();
-    const finishedProjects = allProjects.filter(
-      (p) => p.getStatus() === "Terminado",
-    );
-    renderProjectsCards(finishedProjects);
-    await showProjectsCounters("concluidos", finishedProjects);
-  });
+  if (finishedProjectsBtn) {
+    finishedProjectsBtn.addEventListener("click", async () => {
+      const allProjects = await ProjectService.getProjects();
+      const finishedProjects = allProjects.filter(
+        (p) => p.getStatus() === "Terminado",
+      );
+      renderProjectsCards(finishedProjects);
+      await showProjectsCounters("concluidos", finishedProjects);
+    });
+  }
 
-  inDevelopmentProjectsBtn.addEventListener("click", async () => {
-    const allProjects = await ProjectService.getProjects();
-    const devProjects = allProjects.filter(
-      (p) => p.getStatus() === "Em Desenvolvimento",
-    );
-    renderProjectsCards(devProjects);
-    await showProjectsCounters("desenvolvimento", devProjects);
-  });
+  if (inDevelopmentProjectsBtn) {
+    inDevelopmentProjectsBtn.addEventListener("click", async () => {
+      const allProjects = await ProjectService.getProjects();
+      const devProjects = allProjects.filter(
+        (p) => p.getStatus() === "Em Desenvolvimento",
+      );
+      renderProjectsCards(devProjects);
+      await showProjectsCounters("desenvolvimento", devProjects);
+    });
+  }
 
   // Event listener para busca
   const searchProjectInput = document.querySelector(
@@ -188,3 +204,4 @@ function createProjectCounter(id: string): HTMLElement {
   );
   return sectionProjectsCounter;
 }
+
