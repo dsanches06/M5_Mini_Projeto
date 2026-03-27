@@ -5,7 +5,10 @@ export const getAllTaskDependencies = async () => {
   const [dependencies] = await db.query("SELECT * FROM task_dependency");
   return dependencies.map(mapTaskDependencyAPIResponse);
 };
-
+export const getTaskDependencyById = async (taskDependencyId) => {
+  const [taskDependencies] = await db.query("SELECT * FROM task_dependency WHERE id = ?", [taskDependencyId]);
+  return taskDependencies.length > 0 ? mapTaskDependencyAPIResponse(taskDependencies[0]) : null;
+};
 export const createTaskDependency = async (data) => {
   const [result] = await db.query(
     "INSERT INTO task_dependency (task_id, depends_on_task_id) VALUES (?, ?)",

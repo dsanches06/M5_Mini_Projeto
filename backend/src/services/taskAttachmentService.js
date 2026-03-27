@@ -5,7 +5,10 @@ export const getAllTaskAttachments = async () => {
   const [attachments] = await db.query("SELECT * FROM task_attachment");
   return attachments.map(mapTaskAttachmentAPIResponse);
 };
-
+export const getTaskAttachmentById = async (taskAttachmentId) => {
+  const [taskAttachments] = await db.query("SELECT * FROM task_attachment WHERE id = ?", [taskAttachmentId]);
+  return taskAttachments.length > 0 ? mapTaskAttachmentAPIResponse(taskAttachments[0]) : null;
+};
 export const createTaskAttachment = async (data) => {
   const [result] = await db.query(
     "INSERT INTO task_attachment (task_id, file_name, file_path) VALUES (?, ?, ?)",

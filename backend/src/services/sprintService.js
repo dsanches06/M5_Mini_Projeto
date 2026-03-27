@@ -27,6 +27,12 @@ export const getAllSprints = async (search, sort) => {
   return sprints.map(mapSprintAPIResponse);
 };
 
+/* Função para buscar uma sprint por ID */
+export const getSprintById = async (sprintId) => {
+  const [sprints] = await db.query("SELECT * FROM sprints WHERE id = ?", [sprintId]);
+  return sprints.length > 0 ? mapSprintAPIResponse(sprints[0]) : null;
+};
+
 /* Função para criar sprint */
 export const createSprint = async (data) => {
   const [result] = await db.query(

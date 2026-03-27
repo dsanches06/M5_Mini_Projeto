@@ -11,7 +11,6 @@ import {
 
 /* Serviço para gerir tarefas */
 export class TaskService {
-  
   /* Obtém tarefas da API com os assignees associados */
   static async getTasks(sort?: string, search?: string): Promise<ITask[]> {
     const data = await fetchTasks.getTasks(sort, search);
@@ -64,6 +63,15 @@ export class TaskService {
     }
 
     return tasks;
+  }
+
+  /* Obtém uma tarefa por ID da API */
+  static async getTaskById(taskId: number): Promise<ITask> {
+    const data = await fetchTasks.getTaskById(taskId);
+    if (!data) {
+      throw new Error("Tarefa não encontrada");
+    }
+    return mapToTask(data);
   }
 
   /* Obtém estatísticas de tarefas da API */

@@ -47,6 +47,11 @@ export async function getTasksByProject(
   }
 }
 
+/* Função para obter uma tarefa por ID */
+export async function getTaskById(taskId: number): Promise<TaskAPIResponse | null> {
+  return getById<TaskAPIResponse>(ENDPOINT, taskId);
+}
+
 /* Função para obter estatísticas de tarefas */
 export async function getTaskStats(): Promise<TaskStatsAPIResponse | null> {
   try {

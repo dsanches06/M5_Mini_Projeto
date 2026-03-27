@@ -11,6 +11,18 @@ export const getTags = async (req, res) => {
   }
 };
 
+export const getTagById = async (req, res) => {
+  try {
+    const tag = await tagService.getTagById(Number(req.params.id));
+    if (!tag) {
+      return res.status(404).json({ message: "Tag not found" });
+    }
+    res.json(tag);
+  } catch (error) {
+    res.status(500).json({ message: `Error fetching tag: ${error.message}` });
+  }
+};
+
 /* Função para criar etiqueta */
 export const createTag = async (req, res) => {
   try {

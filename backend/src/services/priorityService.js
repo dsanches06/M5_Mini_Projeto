@@ -6,6 +6,11 @@ export const getAllPriorities = async () => {
   return priorities.map(mapPriorityAPIResponse);
 };
 
+export const getPriorityById = async (priorityId) => {
+  const [priorities] = await db.query("SELECT * FROM priority WHERE id = ?", [priorityId]);
+  return priorities.length > 0 ? mapPriorityAPIResponse(priorities[0]) : null;
+};
+
 export const createPriority = async (data) => {
   const [result] = await db.query(
     "INSERT INTO priority (name, priority_level) VALUES (?, ?)",

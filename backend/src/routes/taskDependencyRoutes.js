@@ -4,6 +4,7 @@ import * as taskDependencyController from "../controllers/taskDependencyControll
 const router = express.Router();
 
 router.get("/", taskDependencyController.getTaskDependencies);
+router.get("/:id", taskDependencyController.getTaskDependencyById);
 router.post("/", taskDependencyController.createTaskDependency);
 router.put("/:id", taskDependencyController.updateTaskDependency);
 router.delete("/:id", taskDependencyController.deleteTaskDependency);

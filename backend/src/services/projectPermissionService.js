@@ -5,7 +5,10 @@ export const getAllProjectPermissions = async () => {
   const [permissions] = await db.query("SELECT * FROM project_permission");
   return permissions.map(mapProjectPermissionAPIResponse);
 };
-
+export const getProjectPermissionById = async (projectPermissionId) => {
+  const [projectPermissions] = await db.query("SELECT * FROM project_permission WHERE id = ?", [projectPermissionId]);
+  return projectPermissions.length > 0 ? mapProjectPermissionAPIResponse(projectPermissions[0]) : null;
+};
 export const createProjectPermission = async (data) => {
   const [result] = await db.query(
     "INSERT INTO project_permission (project_id, user_id, permission) VALUES (?, ?, ?)",

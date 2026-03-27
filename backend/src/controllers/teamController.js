@@ -8,7 +8,17 @@ export const getTeams = async (req, res) => {
     res.status(500).json({ error: `Error fetching teams` });
   }
 };
-
+export const getTeamById = async (req, res) => {
+  try {
+    const team = await teamService.getTeamById(Number(req.params.id));
+    if (!team) {
+      return res.status(404).json({ error: "Team not found" });
+    }
+    res.json(team);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching team: ${error.message}` });
+  }
+};
 export const createTeam = async (req, res) => {
   try {
     const { name } = req.body;

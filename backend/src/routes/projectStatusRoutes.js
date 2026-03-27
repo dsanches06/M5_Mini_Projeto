@@ -4,6 +4,7 @@ import * as projectStatusController from "../controllers/projectStatusController
 const router = express.Router();
 
 router.get("/", projectStatusController.getProjectStatuses);
+router.get("/:id", projectStatusController.getProjectStatusById);
 router.post("/", projectStatusController.createProjectStatus);
 router.put("/:id", projectStatusController.updateProjectStatus);
 router.delete("/:id", projectStatusController.deleteProjectStatus);

@@ -9,6 +9,18 @@ export const getTaskAttachments = async (req, res) => {
   }
 };
 
+export const getTaskAttachmentById = async (req, res) => {
+  try {
+    const taskAttachment = await taskAttachmentService.getTaskAttachmentById(Number(req.params.id));
+    if (!taskAttachment) {
+      return res.status(404).json({ error: "Task attachment not found" });
+    }
+    res.json(taskAttachment);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching task attachment: ${error.message}` });
+  }
+};
+
 export const createTaskAttachment = async (req, res) => {
   try {
     const { task_id, file_name } = req.body;

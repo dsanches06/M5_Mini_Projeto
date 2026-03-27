@@ -6,6 +6,11 @@ export const getAllTimeLogs = async () => {
   return logs.map(mapTimeLogAPIResponse);
 };
 
+export const getTimeLogById = async (timeLogId) => {
+  const [timeLogs] = await db.query("SELECT * FROM time_log WHERE id = ?", [timeLogId]);
+  return timeLogs.length > 0 ? mapTimeLogAPIResponse(timeLogs[0]) : null;
+};
+
 export const createTimeLog = async (data) => {
   const [result] = await db.query(
     "INSERT INTO time_logs (task_id, user_id, hours, description, logged_at) VALUES (?, ?, ?, ?, ?)",

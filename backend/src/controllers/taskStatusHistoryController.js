@@ -9,6 +9,18 @@ export const getTaskStatusHistories = async (req, res) => {
   }
 };
 
+export const getTaskStatusHistoryById = async (req, res) => {
+  try {
+    const taskStatusHistory = await taskStatusHistoryService.getTaskStatusHistoryById(Number(req.params.id));
+    if (!taskStatusHistory) {
+      return res.status(404).json({ error: "Task status history not found" });
+    }
+    res.json(taskStatusHistory);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching task status history: ${error.message}` });
+  }
+};
+
 export const createTaskStatusHistory = async (req, res) => {
   try {
     const { task_id, status_id } = req.body;

@@ -5,7 +5,10 @@ export const getAllFavoriteTasks = async () => {
   const [favorites] = await db.query("SELECT * FROM favorite_task");
   return favorites.map(mapFavoriteTaskAPIResponse);
 };
-
+export const getFavoriteTaskById = async (favoriteTaskId) => {
+  const [favoriteTasks] = await db.query("SELECT * FROM favorite_task WHERE id = ?", [favoriteTaskId]);
+  return favoriteTasks.length > 0 ? mapFavoriteTaskAPIResponse(favoriteTasks[0]) : null;
+};
 export const createFavoriteTask = async (data) => {
   const [result] = await db.query(
     "INSERT INTO favorite_task (task_id, user_id) VALUES (?, ?)",

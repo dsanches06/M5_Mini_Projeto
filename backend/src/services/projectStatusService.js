@@ -5,7 +5,10 @@ export const getAllProjectStatuses = async () => {
   const [statuses] = await db.query("SELECT * FROM project_status");
   return statuses.map(mapProjectStatusAPIResponse);
 };
-
+export const getProjectStatusById = async (projectStatusId) => {
+  const [projectStatuses] = await db.query("SELECT * FROM project_status WHERE id = ?", [projectStatusId]);
+  return projectStatuses.length > 0 ? mapProjectStatusAPIResponse(projectStatuses[0]) : null;
+};
 export const createProjectStatus = async (data) => {
   const [result] = await db.query(
     "INSERT INTO project_status (name, description) VALUES (?, ?)",

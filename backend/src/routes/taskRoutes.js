@@ -8,6 +8,7 @@ const router = express.Router();
 router.get("/", taskController.getTasks);
 router.get("/stats", taskController.getStats);
 router.get("/project/:projectId", taskController.getTasksByProject);
+router.get("/:id", taskController.getTaskById);
 router.post("/", validateTaskData, taskController.createTask);
 router.put("/:id", validateTaskData, taskController.updateTask);
 router.patch("/:id", taskController.updateStatus);

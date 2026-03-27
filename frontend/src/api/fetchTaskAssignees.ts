@@ -1,5 +1,6 @@
 import { get, getById, create, put, remove } from "./index.js";
 import { TaskAssigneeAPIResponse } from "./dto/index.js";
+import { BASE_URL } from "./utils/index.js";
 
 const ENDPOINT = "task_assignees";
 
@@ -16,6 +17,25 @@ export async function getTaskAssigneeById(
   id: number,
 ): Promise<TaskAssigneeAPIResponse | null> {
   return getById<TaskAssigneeAPIResponse>(ENDPOINT, id);
+}
+
+/* Função para obter atribuições de tarefas de um utilizador */
+export async function getTaskAssigneesByUserId(
+  userId: number,
+): Promise<TaskAssigneeAPIResponse[]> {
+  try {
+    const res = await fetch(`${BASE_URL}${ENDPOINT}/${userId}`);
+    if (!res.ok) {
+      throw new Error(
+        `ERRO: Não foi possível obter atribuições para o utilizador ${userId} - ${res.status}`,
+      );
+    }
+    const data: TaskAssigneeAPIResponse[] = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error(`Erro ao obter atribuições do utilizador ${userId}:`, error);
+    return [];
+  }
 }
 
 /* Função para criar uma nova atribuição de tarefa */

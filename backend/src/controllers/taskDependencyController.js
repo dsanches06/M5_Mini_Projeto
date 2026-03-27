@@ -9,6 +9,18 @@ export const getTaskDependencies = async (req, res) => {
   }
 };
 
+export const getTaskDependencyById = async (req, res) => {
+  try {
+    const taskDependency = await taskDependencyService.getTaskDependencyById(Number(req.params.id));
+    if (!taskDependency) {
+      return res.status(404).json({ error: "Task dependency not found" });
+    }
+    res.json(taskDependency);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching task dependency: ${error.message}` });
+  }
+};
+
 export const createTaskDependency = async (req, res) => {
   try {
     const { task_id, depends_on_task_id } = req.body;

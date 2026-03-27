@@ -9,6 +9,18 @@ export const getTaskStatuses = async (req, res) => {
   }
 };
 
+export const getTaskStatusById = async (req, res) => {
+  try {
+    const taskStatus = await taskStatusService.getTaskStatusById(Number(req.params.id));
+    if (!taskStatus) {
+      return res.status(404).json({ error: "Task status not found" });
+    }
+    res.json(taskStatus);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching task status: ${error.message}` });
+  }
+};
+
 export const createTaskStatus = async (req, res) => {
   try {
     const { name } = req.body;

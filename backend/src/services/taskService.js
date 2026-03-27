@@ -22,7 +22,8 @@ export const getAllTasks = async (search, sort) => {
 
 /* Função para buscar tarefas de um projeto específico */
 export const getTasksByProjectId = async (projectId, search, sort) => {
-  let query = "SELECT t.*, ta.user_id FROM task t LEFT JOIN task_assignees ta ON t.id = ta.task_id WHERE t.project_id = ?";
+  let query =
+    "SELECT t.*, ta.user_id FROM task t LEFT JOIN task_assignees ta ON t.id = ta.task_id WHERE t.project_id = ?";
   const params = [projectId];
 
   if (search) {
@@ -181,10 +182,9 @@ export const getTagsByTaskId = async (taskId) => {
 
 /* Função para remover etiqueta de todas as tarefas */
 export const removeTagFromAllTasks = async (tagId) => {
-  const [result] = await db.query(
-    "DELETE FROM tags_task WHERE tag_id = ?",
-    [tagId],
-  );
+  const [result] = await db.query("DELETE FROM tags_task WHERE tag_id = ?", [
+    tagId,
+  ]);
   return result.affectedRows;
 };
 

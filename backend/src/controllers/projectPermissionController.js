@@ -9,6 +9,18 @@ export const getProjectPermissions = async (req, res) => {
   }
 };
 
+export const getProjectPermissionById = async (req, res) => {
+  try {
+    const projectPermission = await projectPermissionService.getProjectPermissionById(Number(req.params.id));
+    if (!projectPermission) {
+      return res.status(404).json({ error: "Project permission not found" });
+    }
+    res.json(projectPermission);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching project permission: ${error.message}` });
+  }
+};
+
 export const createProjectPermission = async (req, res) => {
   try {
     const { project_id, user_id, permission } = req.body;

@@ -25,6 +25,19 @@ export const getTasksByProject = async (req, res) => {
   }
 };
 
+/* Função para buscar tarefa por ID */
+export const getTaskById = async (req, res) => {
+  try {
+    const task = await taskService.getTaskById(Number(req.params.id));
+    if (!task) {
+      return res.status(404).json({ error: "Tarefa não encontrada" });
+    }
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ error: `Erro ao buscar tarefa: ${error.message}` });
+  }
+};
+
 /* Função para criar tarefa */
 export const createTask = async (req, res) => {
   try {

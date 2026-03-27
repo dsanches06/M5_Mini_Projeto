@@ -5,7 +5,10 @@ export const getAllSprintTasks = async () => {
   const [tasks] = await db.query("SELECT * FROM sprint_task");
   return tasks.map(mapSprintTaskAPIResponse);
 };
-
+export const getSprintTaskById = async (sprintTaskId) => {
+  const [sprintTasks] = await db.query("SELECT * FROM sprint_task WHERE id = ?", [sprintTaskId]);
+  return sprintTasks.length > 0 ? mapSprintTaskAPIResponse(sprintTasks[0]) : null;
+};
 export const createSprintTask = async (data) => {
   const [result] = await db.query(
     "INSERT INTO sprint_task (sprint_id, task_id) VALUES (?, ?)",

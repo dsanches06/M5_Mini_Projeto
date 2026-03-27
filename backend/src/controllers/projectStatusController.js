@@ -9,6 +9,18 @@ export const getProjectStatuses = async (req, res) => {
   }
 };
 
+export const getProjectStatusById = async (req, res) => {
+  try {
+    const projectStatus = await projectStatusService.getProjectStatusById(Number(req.params.id));
+    if (!projectStatus) {
+      return res.status(404).json({ error: "Project status not found" });
+    }
+    res.json(projectStatus);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching project status: ${error.message}` });
+  }
+};
+
 export const createProjectStatus = async (req, res) => {
   try {
     const { name } = req.body;

@@ -6,6 +6,11 @@ export const getAllReminders = async () => {
   return reminders.map(mapReminderAPIResponse);
 };
 
+export const getReminderById = async (reminderId) => {
+  const [reminders] = await db.query("SELECT * FROM reminder WHERE id = ?", [reminderId]);
+  return reminders.length > 0 ? mapReminderAPIResponse(reminders[0]) : null;
+};
+
 export const createReminder = async (data) => {
   const [result] = await db.query(
     "INSERT INTO reminder (task_id, user_id, remind_at) VALUES (?, ?, ?)",

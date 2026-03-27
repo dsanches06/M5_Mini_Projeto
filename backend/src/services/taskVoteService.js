@@ -5,7 +5,10 @@ export const getAllTaskVotes = async () => {
   const [votes] = await db.query("SELECT * FROM task_vote");
   return votes.map(mapTaskVoteAPIResponse);
 };
-
+export const getTaskVoteById = async (taskVoteId) => {
+  const [taskVotes] = await db.query("SELECT * FROM task_vote WHERE id = ?", [taskVoteId]);
+  return taskVotes.length > 0 ? mapTaskVoteAPIResponse(taskVotes[0]) : null;
+};
 export const createTaskVote = async (data) => {
   const [result] = await db.query(
     "INSERT INTO task_vote (task_id, user_id, vote_type) VALUES (?, ?, ?)",

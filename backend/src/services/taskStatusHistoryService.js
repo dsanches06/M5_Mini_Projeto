@@ -6,6 +6,11 @@ export const getAllTaskStatusHistories = async () => {
   return histories.map(mapTaskStatusHistoryAPIResponse);
 };
 
+export const getTaskStatusHistoryById = async (taskStatusHistoryId) => {
+  const [taskStatusHistories] = await db.query("SELECT * FROM task_status_history WHERE id = ?", [taskStatusHistoryId]);
+  return taskStatusHistories.length > 0 ? mapTaskStatusHistoryAPIResponse(taskStatusHistories[0]) : null;
+};
+
 export const createTaskStatusHistory = async (data) => {
   const [result] = await db.query(
     "INSERT INTO task_status_history (task_id, status_id, changed_at) VALUES (?, ?, ?)",

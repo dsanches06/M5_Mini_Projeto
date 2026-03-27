@@ -9,6 +9,18 @@ export const getFavoriteTasks = async (req, res) => {
   }
 };
 
+export const getFavoriteTaskById = async (req, res) => {
+  try {
+    const favoriteTask = await favoriteTaskService.getFavoriteTaskById(Number(req.params.id));
+    if (!favoriteTask) {
+      return res.status(404).json({ error: "Favorite task not found" });
+    }
+    res.json(favoriteTask);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching favorite task: ${error.message}` });
+  }
+};
+
 export const createFavoriteTask = async (req, res) => {
   try {
     const { task_id, user_id } = req.body;

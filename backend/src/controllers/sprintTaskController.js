@@ -9,6 +9,18 @@ export const getSprintTasks = async (req, res) => {
   }
 };
 
+export const getSprintTaskById = async (req, res) => {
+  try {
+    const sprintTask = await sprintTaskService.getSprintTaskById(Number(req.params.id));
+    if (!sprintTask) {
+      return res.status(404).json({ error: "Sprint task not found" });
+    }
+    res.json(sprintTask);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching sprint task: ${error.message}` });
+  }
+};
+
 export const createSprintTask = async (req, res) => {
   try {
     const { sprint_id, task_id } = req.body;

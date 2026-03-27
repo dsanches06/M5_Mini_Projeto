@@ -2,17 +2,13 @@ import { db } from "../db.js";
 import { mapTeamAPIResponse } from "../dto/mapDTO.js";
 
 export const getAllTeams = async () => {
-  try {
-    console.log("🔍 Query: SELECT * FROM teams");
-    const [teams] = await db.query("SELECT * FROM teams");
-    console.log(`📊 Resultado: ${teams.length} teams`);
-    const mapped = teams.map(mapTeamAPIResponse);
-    console.log("✅ Teams mapeados:", mapped);
-    return mapped;
-  } catch (error) {
-    console.error("❌ Erro na query de teams:", error);
-    throw error;
-  }
+  const [teams] = await db.query("SELECT * FROM teams");
+  return teams.map(mapTeamAPIResponse);
+};
+
+export const getTeamById = async (teamId) => {
+  const [teams] = await db.query("SELECT * FROM teams WHERE id = ?", [teamId]);
+  return teams.length > 0 ? mapTeamAPIResponse(teams[0]) : null;
 };
 
 export const createTeam = async (data) => {

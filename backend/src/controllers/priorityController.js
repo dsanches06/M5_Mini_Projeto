@@ -9,6 +9,18 @@ export const getPriorities = async (req, res) => {
   }
 };
 
+export const getPriorityById = async (req, res) => {
+  try {
+    const priority = await priorityService.getPriorityById(Number(req.params.id));
+    if (!priority) {
+      return res.status(404).json({ error: "Priority not found" });
+    }
+    res.json(priority);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching priority: ${error.message}` });
+  }
+};
+
 export const createPriority = async (req, res) => {
   try {
     const { name } = req.body;

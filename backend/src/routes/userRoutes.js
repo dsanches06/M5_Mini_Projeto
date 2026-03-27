@@ -11,6 +11,7 @@ router.use(checkUserExists);
 //Users routes
 router.get("/", userController.getUsers);
 router.get("/stats", userController.getStats);
+router.get("/:id", userController.getUserById);
 router.post("/", validateUserData, userController.createUser);
 router.put("/:id", validateUserData, userController.updateUser);
 router.patch("/:id", userController.toggleUserActive);

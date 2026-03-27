@@ -5,7 +5,10 @@ export const getAllTeamMembers = async () => {
   const [members] = await db.query("SELECT * FROM team_members");
   return members.map(mapTeamMemberAPIResponse);
 };
-
+export const getTeamMemberById = async (teamMemberId) => {
+  const [teamMembers] = await db.query("SELECT * FROM team_member WHERE id = ?", [teamMemberId]);
+  return teamMembers.length > 0 ? mapTeamMemberAPIResponse(teamMembers[0]) : null;
+};
 export const createTeamMember = async (data) => {
   const [result] = await db.query(
     "INSERT INTO team_members (team_id, user_id) VALUES (?, ?)",

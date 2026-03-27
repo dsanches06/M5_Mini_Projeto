@@ -9,6 +9,18 @@ export const getTeamMembers = async (req, res) => {
   }
 };
 
+export const getTeamMemberById = async (req, res) => {
+  try {
+    const teamMember = await teamMemberService.getTeamMemberById(Number(req.params.id));
+    if (!teamMember) {
+      return res.status(404).json({ error: "Team member not found" });
+    }
+    res.json(teamMember);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching team member: ${error.message}` });
+  }
+};
+
 export const createTeamMember = async (req, res) => {
   try {
     const { team_id, user_id } = req.body;

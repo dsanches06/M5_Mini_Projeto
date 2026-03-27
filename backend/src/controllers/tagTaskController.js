@@ -9,6 +9,18 @@ export const getTagTasks = async (req, res) => {
   }
 };
 
+export const getTagTaskById = async (req, res) => {
+  try {
+    const tagTask = await tagTaskService.getTagTaskById(Number(req.params.id));
+    if (!tagTask) {
+      return res.status(404).json({ error: "Tag task not found" });
+    }
+    res.json(tagTask);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching tag task: ${error.message}` });
+  }
+};
+
 export const createTagTask = async (req, res) => {
   try {
     const { task_id, tag_id } = req.body;

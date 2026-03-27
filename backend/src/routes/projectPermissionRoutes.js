@@ -4,6 +4,7 @@ import * as projectPermissionController from "../controllers/projectPermissionCo
 const router = express.Router();
 
 router.get("/", projectPermissionController.getProjectPermissions);
+router.get("/:id", projectPermissionController.getProjectPermissionById);
 router.post("/", projectPermissionController.createProjectPermission);
 router.put("/:id", projectPermissionController.updateProjectPermission);
 router.delete("/:id", projectPermissionController.deleteProjectPermission);

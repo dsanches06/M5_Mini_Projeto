@@ -6,6 +6,11 @@ export const getAllCategories = async () => {
   return categories.map(mapCategoryAPIResponse);
 };
 
+export const getCategoryById = async (categoryId) => {
+  const [categories] = await db.query("SELECT * FROM category WHERE id = ?", [categoryId]);
+  return categories.length > 0 ? mapCategoryAPIResponse(categories[0]) : null;
+};
+
 export const createCategory = async (data) => {
   const [result] = await db.query(
     "INSERT INTO category (name, description) VALUES (?, ?)",

@@ -14,6 +14,21 @@ export const getUsers = async (req, res) => {
   }
 };
 
+/* Função para buscar usuário por ID */
+export const getUserById = async (req, res) => {
+  try {
+    const user = await userService.getUserById(Number(req.params.id));
+    if (!user) {
+      return res.status(404).json({ message: "Utilizador não encontrado" });
+    }
+    res.json(user);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: `Erro ao buscar utilizador: ${error.message}` });
+  }
+};
+
 /* Função para criar usuário */
 export const createUser = async (req, res) => {
   try {

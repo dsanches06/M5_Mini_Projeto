@@ -9,6 +9,18 @@ export const getTaskVotes = async (req, res) => {
   }
 };
 
+export const getTaskVoteById = async (req, res) => {
+  try {
+    const taskVote = await taskVoteService.getTaskVoteById(Number(req.params.id));
+    if (!taskVote) {
+      return res.status(404).json({ error: "Task vote not found" });
+    }
+    res.json(taskVote);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching task vote: ${error.message}` });
+  }
+};
+
 export const createTaskVote = async (req, res) => {
   try {
     const { task_id, user_id, vote_type } = req.body;

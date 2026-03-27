@@ -9,6 +9,18 @@ export const getTimeLogs = async (req, res) => {
   }
 };
 
+export const getTimeLogById = async (req, res) => {
+  try {
+    const timeLog = await timeLogService.getTimeLogById(Number(req.params.id));
+    if (!timeLog) {
+      return res.status(404).json({ error: "Time log not found" });
+    }
+    res.json(timeLog);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching time log: ${error.message}` });
+  }
+};
+
 export const createTimeLog = async (req, res) => {
   try {
     const { task_id, user_id, hours } = req.body;

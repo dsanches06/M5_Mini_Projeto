@@ -9,6 +9,18 @@ export const getMentions = async (req, res) => {
   }
 };
 
+export const getMentionById = async (req, res) => {
+  try {
+    const mention = await mentionService.getMentionById(Number(req.params.id));
+    if (!mention) {
+      return res.status(404).json({ error: "Mention not found" });
+    }
+    res.json(mention);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching mention: ${error.message}` });
+  }
+};
+
 export const createMention = async (req, res) => {
   try {
     const { task_id, user_id } = req.body;

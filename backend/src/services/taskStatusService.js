@@ -5,7 +5,10 @@ export const getAllTaskStatuses = async () => {
   const [statuses] = await db.query("SELECT * FROM task_status");
   return statuses.map(mapTaskStatusAPIResponse);
 };
-
+export const getTaskStatusById = async (taskStatusId) => {
+  const [taskStatuses] = await db.query("SELECT * FROM task_status WHERE id = ?", [taskStatusId]);
+  return taskStatuses.length > 0 ? mapTaskStatusAPIResponse(taskStatuses[0]) : null;
+};
 export const createTaskStatus = async (data) => {
   const [result] = await db.query(
     "INSERT INTO task_status (name, description) VALUES (?, ?)",

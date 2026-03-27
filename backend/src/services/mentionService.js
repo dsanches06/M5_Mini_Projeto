@@ -6,6 +6,11 @@ export const getAllMentions = async () => {
   return mentions.map(mapMentionAPIResponse);
 };
 
+export const getMentionById = async (mentionId) => {
+  const [mentions] = await db.query("SELECT * FROM mention WHERE id = ?", [mentionId]);
+  return mentions.length > 0 ? mapMentionAPIResponse(mentions[0]) : null;
+};
+
 export const createMention = async (data) => {
   const [result] = await db.query(
     "INSERT INTO mention (task_id, user_id, mentioned_at) VALUES (?, ?, ?)",

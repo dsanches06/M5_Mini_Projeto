@@ -11,6 +11,19 @@ export const getSprints = async (req, res) => {
   }
 };
 
+/* Função para obter uma sprint por ID */
+export const getSprintById = async (req, res) => {
+  try {
+    const sprint = await sprintService.getSprintById(Number(req.params.id));
+    if (!sprint) {
+      return res.status(404).json({ error: "Sprint not found" });
+    }
+    res.json(sprint);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching sprint: ${error.message}` });
+  }
+};
+
 /* Função para criar sprint */
 export const createSprint = async (req, res) => {
   try {

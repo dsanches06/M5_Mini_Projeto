@@ -4,6 +4,7 @@ import * as taskStatusHistoryController from "../controllers/taskStatusHistoryCo
 const router = express.Router();
 
 router.get("/", taskStatusHistoryController.getTaskStatusHistories);
+router.get("/:id", taskStatusHistoryController.getTaskStatusHistoryById);
 router.post("/", taskStatusHistoryController.createTaskStatusHistory);
 router.put("/:id", taskStatusHistoryController.updateTaskStatusHistory);
 router.delete("/:id", taskStatusHistoryController.deleteTaskStatusHistory);

@@ -13,6 +13,11 @@ export class TaskAssigneeService {
     return await fetchTaskAssignees.getTaskAssigneeById(id);
   }
 
+  /* Função para obter atribuições de tarefas de um utilizador */
+  static async getTaskAssigneesByUserId(userId: number): Promise<TaskAssigneeAPIResponse[]> {
+    return await fetchTaskAssignees.getTaskAssigneesByUserId(userId);
+  }
+
   /* Função para criar uma nova atribuição de tarefa */
   static async createTaskAssignee(assignee: any): Promise<TaskAssigneeAPIResponse | null> {
     return await fetchTaskAssignees.createTaskAssignee(assignee);

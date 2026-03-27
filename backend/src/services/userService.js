@@ -70,10 +70,10 @@ export const deleteUser = async (userId) => {
 
 /* Função para alternar status ativo/inativo do utilizador */
 export const toggleUserActive = async (userId, data) => {
-  const [result] = await db.query(
-    "UPDATE users SET active = ? WHERE id = ?",
-    [data.active, userId],
-  );
+  const [result] = await db.query("UPDATE users SET active = ? WHERE id = ?", [
+    data.active,
+    userId,
+  ]);
   return result.affectedRows;
 };
 
@@ -96,13 +96,19 @@ export const getUserStats = async () => {
   const [result] = await db.query("SELECT COUNT(*) as totalUsers FROM users");
   const totalUsers = result[0].totalUsers;
 
-  const [activeResult] = await db.query("SELECT COUNT(*) as activeUsers FROM users WHERE active = 1");
+  const [activeResult] = await db.query(
+    "SELECT COUNT(*) as activeUsers FROM users WHERE active = 1",
+  );
   const activeUsers = activeResult[0].activeUsers;
-  const [inactiveResult] = await db.query("SELECT COUNT(*) as inactiveUsers FROM users WHERE active = 0");
+  const [inactiveResult] = await db.query(
+    "SELECT COUNT(*) as inactiveUsers FROM users WHERE active = 0",
+  );
   const inactiveUsers = inactiveResult[0].inactiveUsers;
 
-  const activePercentage = totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(2) : "0.00";
-  const inactivePercentage = totalUsers > 0 ? ((inactiveUsers / totalUsers) * 100).toFixed(2) : "0.00";
+  const activePercentage =
+    totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(2) : "0.00";
+  const inactivePercentage =
+    totalUsers > 0 ? ((inactiveUsers / totalUsers) * 100).toFixed(2) : "0.00";
 
   return {
     totalUsers,

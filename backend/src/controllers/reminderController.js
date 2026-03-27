@@ -9,6 +9,18 @@ export const getReminders = async (req, res) => {
   }
 };
 
+export const getReminderById = async (req, res) => {
+  try {
+    const reminder = await reminderService.getReminderById(Number(req.params.id));
+    if (!reminder) {
+      return res.status(404).json({ error: "Reminder not found" });
+    }
+    res.json(reminder);
+  } catch (error) {
+    res.status(500).json({ error: `Error fetching reminder: ${error.message}` });
+  }
+};
+
 export const createReminder = async (req, res) => {
   try {
     const { task_id, remind_at } = req.body;
