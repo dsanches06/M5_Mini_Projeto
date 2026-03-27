@@ -102,7 +102,7 @@ CREATE TABLE task_assignees (
 CREATE TABLE tags (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE,
-    color VARCHAR(10)
+    color VARCHAR(20)
 );
 
 /* tags_Task (N:M) */
@@ -330,6 +330,7 @@ CREATE TABLE time_logs (
 -- =====================================================
 -- DADOS DE TESTE
 -- =====================================================
+use clickup_db;
 
 /* 1. Users */
 INSERT INTO users (name, email, phone, gender, active, created_at) VALUES 
@@ -382,65 +383,83 @@ INSERT INTO categories (name, flow_order) VALUES
 
 /* 4. Tasks (As 15 tarefas) */
 INSERT INTO task (title, description, task_status_id, priority_id, category_id, project_id, due_date, completed_at, estimated_hours, created_at) VALUES
-('Tarefa 1','Descricao tarefa 1',2,2,2,1,'2026-02-09',NULL,5.00,'2026-02-02'),
-('Tarefa 2','Descricao tarefa 2',2,3,3,1,'2026-02-10',NULL,6.00,'2026-02-03'),
-('Tarefa 3','Descricao tarefa 3',2,4,1,1,'2026-02-11',NULL,7.00,'2026-02-04'),
-('Tarefa 4','Descricao tarefa 4',2,1,2,1,'2026-02-12',NULL,8.00,'2026-02-05'),
-('Tarefa 5','Descricao tarefa 5',3,2,3,1,'2026-02-13',NULL,4.00,'2026-02-06'),
-('Tarefa 6','Descricao tarefa 6',3,3,1,1,'2026-02-14',NULL,5.00,'2026-02-07'),
-('Tarefa 7','Descricao tarefa 7',3,4,2,1,'2026-02-15',NULL,6.00,'2026-02-08'),
-('Tarefa 8','Descricao tarefa 8',3,1,3,1,'2026-02-16',NULL,7.00,'2026-02-09'),
-('Tarefa 9','Descricao tarefa 9',3,2,1,1,'2026-02-17',NULL,8.00,'2026-02-10'),
-('Tarefa 10','Descricao tarefa 10',5,3,2,1,'2026-02-18','2026-02-13',4.00,'2026-02-11'),
-('Tarefa 11','Descricao tarefa 11',5,4,3,2,'2026-02-19','2026-02-14',5.00,'2026-02-12'),
-('Tarefa 12','Descricao tarefa 12',5,1,1,2,'2026-02-20','2026-02-15',6.00,'2026-02-13'),
-('Tarefa 13','Descricao tarefa 13',5,2,2,2,'2026-02-21','2026-02-16',7.00,'2026-02-14'),
-('Tarefa 14','Descricao tarefa 14',5,3,3,2,'2026-02-22','2026-02-17',8.00,'2026-02-15'),
-('Tarefa 15','Descricao tarefa 15',5,4,1,2,'2026-02-23','2026-02-18',4.00,'2026-02-16');
+('Módulo de Notas', 'Desenvolvimento do boletim escolar', 2, 4, 1, 1, '2026-03-15', NULL, 15.00, '2026-02-01'),
+('Integração de Mapas', 'API Google Maps para estafetas', 2, 4, 2, 2, '2026-04-10', NULL, 20.00, '2026-02-01'),
+('Checkout Transacional', 'Configuração de pagamento e frete', 1, 4, 1, 3, '2026-05-20', NULL, 12.00, NOW()),
+('Catálogo de Produtos', 'Upload de imagens e descrições', 1, 3, 2, 3, '2026-05-10', NULL, 8.00, NOW()),
+('Filtro de ONGs', 'Sistema de busca por categoria', 1, 2, 1, 4, '2026-06-15', NULL, 10.00, NOW()),
+('Perfil do Voluntário', 'Criação de dashboard de usuário', 1, 3, 2, 4, '2026-06-30', NULL, 14.00, NOW()),
+('Configuração de Hub IoT', 'Setup inicial do hardware', 2, 4, 3, 5, '2026-12-20', NULL, 25.00, NOW()),
+('Gráficos de Consumo', 'Visualização de dados em tempo real', 1, 3, 1, 5, '2027-01-15', NULL, 18.00, NOW()),
+('Mapeamento de Tabelas', 'De/Para de campos antigos', 5, 4, 1, 6, '2023-11-01', '2023-10-28', 10.00, '2023-10-01'),
+('Limpeza de Dados', 'Remover duplicados na migração', 5, 3, 1, 6, '2023-11-15', '2023-11-10', 12.00, '2023-10-10'),
+('Implementação de CSS', 'Estilização conforme mockups', 5, 2, 2, 7, '2024-02-15', '2024-02-14', 20.00, '2024-01-15'),
+('Auditoria de Logs', 'Verificação de acessos indevidos', 5, 4, 3, 8, '2023-06-05', '2023-06-04', 5.00, '2023-05-25'),
+('Update SSL', 'Renovação de certificados', 5, 3, 3, 8, '2023-06-08', '2023-06-07', 2.00, '2023-06-01'),
+('Bloqueio de IPs Externos', 'Configuração de regras deny-all', 5, 4, 3, 9, '2024-02-25', '2024-02-24', 4.00, '2024-02-15'),
+('Testes de Intrusão', 'Validar eficácia das regras', 5, 4, 3, 9, '2024-02-28', '2024-02-28', 8.00, '2024-02-20');
 
 /* 5. Assignees, Comments & Labels (Tudo o que enviou) */
 INSERT INTO task_assignees (task_id, user_id, assigned_at) VALUES
-(1,1,'2026-02-02'), 
-(2,2,'2026-02-03'), 
-(3,3,'2026-02-04'), 
-(4,4,'2026-02-05'), 
-(5,1,'2026-02-06'), 
-(6,2,'2026-02-07'), 
-(7,3,'2026-02-08'), 
-(8,4,'2026-02-09'), 
-(9,5,'2026-02-10'), 
-(10,6,'2026-02-11');
+(1, 1, '2026-02-02'), 
+(2, 2, '2026-02-03'), 
+(3, 3, '2026-02-04'), 
+(4, 4, '2026-02-05'), 
+(5, 5, '2026-02-06'), 
+(6, 6, '2026-02-07'), 
+(7, 7, '2026-02-08'), 
+(8, 8, '2026-02-09'), 
+(9, 9, '2026-02-10'), 
+(10, 10, '2026-02-11'),
+(11, 1, '2026-02-12'), 
+(12, 2, '2026-02-13'), 
+(13, 3, '2026-02-14'), 
+(14, 4, '2026-02-15'), 
+(15, 5, '2026-02-16');
 
 INSERT INTO comment (content, task_id, user_id, created_at, resolved) VALUES 
-('Comentário tarefa 1',1,1,'2026-02-02 03:00:00', 0), 
-('Comentário tarefa 2',2,1,'2026-02-03 03:00:00', 0), 
-('Comentário tarefa 3',3,1,'2026-02-04 03:00:00', 0), 
-('Comentário tarefa 4',4,1,'2026-02-05 03:00:00', 0), 
-('Comentário tarefa 5',5,1,'2026-02-06 03:00:00', 0), 
-('Comentário tarefa 6',6,1,'2026-02-07 03:00:00', 0), 
-('Comentário tarefa 7',7,1,'2026-02-08 03:00:00', 0);
+('Análise inicial da tarefa 1', 1, 1, '2026-02-02 10:00:00', 0), 
+('Documentação da tarefa 2 pronta', 2, 2, '2026-02-03 11:30:00', 0), 
+('Iniciando desenvolvimento da tarefa 3', 3, 3, '2026-02-04 09:15:00', 0), 
+('Aguardando feedback na tarefa 4', 4, 4, '2026-02-05 14:00:00', 0), 
+('Tarefa 5 em fase de testes', 5, 5, '2026-02-06 16:45:00', 0), 
+('Problema técnico na tarefa 6 reportado', 6, 6, '2026-02-07 10:20:00', 0), 
+('Tarefa 7 validada pelo QA', 7, 7, '2026-02-08 11:00:00', 0), 
+('Revisão de código da tarefa 8 concluída', 8, 8, '2026-02-09 17:30:00', 0), 
+('Tarefa 9 enviada para homologação', 9, 9, '2026-02-10 13:00:00', 0), 
+('Tarefa 10 finalizada e resolvida', 10, 10, '2026-02-11 18:00:00', 1), 
+('Ajustes finos na tarefa 11', 11, 1, '2026-02-12 10:00:00', 0), 
+('Tarefa 12 aguardando deploy', 12, 2, '2026-02-13 09:00:00', 0), 
+('Início do mapeamento na tarefa 13', 13, 3, '2026-02-14 15:20:00', 0), 
+('Tarefa 14 com dependências externas', 14, 4, '2026-02-15 11:45:00', 0), 
+('Tarefa 15 pronta para revisão final', 15, 5, '2026-02-16 14:10:00', 0);
 
-INSERT INTO tags (name, color) VALUES
- ('Urgente', 'Vermelho'),
- ('Frontend', 'Azul'),
- ('Backend', 'Verde'), 
- ('Bug', 'Laranja'), 
- ('Melhoria', 'Roxo');
- 
+INSERT INTO tags (id, name, color) VALUES
+(1, 'Urgente', 'Vermelho'),
+(2, 'Frontend', 'Azul'),
+(3, 'Backend', 'Verde'), 
+(4, 'Bug', 'Laranja'), 
+(5, 'Melhoria', 'Roxo');
+
 INSERT INTO tags_task (task_id, tag_id) VALUES
- (1,1), 
- (1,2), 
- (3,2), 
- (2,3), 
- (2,4), 
- (12,4), 
- (13,4), 
- (14,3), 
- (15,4), 
- (11,5), 
- (5,2), 
- (5,4), 
- (10,1);
+-- Tarefas de Desenvolvimento (Frontend/Backend)
+(1, 2), (1, 1), -- Tarefa 1: Frontend + Urgente
+(2, 3), (2, 4), -- Tarefa 2: Backend + Bug
+(3, 2),         -- Tarefa 3: Frontend
+(4, 2),         -- Tarefa 4: Frontend
+(5, 3), (5, 4), -- Tarefa 5: Backend + Bug
+-- Tarefas de Manutenção e Bugs
+(6, 4),         -- Tarefa 6: Bug
+(7, 5),         -- Tarefa 7: Melhoria
+(8, 3),         -- Tarefa 8: Backend
+(9, 5),         -- Tarefa 9: Melhoria
+(10, 1),        -- Tarefa 10: Urgente
+-- Tarefas Finais/Passadas
+(11, 2),        -- Tarefa 11: Frontend
+(12, 4),        -- Tarefa 12: Bug
+(13, 3),        -- Tarefa 13: Backend
+(14, 1),        -- Tarefa 14: Urgente
+(15, 5);        -- Tarefa 15: Melhoria
 
 /* 6. Task Attachments (Os 22 anexos) */
 INSERT INTO task_attachments (task_id, file_name, file_type, size_kb) VALUES 
@@ -469,15 +488,21 @@ INSERT INTO task_attachments (task_id, file_name, file_type, size_kb) VALUES
 
 /* 7. Notifications & Teams */
 INSERT INTO notification (user_id, title, message, is_read) VALUES 
-(10, 'Nova Tarefa', 'Atribuída a tarefa "Configurar Docker".', 0),
-(10, 'Backup Concluído', 'Tarefa 24 finalizada.', 1), 
-(10, 'Menção', 'Mencionado na tarefa Migração.', 0), 
-(2, 'Prazo Próximo', 'Tarefa termina em 48h.', 0),
-(2, 'Novo Comentário', 'Admin comentou no Mockup.', 0),
-(2, 'Voto Recebido', 'Novo voto na tarefa Dark Mode.', 1),
-(1, 'Relatório Semanal', 'Sprint 01 pronto.', 0), 
-(3, 'Acesso Concedido', 'Responsável pelo Login.', 0),
-(4, 'Simulação Alerta', 'Limite de 1000 users.', 1);
+(1, 'Nova Tarefa', 'Atribuída a tarefa 1: Sistema Gestão Escolar.', 0),
+(2, 'Nova Tarefa', 'Atribuída a tarefa 2: App Delivery.', 0),
+(3, 'Nova Tarefa', 'Atribuída a tarefa 3: Checkout Transacional.', 0),
+(4, 'Nova Tarefa', 'Atribuída a tarefa 4: Filtro de ONGs.', 0),
+(5, 'Nova Tarefa', 'Atribuída a tarefa 5: Configuração Hub IoT.', 0),
+(6, 'Nova Tarefa', 'Atribuída a tarefa 6: Mapeamento de Tabelas.', 1),
+(7, 'Nova Tarefa', 'Atribuída a tarefa 7: Implementação CSS.', 1),
+(8, 'Nova Tarefa', 'Atribuída a tarefa 8: Auditoria de Logs.', 0),
+(9, 'Nova Tarefa', 'Atribuída a tarefa 9: Bloqueio de IPs.', 0),
+(10, 'Nova Tarefa', 'Atribuída a tarefa 10: Testes de Intrusão.', 0),
+(1, 'Nova Tarefa', 'Atribuída a tarefa 11: Ajustes Finos.', 1),
+(2, 'Nova Tarefa', 'Atribuída a tarefa 12: Aguardando Deploy.', 0),
+(3, 'Nova Tarefa', 'Atribuída a tarefa 13: Início do Mapeamento.', 0),
+(4, 'Nova Tarefa', 'Atribuída a tarefa 14: Dependências Externas.', 1),
+(5, 'Nova Tarefa', 'Atribuída a tarefa 15: Revisão Final.', 0);
 
 INSERT INTO teams (name, description) VALUES 
 ('Frontend Devs', 'Interface UI/UX.'), 
@@ -488,17 +513,24 @@ INSERT INTO teams (name, description) VALUES
 
 /* 1. Membros das Equipas (Completar as 5 equipas que inserimos no passo anterior) */
 INSERT INTO team_members (team_id, user_id, role) VALUES 
+-- Equipa 1: Frontend Devs (User 1 como Admin + 2 Membros)
 (1, 1, 'admin'),
 (1, 2, 'member'),
 (1, 3, 'member'),
+-- Equipa 2: Backend Ops (User 4 como Admin + 2 Membros)
 (2, 4, 'admin'),
 (2, 5, 'member'), 
 (2, 6, 'member'), 
-(3, 7, 'member'), 
+-- Equipa 3: QA & Testes (User 7 como Admin + 1 Membro)
+(3, 7, 'admin'), 
 (3, 8, 'member'),               
-(4, 9, 'member'),                                  
-(5, 10, 'admin');                                   
-
+-- Equipa 4: Design Criativo (User 9 como Admin)
+(4, 9, 'admin'),                                  
+-- Equipa 5: Gestão de Produto (User 10 como Admin)
+(5, 10, 'admin'),
+-- Adicionando um segundo membro à equipa de Gestão para balancear
+(5, 1, 'member'); 
+                                
 /* 2. Permissões de Projeto */
 INSERT INTO project_permissions (project_id, user_id, can_edit, can_delete) VALUES 
 (1, 1, 1, 1), 
@@ -509,11 +541,12 @@ INSERT INTO project_permissions (project_id, user_id, can_edit, can_delete) VALU
 
 /* 3. Votos em Tarefas */
 INSERT INTO task_votes (task_id, user_id, voted_at) VALUES 
-(1, 2, NOW()),
- (1, 3, NOW()), 
-(5, 1, NOW()),
- (7, 4, NOW()), 
-(10, 5, NOW());
+(1, 1, NOW()), (1, 2, NOW()), (1, 3, NOW()), -- Tarefa 1 com 3 votos
+(10, 10, NOW()), (10, 9, NOW()),             -- Tarefa 10 com 2 votos
+(5, 5, NOW()), (5, 6, NOW()),                -- Tarefa 5 com 2 votos
+(14, 4, NOW()),                              -- Tarefa 14 com 1 voto
+(2, 2, NOW()),                               -- Tarefa 2 com 1 voto
+(15, 8, NOW());                              -- Tarefa 15 com 1 voto
 
 /* 4. Tarefas Favoritas */
 INSERT INTO favorite_tasks (user_id, task_id, marked_at) VALUES 
@@ -528,19 +561,17 @@ INSERT INTO task_dependencies (task_id, dependent_task_id, type) VALUES
 (6, 7, 'blocks');      -- Tarefa 6 bloqueia a 7
 
 /* 6. Sprints e Sprint Tasks */
-INSERT INTO sprints (project_id, name, start_date, end_date) VALUES 
-(1, 'Sprint 01 - Setup', '2026-02-01', '2026-02-15'),
-(1, 'Sprint 02 - Development', '2026-02-16', '2026-03-02');
+/* Criar Sprints */
+INSERT INTO sprints (id, project_id, name, start_date, end_date) VALUES 
+(1, 1, 'Sprint 01 - Core Gestão', '2026-02-01', '2026-02-15'),
+(2, 1, 'Sprint 02 - Refinamento', '2026-02-16', '2026-03-01'),
+(3, 2, 'Sprint Alpha - Delivery', '2026-02-01', '2026-02-28');
 
+/* Associar Tarefas às Sprints (sprint_tasks) */
 INSERT INTO sprint_tasks (sprint_id, task_id) VALUES 
-(1, 1), 
-(1, 2), 
-(1, 3), 
-(1, 4),
-(1, 10),
-(2, 5), 
-(2, 6), 
-(2, 7);
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), -- Tarefas da primeira fase do Proj 1
+(2, 11), (2, 13),                       -- Tarefas de refinamento do Proj 1
+(3, 12), (3, 14), (3, 15);              -- Tarefas do Proj 2
 
 /* 7. Histórico de Estados (Task Status History) */
 INSERT INTO task_status_history (task_id, previous_status_id, new_status_id, changed_at) VALUES 
@@ -550,6 +581,18 @@ INSERT INTO task_status_history (task_id, previous_status_id, new_status_id, cha
 
 /* 8. Registo de Tempo (Time Logs) */
 INSERT INTO time_logs (task_id, user_id, hours, description, logged_at) VALUES 
-(1, 1, 2.50, 'Análise inicial do esquema', '2026-02-02 14:00:00'),
-(1, 1, 1.50, 'Correção de chaves estrangeiras', '2026-02-02 16:00:00'),
-(10, 6, 4.00, 'Finalização e testes de QA', '2026-02-13 15:30:00');
+(1, 1, 4.50, 'Desenvolvimento inicial do módulo de notas.', '2026-02-05 10:00:00'),
+(2, 2, 6.00, 'Configuração da API de mapas e testes de rota.', '2026-02-06 14:30:00'),
+(3, 3, 3.00, 'Configuração inicial do Stripe para checkout.', '2026-02-07 09:00:00'),
+(4, 4, 5.50, 'Criação dos filtros de pesquisa por categoria.', '2026-02-08 11:15:00'),
+(5, 5, 8.00, 'Montagem e calibração do hardware IoT.', '2026-02-09 16:00:00'),
+(6, 6, 4.00, 'Mapeamento de campos da base legado para nova.', '2023-10-05 10:00:00'),
+(7, 7, 7.25, 'Ajustes de CSS para mobile e responsividade.', '2024-01-20 13:00:00'),
+(8, 8, 2.00, 'Análise de logs de acesso do servidor legado.', '2023-05-25 15:45:00'),
+(9, 9, 3.50, 'Configuração de regras de bloqueio no firewall.', '2024-02-18 09:30:00'),
+(10, 10, 4.00, 'Execução de pentest e relatório de vulnerabilidades.', '2026-02-15 17:00:00'),
+(11, 1, 2.50, 'Refatoração de código após code review.', '2026-02-14 11:00:00'),
+(12, 2, 1.50, 'Preparação de scripts de deploy em produção.', '2026-02-16 10:30:00'),
+(13, 3, 5.00, 'Finalização do De/Para das tabelas críticas.', '2026-02-17 14:00:00'),
+(14, 4, 6.00, 'Resolução de conflitos de dependências NPM.', '2026-02-18 16:20:00'),
+(15, 5, 4.00, 'Revisão final de interface e testes unitários.', '2026-02-19 09:00:00');
