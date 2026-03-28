@@ -64,18 +64,12 @@ export const getTagTasks = async (req, res) => {
   try {
     const tagId = Number(req.params.id);
     const tag = await tagService.getTagById(tagId);
-    
+
     if (!tag) {
       return res.status(404).json({ error: "Tag not found" });
     }
 
-    const taskRelations = await taskService.getTagsByTaskId(tagId);
-    const tasks = await Promise.all(
-      taskRelations.map((relation) =>
-        taskService.getTaskById(relation.task_id),
-      ),
-    );
-
+    const tasks = await taskService.getTasksByTagId(tagId);
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: `Error fetching tag tasks: ${error.message}` });

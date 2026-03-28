@@ -1,5 +1,5 @@
-import { ITask, Task } from "../../tasks/index.js";
-import { UserService, CommentService } from "../../services/index.js";
+import { ITask } from "../../tasks/index.js";
+import { UserService, CommentService, TaskService } from "../../services/index.js";
 import {
   createButton,
   createHeadingTitle,
@@ -10,110 +10,30 @@ import {
   getCardBorderColor,
   showInfoBanner,
 } from "../../helpers/index.js";
-import Comment from "../../comments/Comment.js";
 import { TaskStatus } from "../../tasks/TaskStatus.js";
 
-function renderEditCommentModal(comment: Comment, onSave: () => void): void {
-  const editModal = createSection("editCommentModal") as HTMLElement;
-  editModal.classList.add("modal");
-  editModal.style.display = "flex";
-  editModal.style.justifyContent = "center";
-  editModal.style.alignItems = "center";
-
-  const editContent = createSection("editCommentContent") as HTMLElement;
-  editContent.classList.add("modal-content");
-  editContent.style.maxWidth = "450px";
-  editContent.style.width = "450px";
-  editContent.style.padding = "20px";
-  editContent.style.maxHeight = "280px";
-
-  const closeBtn = document.createElement("span") as HTMLSpanElement;
-  closeBtn.classList.add("close");
-  closeBtn.innerHTML = "&times;";
-  closeBtn.onclick = () => editModal.remove();
-
-  const editTitle = createHeadingTitle(
-    "h3",
-    "Editar Comentário",
-  ) as HTMLHeadingElement;
-  editTitle.style.textAlign = "center";
-  editTitle.style.marginBottom = "0.5rem";
-
-  const inputGroup = createSection("section");
-  inputGroup.className = "form-group";
-
-  const textInput = document.createElement("textarea") as HTMLTextAreaElement;
-  textInput.id = "editCommentInput";
-  textInput.rows = 4;
-  textInput.value = comment.getMessage();
-  textInput.style.width = "100%";
-  textInput.style.padding = "8px";
-  textInput.style.border = "1px solid #ccc";
-  textInput.style.borderRadius = "4px";
-  textInput.style.fontFamily = "inherit";
-
-  inputGroup.appendChild(textInput);
-
-  const btnGroup = document.createElement("div");
-  btnGroup.style.display = "flex";
-  btnGroup.style.gap = "10px";
-  btnGroup.style.marginTop = "15px";
-  btnGroup.style.justifyContent = "flex-end";
-
-  const saveBtn = createButton(
-    "saveEditCommentBtn",
-    "Guardar",
-    "button",
-  ) as HTMLButtonElement;
-  saveBtn.onclick = () => {
-    const newMsg = textInput.value.trim();
-    if (newMsg) {
-      comment.setMessage(newMsg);
-      try {
-        // Atualizar comentário via API (quando CommentService estiver disponível)
-        // const updated = await CommentService.updateTaskComment(task.getId(), comment.getId(), { content: newMsg });
-        showInfoBanner("INFO: Comentário atualizado com sucesso.", "success-banner");
-        onSave();
-        editModal.remove();
-      } catch (error) {
-        console.error("Erro ao atualizar comentário:", error);
-        showInfoBanner("ERRO: Não foi possível atualizar o comentário.", "error-banner");
-      }
-    } else {
-      showInfoBanner(
-        "ERRO: O comentário não pode estar vazio.",
-        "error-banner",
-      );
-    }
-  };
-
-  const cancelBtn = createButton(
-    "cancelEditCommentBtn",
-    "Cancelar",
-    "button",
-  ) as HTMLButtonElement;
-  cancelBtn.style.backgroundColor = "#6c757d";
-  cancelBtn.onclick = () => editModal.remove();
-
-  btnGroup.append(saveBtn, cancelBtn);
-
-  editContent.append(closeBtn, editTitle, inputGroup, btnGroup);
-  editModal.append(editContent);
-  document.body.appendChild(editModal);
-
-  editModal.onclick = (e) => {
-    if (e.target === editModal) editModal.remove();
-  };
-
-  editModal.style.display = "flex";
-}
-
-export function renderEditTaskRightPanel(task: ITask): HTMLDivElement {
+export async function renderEditTaskRightPanel(task: ITask): Promise<HTMLDivElement> {
   const rightContainer = document.createElement("div");
   rightContainer.className = "edit-task-right";
   rightContainer.style.flex = "1";
   rightContainer.style.display = "flex";
   rightContainer.style.flexDirection = "column";
+
+  const tagsHeader = createHeadingTitle(
+    "h4",
+    "TAGS",
+  ) as HTMLHeadingElement;
+  tagsHeader.style.textAlign = "center";
+  tagsHeader.style.marginBottom = "0.5rem";
+
+  const tagsContainer = document.createElement("div");
+  tagsContainer.style.display = "flex";
+  tagsContainer.style.flexWrap = "wrap";
+  tagsContainer.style.gap = "0.5rem";
+  tagsContainer.style.marginBottom = "1rem";
+
+  rightContainer.append(tagsHeader, tagsContainer);
+  await loadTaskTags(task, tagsContainer);
 
   const commentsHeader = createHeadingTitle(
     "h4",
@@ -122,6 +42,26 @@ export function renderEditTaskRightPanel(task: ITask): HTMLDivElement {
   commentsHeader.style.textAlign = "center";
   commentsHeader.style.marginBottom = "0.5rem";
   rightContainer.appendChild(commentsHeader);
+
+  const authorSection = createSection("commentAuthorSection");
+  authorSection.className = "form-group";
+  authorSection.style.marginBottom = "0.5rem";
+
+  const authorLabel = document.createElement("label");
+  authorLabel.setAttribute("for", "commentAuthorSelect");
+  authorLabel.textContent = "Comentário feito por";
+  authorLabel.style.display = "block";
+  authorLabel.style.marginBottom = "0.35rem";
+
+  const authorSelect = document.createElement("select") as HTMLSelectElement;
+  authorSelect.id = "commentAuthorSelect";
+  authorSelect.style.width = "100%";
+  authorSelect.style.padding = "0.5rem";
+  authorSelect.style.border = "1px solid #ccc";
+  authorSelect.style.borderRadius = "4px";
+
+  authorSection.append(authorLabel, authorSelect);
+  rightContainer.appendChild(authorSection);
 
   const commentList = document.createElement("div");
   commentList.className = "comment-list";
@@ -132,71 +72,214 @@ export function renderEditTaskRightPanel(task: ITask): HTMLDivElement {
   commentList.style.marginBottom = "0.5rem";
   commentList.style.backgroundColor = "#e9e6e6";
 
-  const commentInput = document.createElement(
-    "textarea",
-  ) as HTMLTextAreaElement;
+  const commentInput = document.createElement("textarea") as HTMLTextAreaElement;
   commentInput.rows = 3;
   commentInput.placeholder = "Escreva um comentário";
   commentInput.style.width = "100%";
   commentInput.id = "newCommentText";
   commentInput.style.marginTop = "0.5rem";
   commentInput.style.marginBottom = "0.5rem";
+  commentInput.style.padding = "0.75rem";
+  commentInput.style.border = "1px solid #ccc";
+  commentInput.style.borderRadius = "4px";
+  commentInput.style.resize = "vertical";
 
   const sendBtn = createButton(
     "buttonSendComment",
     "Enviar Comentário",
     "button",
   ) as HTMLButtonElement;
+  sendBtn.style.alignSelf = "flex-start";
+  sendBtn.style.backgroundColor = "#2196F3";
+  sendBtn.style.color = "white";
+  sendBtn.style.border = "none";
+  sendBtn.style.borderRadius = "4px";
+  sendBtn.style.padding = "0.65rem 1rem";
+  sendBtn.style.cursor = "pointer";
 
   rightContainer.append(commentList, commentInput, sendBtn);
 
-  sendBtn.onclick = () => {
+  await populateAuthorSelect(task, authorSelect, sendBtn);
+
+  sendBtn.onclick = async () => {
     const msg = commentInput.value.trim();
-    if (msg) {
-      const userId = task.getAssignees?.()[0]?.user_id ?? 0;
-      // TODO: Implementar criação de comentário via API
-      // await CommentService.createTaskComment(task.getId(), { userId, message: msg });
+    const selectedAuthor = Number(authorSelect.value);
+
+    if (!msg) {
+      showInfoBanner("Escreva o comentário antes de enviar.", "error-banner");
+      return;
+    }
+
+    if (!selectedAuthor || selectedAuthor <= 0) {
+      showInfoBanner(
+        "Selecione um membro para assinar o comentário.",
+        "error-banner",
+      );
+      return;
+    }
+
+    try {
+      const created = await CommentService.createTaskComment(task.getId(), {
+        userId: selectedAuthor,
+        content: msg,
+      });
+
+      if (!created) {
+        throw new Error("Comentário não foi criado.");
+      }
+
+      showInfoBanner("Comentário criado com sucesso.", "success-banner");
       commentInput.value = "";
-      refreshComments(task, commentList);
+      await refreshComments(task, commentList);
+    } catch (error) {
+      console.error("Erro ao criar comentário:", error);
+      showInfoBanner("Erro ao criar comentário.", "error-banner");
     }
   };
 
-  refreshComments(task, commentList);
+  await refreshComments(task, commentList);
 
   return rightContainer;
 }
 
-function refreshComments(task: ITask, commentList: HTMLElement): void {
-  commentList.innerHTML = "";
-  const comments: any[] = []; // TODO: Obter comentários da API
-  // const comments = await CommentService.getTaskComments(task.getId());
-  comments.forEach((comment) => {
-    // TODO: Obter usuário da API
-    const user = null; // await UserService.getUserById(comment.getUserId());
-    const item = document.createElement("div");
-    item.className = "comment-item";
-    const authorName = document.createElement("strong");
-    // TODO: Implementar getName() quando user for obtido da API
-    authorName.textContent = user ? "[user name]" : "[desconhecido]";
+async function populateAuthorSelect(
+  task: ITask,
+  authorSelect: HTMLSelectElement,
+  sendBtn: HTMLButtonElement,
+): Promise<void> {
+  authorSelect.innerHTML = "";
+  const assignees = task.getAssignees?.() || [];
 
-    const commentText = document.createElement("p");
-    commentText.textContent = comment.getMessage();
-    commentText.style.margin = "0.25rem 0 0 0";
+  if (assignees.length === 0) {
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Nenhum membro atribuído";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    authorSelect.appendChild(placeholder);
+    authorSelect.disabled = true;
+    sendBtn.disabled = true;
+    return;
+  }
 
-    item.append(authorName, commentText);
+  const uniqueIds = Array.from(
+    new Set(assignees.map((assignee: any) => assignee.user_id)),
+  );
 
-    // Aplicar cor do border baseada no taskId
-    const taskFromComment = null; // TODO: Obter tarefa do comentário via API
-    // TODO: Implementar getStatus() quando task for obtido da API
-    const borderColor = getCardBorderColor(TaskStatus.ARCHIVED); // Placeholder color
-    setCardBorderColor(item, borderColor);
+  const users = await Promise.all(
+    uniqueIds.map((id) => UserService.getUserById(id)),
+  );
 
-    item.style.cursor = "pointer";
-    item.onclick = () => {
-      renderEditCommentModal(comment, () =>
-        refreshComments(task, commentList),
-      );
-    };
-    commentList.appendChild(item);
+  uniqueIds.forEach((userId, index) => {
+    const user = users[index];
+    const option = document.createElement("option");
+    option.value = String(userId);
+    option.textContent = user ? user.getName() : `Membro ${userId}`;
+    authorSelect.appendChild(option);
   });
+  authorSelect.disabled = false;
+  sendBtn.disabled = false;
+}
+
+async function loadTaskTags(task: ITask, container: HTMLElement): Promise<void> {
+  container.innerHTML = "";
+  try {
+    const tags = await TaskService.getTaskTags(task.getId());
+    if (tags.length === 0) {
+      const noTags = document.createElement("p");
+      noTags.textContent = "Nenhuma tag associada.";
+      noTags.style.margin = "0";
+      noTags.style.color = "#777";
+      container.appendChild(noTags);
+      return;
+    }
+
+    tags.forEach((tag) => {
+      const badge = document.createElement("span");
+      badge.textContent = tag.name;
+      badge.style.padding = "0.25rem 0.6rem";
+      badge.style.backgroundColor = "#eef";
+      badge.style.color = "#084";
+      badge.style.borderRadius = "12px";
+      badge.style.fontSize = "0.8rem";
+      badge.style.border = "1px solid #cce";
+      container.appendChild(badge);
+    });
+  } catch (error) {
+    console.warn("Erro ao carregar tags da tarefa:", error);
+    const errorMsg = document.createElement("p");
+    errorMsg.textContent = "Não foi possível carregar tags.";
+    errorMsg.style.margin = "0";
+    errorMsg.style.color = "#e74c3c";
+    container.appendChild(errorMsg);
+  }
+}
+
+async function refreshComments(task: ITask, commentList: HTMLElement): Promise<void> {
+  commentList.innerHTML = "";
+
+  try {
+    const comments = await CommentService.getTaskComments(task.getId());
+
+    if (comments.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "Nenhum comentário ainda.";
+      empty.style.color = "#555";
+      empty.style.margin = "0";
+      commentList.appendChild(empty);
+      return;
+    }
+
+    const userIds = Array.from(new Set(comments.map((comment: any) => comment.user_id)));
+    const users = await Promise.all(
+      userIds.map((id) => UserService.getUserById(id)),
+    );
+    const userMap = new Map<number, string>();
+    userIds.forEach((id, index) => {
+      const user = users[index];
+      userMap.set(id, user ? user.getName() : `Membro ${id}`);
+    });
+
+    comments.forEach((comment: any) => {
+      const item = document.createElement("div");
+      item.className = "comment-item";
+      item.style.border = "1px solid #ccc";
+      item.style.borderRadius = "8px";
+      item.style.padding = "0.75rem";
+      item.style.marginBottom = "0.5rem";
+      item.style.backgroundColor = "#fff";
+
+      const authorName = document.createElement("strong");
+      authorName.textContent = userMap.get(comment.user_id) || "Membro";
+
+      const createdAt = document.createElement("span");
+      createdAt.style.display = "block";
+      createdAt.style.fontSize = "0.8rem";
+      createdAt.style.color = "#666";
+      createdAt.style.marginTop = "0.25rem";
+      createdAt.textContent = comment.created_at
+        ? new Date(comment.created_at).toLocaleString("pt-BR")
+        : "Data não disponível";
+
+      const commentText = document.createElement("p");
+      commentText.textContent = comment.content;
+      commentText.style.margin = "0.5rem 0 0 0";
+      commentText.style.whiteSpace = "pre-wrap";
+      commentText.style.lineHeight = "1.4";
+
+      item.append(authorName, createdAt, commentText);
+
+      const borderColor = getCardBorderColor(TaskStatus.ARCHIVED);
+      setCardBorderColor(item, borderColor);
+
+      commentList.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar comentários:", error);
+    const errorMsg = document.createElement("p");
+    errorMsg.textContent = "Não foi possível carregar comentários.";
+    errorMsg.style.color = "#e74c3c";
+    errorMsg.style.margin = "0";
+    commentList.appendChild(errorMsg);
+  }
 }

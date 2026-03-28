@@ -1,8 +1,8 @@
 import { ITask } from "../../tasks/index.js";
 import { IProject } from "../../projects/index.js";
 import { IUser } from "../../models/index.js";
-import { getCardBorderColor, setCardBorderColor } from "../../helpers/index.js";
-import { renderModalEditTask } from "../modal/index.js";
+import { loadTaskDetailPage } from "./TaskDetailPageUI.js";
+import { createTaskCard } from "./TaskCardUI.js";
 import { ProjectService, TaskService, UserService } from "../../services/index.js";
 
 export class TaskDashboardUI {
@@ -23,7 +23,7 @@ export class TaskDashboardUI {
   public async loadAndRender(): Promise<HTMLElement> {
     try {
       await this.loadProjectsAndTasks();
-      this.render();
+      await this.render();
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       this.container.innerHTML = `
@@ -70,7 +70,7 @@ export class TaskDashboardUI {
   /**
    * Renderiza as tarefas em um container com cards agrupadas por projeto
    */
-  private render(): void {
+  private async render(): Promise<void> {
     this.container.innerHTML = "";
     
     if (this.projects.length === 0) {
@@ -83,19 +83,17 @@ export class TaskDashboardUI {
     }
 
     // Renderizar cada projeto com suas tarefas
-    this.projects.forEach(project => {
+    for (const project of this.projects) {
       const tasks = this.tasksByProject.get(project.getId()) || [];
-      const projectSection = this.createProjectSection(project, tasks);
+      const projectSection = await this.createProjectSection(project, tasks);
       this.container.appendChild(projectSection);
-    });
-
-    this.attachEventListeners();
+    }
   }
 
   /**
    * Cria uma seção de projeto com suas tarefas
    */
-  private createProjectSection(project: IProject, tasks: ITask[]): HTMLElement {
+  private async createProjectSection(project: IProject, tasks: ITask[]): Promise<HTMLElement> {
     const section = document.createElement("div");
     section.className = "project-task-section";
 
@@ -116,79 +114,15 @@ export class TaskDashboardUI {
       `;
     } else {
       // Renderizar cards das tarefas
-      tasks.forEach(task => {
-        const taskCard = this.createTaskCard(task);
+      for (const task of tasks) {
+        const taskCard = await createTaskCard(task, this.userMap);
         tasksWrapper.appendChild(taskCard);
-      });
+      }
     }
 
     section.appendChild(header);
     section.appendChild(tasksWrapper);
 
     return section;
-  }
-
-  /**
-   * Cria um card individual para uma tarefa
-   */
-  private createTaskCard(task: ITask): HTMLElement {
-    const card = document.createElement("div");
-    card.className = "task-card";
-    card.setAttribute("data-task-id", task.getId().toString());
-
-    // Obter assignee da tarefa (objetos com user_id)
-    const assignees = task.getAssignees?.() || [];
-    let assigneeName = "Sem atribuição";
-    
-    if (assignees.length > 0) {
-      const firstAssignee = assignees[0];
-      // Obter nome do usuário usando o mapa
-      const user = this.userMap.get(firstAssignee.user_id);
-      if (user) {
-        assigneeName = user.getName().split(" ")[0];
-      }
-    }
-    
-    card.innerHTML = `
-      <h3 class="task-title">${task.getTitle()}</h3>
-      <div class="task-meta">
-        <span class="task-user">${assigneeName}</span>
-        <span class="task-status">${task.getStatus()}</span>
-      </div>
-    `;
-
-    setCardBorderColor(card, getCardBorderColor(task.getStatus()));
-    return card;
-  }
-
-  /**
-   * Adicionar event listeners aos cards
-   */
-  private attachEventListeners(): void {
-    this.container.addEventListener("click", (event: MouseEvent) => {
-      const card = (event.target as HTMLElement).closest(".task-card");
-      if (!card) return;
-
-      const taskId = card.getAttribute("data-task-id");
-      
-      // Procurar a tarefa em todos os projetos
-      let foundTask: ITask | undefined;
-      for (const tasks of this.tasksByProject.values()) {
-        foundTask = tasks.find(t => t.getId().toString() === taskId);
-        if (foundTask) break;
-      }
-
-      if (foundTask) {
-        // Obter o primeiro assignee
-        const assignees = foundTask.getAssignees?.() || [];
-        if (assignees.length > 0) {
-          const assigneeUser = this.userMap.get(assignees[0].user_id);
-          // Abre o modal de edição da tarefa
-          if (assigneeUser) {
-            renderModalEditTask(foundTask, assigneeUser);
-          }
-        }
-      }
-    });
   }
 }

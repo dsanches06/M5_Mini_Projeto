@@ -239,13 +239,16 @@
   position: relative;
 }
 
-.menu-item > a .fa-chevron-down {
-  font-size: 12px;
-  transition: transform 0.3s;
+.menu-item > a .submenu-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
   margin-left: 8px;
+  transform: rotate(0deg);
 }
 
-.menu-item > a.expanded .fa-chevron-down {
+.menu-item > a.expanded .submenu-toggle-icon {
   transform: rotate(180deg);
 }
 
@@ -258,11 +261,13 @@
   color: #333333;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
 }
 
 .submenu[id$="Submenu"].show {
   max-height: 200px;
+  opacity: 1;
 }
 
 .submenu[id$="Submenu"]::before {

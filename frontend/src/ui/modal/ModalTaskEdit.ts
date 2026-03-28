@@ -23,7 +23,7 @@ export async function renderModalEditTask(task: ITask, user?: IUser): Promise<vo
 
   const leftPanel = await renderEditTaskLeftPanel(task, user, modal);
 
-  const rightPanel = renderEditTaskRightPanel(task);
+  const rightPanel = await renderEditTaskRightPanel(task);
 
   const mainContainer = document.createElement("div");
   mainContainer.className = "edit-task-main";

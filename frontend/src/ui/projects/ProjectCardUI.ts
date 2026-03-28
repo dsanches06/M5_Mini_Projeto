@@ -1,12 +1,15 @@
 import { IProject, Project } from "../../projects/index.js";
 import { addElementInContainer, clearContainer } from "../dom/index.js";
 import { renderProjectDashboard } from "./index.js";
+import { renderProjectModal } from "../modal/index.js";
 import {
   ProjectPermissionService,
+  ProjectService,
   UserService,
   TaskService,
   TimeLogService,
 } from "../../services/index.js";
+import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
 import { IUser } from "../../models/index.js";
 import { ITask } from "../../tasks/index.js";
 
@@ -49,9 +52,60 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
   // HEADER (Título e Botões de Opções se existirem)
   const header = document.createElement("div");
   header.className = "card-header";
+  header.style.display = "flex";
+  header.style.alignItems = "center";
+  header.style.justifyContent = "space-between";
+
   const title = document.createElement("h3");
   title.textContent = project.getName();
-  header.appendChild(title);
+
+  const actionButtons = document.createElement("div");
+  actionButtons.style.display = "flex";
+  actionButtons.style.alignItems = "center";
+  actionButtons.style.gap = "0.4rem";
+
+  const editBtn = document.createElement("button");
+  editBtn.className = "icon-button";
+  editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
+  editBtn.title = "Editar projeto";
+  editBtn.setAttribute("aria-label", "Editar projeto");
+  editBtn.style.backgroundColor = "#2196F3";
+  editBtn.style.color = "white";
+  editBtn.style.border = "none";
+  editBtn.style.fontSize = "0.9rem";
+
+  editBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await renderProjectModal(project);
+  });
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "icon-button";
+  deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+  deleteBtn.title = "Apagar projeto";
+  deleteBtn.setAttribute("aria-label", "Apagar projeto");
+  deleteBtn.style.backgroundColor = "#f44336";
+  deleteBtn.style.color = "white";
+  deleteBtn.style.border = "none";
+  deleteBtn.style.fontSize = "0.9rem";
+
+  deleteBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (!await showConfirmDialog(`Tem a certeza que deseja apagar o projeto "${project.getName()}"?`)) {
+      return;
+    }
+    try {
+      await ProjectService.deleteProject(project.getId());
+      showInfoBanner(`Projeto "${project.getName()}" apagado com sucesso.`, "success-banner");
+      card.remove();
+    } catch (error) {
+      showInfoBanner(`Erro ao apagar projeto: ${error}`, "error-banner");
+    }
+  });
+
+  actionButtons.appendChild(editBtn);
+  actionButtons.appendChild(deleteBtn);
+  header.append(title, actionButtons);
 
   // STATUS (Badge)
   const status = document.createElement("span");

@@ -1,18 +1,34 @@
 import { addElementInContainer } from "../dom/index.js";
-import { TaskService, UserService } from "../../services/index.js";
+import { TaskService, UserService, SprintService } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
+import { renderSprintModal } from "../modal/index.js";
+import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
 
 /* Renderiza os sprints em cards na Grid principal */
-export async function renderSprintsCards(sprints: any[]): Promise<void> {
-  let gridContainer = document.querySelector(
-    "#sprintsGridContainer",
-  ) as HTMLElement;
+export async function renderSprintsCards(
+  sprints: any[],
+  targetContainer?: HTMLElement,
+): Promise<void> {
+  let gridContainer: HTMLElement | null = null;
+
+  if (targetContainer) {
+    gridContainer = targetContainer.querySelector("#sprintsGridContainer");
+  }
+
+  if (!gridContainer) {
+    gridContainer = document.querySelector("#sprintsGridContainer") as HTMLElement;
+  }
 
   if (!gridContainer) {
     gridContainer = document.createElement("div");
     gridContainer.id = "sprintsGridContainer";
     gridContainer.className = "sprints-grid-container";
-    addElementInContainer("#containerSection", gridContainer);
+
+    if (targetContainer) {
+      targetContainer.appendChild(gridContainer);
+    } else {
+      addElementInContainer("#containerSection", gridContainer);
+    }
   }
 
   gridContainer.innerHTML = "";
@@ -20,7 +36,6 @@ export async function renderSprintsCards(sprints: any[]): Promise<void> {
   for (const sprint of sprints) {
     const card = await createSprintCard(sprint);
     card.style.cursor = "pointer";
-
     gridContainer.appendChild(card);
   }
 }
@@ -30,12 +45,54 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
   const card = document.createElement("div");
   card.className = "sprint-card";
 
-  // HEADER (Título)
+  // HEADER (Título e ações)
   const header = document.createElement("div");
   header.className = "card-header";
+
   const title = document.createElement("h3");
   title.textContent = sprint.name || "Sprint sem nome";
+
+  const headerActions = document.createElement("div");
+  headerActions.className = "sprint-card-actions";
+
+  const editBtn = document.createElement("button");
+  editBtn.className = "icon-button";
+  editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
+  editBtn.title = "Editar sprint";
+  editBtn.setAttribute("aria-label", "Editar sprint");
+  editBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const projectId = sprint.projectId || sprint.project_id || sprint.project?.id;
+    if (!projectId) {
+      showInfoBanner("Projeto não encontrado para este sprint.", "error-banner");
+      return;
+    }
+    await renderSprintModal(projectId, sprint);
+  });
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "icon-button";
+  deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+  deleteBtn.title = "Excluir sprint";
+  deleteBtn.setAttribute("aria-label", "Excluir sprint");
+  deleteBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (await showConfirmDialog(`Tem certeza que deseja excluir o sprint "${sprint.name}"?`)) {
+      try {
+        await SprintService.deleteSprint(sprint.id);
+        showInfoBanner(`Sprint "${sprint.name}" removido com sucesso.`, "success-banner");
+        const currentSprints = await SprintService.getSprints();
+        await renderSprintsCards(currentSprints);
+      } catch (error) {
+        showInfoBanner(`Erro ao excluir sprint: ${error}`, "error-banner");
+      }
+    }
+  });
+
+  headerActions.appendChild(editBtn);
+  headerActions.appendChild(deleteBtn);
   header.appendChild(title);
+  header.appendChild(headerActions);
 
   // STATUS (Badge)
   const status = document.createElement("span");
@@ -135,6 +192,11 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
   }
 
   footer.appendChild(avatarStack);
+
+  const actions = document.createElement("div");
+  actions.className = "sprint-card-more-info";
+  actions.appendChild(avatarStack);
+  footer.appendChild(actions);
 
   // Adicionar ao card na ordem correta
   card.appendChild(header);

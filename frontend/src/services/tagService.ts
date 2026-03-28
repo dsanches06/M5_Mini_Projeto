@@ -12,6 +12,11 @@ export class TagService {
     return await fetchTags.getTagById(id);
   }
 
+  /* Função para obter tarefas associadas a uma tag */
+  static async getTagTasks(id: number): Promise<any[]> {
+    return await fetchTags.getTasksByTag(id);
+  }
+
   /* Função para criar uma nova tag */
   static async createTag(tag: any): Promise<any | null> {
     return await fetchTags.createTag(tag);

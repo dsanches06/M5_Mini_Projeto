@@ -178,7 +178,7 @@ export const getTaskTags = async (req, res) => {
     const tags = await taskService.getTagsByTaskId(taskId);
 
     const tagDetails = await Promise.all(
-      tags.map((relation) => tagService.getTagById(relation.label_id)),
+      tags.map((relation) => tagService.getTagById(relation.tag_id)),
     );
     res.json(tagDetails);
   } catch (error) {

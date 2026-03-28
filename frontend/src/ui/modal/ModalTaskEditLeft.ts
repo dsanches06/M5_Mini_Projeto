@@ -4,6 +4,7 @@ import {
   UserService,
   TaskService,
   TaskAssigneeService,
+  TagService,
 } from "../../services/index.js";
 import { GlobalValidators, StateTransitions } from "../../utils/index.js";
 import {
@@ -26,6 +27,8 @@ function setupEditTaskFormLogic(
   errors: {
     titleErr: HTMLElement;
   },
+  tagCheckboxes: HTMLInputElement[],
+  initialTagIds: Set<number>,
   modal: HTMLElement,
   task: ITask,
   user?: IUser,
@@ -69,6 +72,7 @@ function setupEditTaskFormLogic(
     } else {
       await handleAssign(userValue, task, { ...fields, userAssign: fields.userAssign }, user);
     }
+    await handleTagChange(task, tagCheckboxes, initialTagIds);
     modal.remove();
   };
 }
@@ -314,6 +318,36 @@ async function handleAssign(
   }
 }
 
+async function handleTagChange(
+  task: ITask,
+  tagCheckboxes: HTMLInputElement[],
+  initialTagIds: Set<number>,
+) {
+  const selectedTagIds = tagCheckboxes
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) => Number(checkbox.value));
+
+  const tagsToAdd = selectedTagIds.filter((id) => !initialTagIds.has(id));
+  const tagsToRemove = Array.from(initialTagIds).filter(
+    (id) => !selectedTagIds.includes(id),
+  );
+
+  try {
+    await Promise.all(
+      tagsToAdd.map((tagId) => TaskService.addTagToTask(task.getId(), { tagId })),
+    );
+    await Promise.all(
+      tagsToRemove.map((tagId) => TaskService.removeTagFromTask(task.getId(), tagId)),
+    );
+  } catch (error) {
+    console.error("Erro ao atualizar tags da tarefa:", error);
+    showInfoBanner(
+      `ERRO: Não foi possível atualizar as tags da tarefa.`,
+      "error-banner",
+    );
+  }
+}
+
 export async function renderEditTaskLeftPanel(
   task: ITask,
   user: IUser | undefined,
@@ -448,6 +482,71 @@ export async function renderEditTaskLeftPanel(
   
   userGroup.append(userLabel, userSelect);
 
+  const availableTags = await TagService.getTags();
+  const initialTagIds = new Set<number>();
+  const tagCheckboxes: HTMLInputElement[] = [];
+
+  let taskTags: any[] = [];
+  try {
+    taskTags = await TaskService.getTaskTags(task.getId());
+    taskTags.forEach((tag) => initialTagIds.add(tag.id));
+  } catch (error) {
+    console.warn("Erro ao carregar tags da tarefa:", error);
+  }
+
+  const tagSection = document.createElement("section");
+  tagSection.className = "form-group";
+
+  const tagLabel = document.createElement("label");
+  tagLabel.textContent = "Tags";
+  tagLabel.setAttribute("for", "editTaskTags");
+
+  const tagContainer = document.createElement("div");
+  tagContainer.style.display = "flex";
+  tagContainer.style.flexWrap = "wrap";
+  tagContainer.style.gap = "0.5rem";
+  tagContainer.style.paddingTop = "0.4rem";
+
+  if (availableTags.length === 0) {
+    const noTags = document.createElement("p");
+    noTags.textContent = "Nenhuma tag disponível. Crie tags primeiro.";
+    noTags.style.margin = "0";
+    noTags.style.color = "#777";
+    tagContainer.appendChild(noTags);
+  } else {
+    availableTags.forEach((tag) => {
+      const checkboxWrapper = document.createElement("label");
+      checkboxWrapper.style.display = "inline-flex";
+      checkboxWrapper.style.alignItems = "center";
+      checkboxWrapper.style.gap = "0.25rem";
+      checkboxWrapper.style.border = "1px solid #ccc";
+      checkboxWrapper.style.borderRadius = "4px";
+      checkboxWrapper.style.padding = "0.3rem 0.5rem";
+      checkboxWrapper.style.backgroundColor = "#fff";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = String(tag.id);
+      checkbox.checked = initialTagIds.has(tag.id);
+      checkboxWrapper.appendChild(checkbox);
+
+      const tagName = document.createElement("span");
+      tagName.textContent = tag.name;
+      tagName.style.fontSize = "0.85rem";
+      tagName.style.color = "#333";
+      checkboxWrapper.appendChild(tagName);
+
+      tagContainer.appendChild(checkboxWrapper);
+      tagCheckboxes.push(checkbox);
+    });
+  }
+
+  const tagErrorSection = document.createElement("section");
+  tagErrorSection.id = "editTaskTagsError";
+  tagErrorSection.className = "error-message";
+
+  tagSection.append(tagLabel, tagContainer, tagErrorSection);
+
   const submitBtn = createButton(
     "buttonEditTask",
     "Guardar",
@@ -459,6 +558,7 @@ export async function renderEditTaskLeftPanel(
     descriptionGroup,
     statusGroup,
     userGroup,
+    tagSection,
     submitBtn,
   );
 
@@ -478,6 +578,8 @@ export async function renderEditTaskLeftPanel(
     {
       titleErr: titleData.errorSection,
     },
+    tagCheckboxes,
+    initialTagIds,
     modal,
     task,
     user,

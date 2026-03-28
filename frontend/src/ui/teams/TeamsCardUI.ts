@@ -1,6 +1,8 @@
 import { addElementInContainer, clearContainer } from "../dom/index.js";
-import { UserService, TeamMemberService } from "../../services/index.js";
+import { UserService, TeamMemberService, TaskAssigneeService, TeamService } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
+import { renderTeamModal } from "../modal/index.js";
+import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
 
 /* Renderiza as equipes em cards na Grid principal */
 export async function renderTeamsCards(teams: any[]): Promise<void> {
@@ -30,19 +32,70 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
   const card = document.createElement("div");
   card.className = "team-card";
 
-  // HEADER (Título)
+  const cardContent = document.createElement("div");
+  cardContent.className = "team-card-content";
+
+  const mainSection = document.createElement("div");
+  mainSection.className = "team-card-main";
+
   const header = document.createElement("div");
   header.className = "card-header";
+
   const title = document.createElement("h3");
   title.textContent = team.name || "Equipe sem nome";
-  header.appendChild(title);
 
-  // DESCRIPTION
+  const actions = document.createElement("div");
+  actions.className = "team-card-actions";
+
+  const editBtn = document.createElement("button");
+  editBtn.className = "icon-button";
+  editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
+  editBtn.title = "Editar equipe";
+  editBtn.setAttribute("aria-label", "Editar equipe");
+  editBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    await renderTeamModal(team);
+  });
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "icon-button";
+  deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+  deleteBtn.title = "Excluir equipe";
+  deleteBtn.setAttribute("aria-label", "Excluir equipe");
+  deleteBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (await showConfirmDialog(`Tem certeza que deseja excluir a equipe "${team.name}"?`)) {
+      try {
+        await TeamService.deleteTeam(team.id);
+        showInfoBanner(`Equipe "${team.name}" removida com sucesso.`, "success-banner");
+        const currentTeams = await TeamService.getTeams();
+        await renderTeamsCards(currentTeams);
+      } catch (error) {
+        showInfoBanner(`Erro ao excluir equipe: ${error}`, "error-banner");
+      }
+    }
+  });
+
+  const detailsBtn = document.createElement("button");
+  detailsBtn.className = "icon-button";
+  detailsBtn.innerHTML = `<i class="fas fa-users-cog"></i>`;
+  detailsBtn.title = "Gerenciar equipe";
+  detailsBtn.setAttribute("aria-label", "Gerenciar equipe");
+  detailsBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    await renderTeamDetailsModal(team);
+  });
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+  actions.appendChild(detailsBtn);
+  header.appendChild(title);
+  mainSection.appendChild(header);
+
   const desc = document.createElement("p");
   desc.className = "team-desc";
   desc.textContent = team.description || "Sem descrição disponível";
 
-  // INFO (Container Flex)
   const infoContainer = document.createElement("div");
   infoContainer.className = "team-info";
 
@@ -64,28 +117,21 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
   avatarStack.className = "avatar-stack";
 
   try {
-    // Buscar TODOS os team members da API
     const allTeamMembers = await TeamMemberService.getTeamMembers();
-    
-    // Filtrar membros da equipe atual
     const teamMembers = allTeamMembers.filter(
-      (member: any) => member.team_id === team.id
+      (member: any) => member.team_id === team.id,
     );
 
-    // Se não há membros, mostrar 0
     memberCount.textContent = `Membros: ${teamMembers.length}`;
 
     if (teamMembers.length > 0) {
-      // Buscar todos os users para pegar género e nome
       const allUsers = await UserService.getUsers();
       const userMap = new Map<number, IUser>();
       allUsers.forEach((user: IUser) => {
         userMap.set(user.getId(), user);
       });
 
-      // Construir array de membros com dados dos users
       const members: Array<{ userId: number; gender: string; user: IUser }> = [];
-
       teamMembers.forEach((member: any) => {
         const user = userMap.get(member.user_id);
         if (user) {
@@ -97,15 +143,13 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
         }
       });
 
-      // Renderizar avatares (máximo 4)
       const displayLimit = 4;
       members.slice(0, displayLimit).forEach((member, index) => {
         const img = document.createElement("img");
         img.className = "avatar-img";
 
-        // Selecionar pasta baseado no gender
         const folder = member.gender === "Female" ? "woman" : "man";
-        const randomValue = (index % 4) + 1; // 1-4
+        const randomValue = (index % 4) + 1;
         img.src = `./src/assets/${folder}-${randomValue}.png`;
         img.alt = member.user.getName();
         img.title = member.user.getName();
@@ -113,7 +157,6 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
         avatarStack.appendChild(img);
       });
 
-      // Mostrar "+X" se houver mais membros
       if (members.length > displayLimit) {
         const more = document.createElement("span");
         more.className = "avatar-more";
@@ -128,11 +171,234 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
 
   footer.appendChild(avatarStack);
 
-  // Adicionar ao card na ordem correta
-  card.appendChild(header);
-  card.appendChild(desc);
-  card.appendChild(infoContainer);
-  card.appendChild(footer);
+  mainSection.appendChild(desc);
+  mainSection.appendChild(infoContainer);
+  mainSection.appendChild(footer);
+  cardContent.appendChild(mainSection);
+  cardContent.appendChild(actions);
+  card.appendChild(cardContent);
 
   return card;
 }
+
+async function renderTeamDetailsModal(team: any): Promise<void> {
+  const modal = document.createElement("section") as HTMLElement;
+  modal.className = "modal";
+  modal.id = "modalTeamDetails";
+
+  const content = document.createElement("div");
+  content.className = "modal-content";
+  content.style.maxWidth = "700px";
+  content.style.padding = "1.5rem";
+  content.style.position = "relative";
+
+  const closeBtn = document.createElement("span");
+  closeBtn.className = "close";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.style.position = "absolute";
+  closeBtn.style.top = "1rem";
+  closeBtn.style.right = "1rem";
+  closeBtn.style.cursor = "pointer";
+  closeBtn.style.fontSize = "1.5rem";
+  closeBtn.onclick = () => modal.remove();
+
+  const title = document.createElement("h2");
+  title.textContent = team.name || "Equipe";
+  title.style.marginTop = "0";
+
+  const description = document.createElement("p");
+  description.textContent = team.description || "Sem descrição disponível.";
+  description.style.color = "#555";
+
+  const createdDate = document.createElement("p");
+  const dateValue = team.createdAt || team.created_at || new Date();
+  createdDate.textContent = `Criada em: ${new Date(dateValue).toLocaleDateString("pt-BR")}`;
+  createdDate.style.color = "#777";
+  createdDate.style.marginTop = "0.25rem";
+
+  const membersSection = document.createElement("div");
+  membersSection.style.marginTop = "1rem";
+
+  const membersHeader = document.createElement("div");
+  membersHeader.style.display = "flex";
+  membersHeader.style.justifyContent = "space-between";
+  membersHeader.style.alignItems = "center";
+
+  const membersTitle = document.createElement("h3");
+  membersTitle.textContent = "Membros da equipe";
+  membersTitle.style.margin = "0";
+
+  const addMemberBtn = document.createElement("button");
+  addMemberBtn.textContent = "+ Adicionar membro";
+  addMemberBtn.style.padding = "0.4rem 0.9rem";
+  addMemberBtn.style.border = "none";
+  addMemberBtn.style.borderRadius = "4px";
+  addMemberBtn.style.cursor = "pointer";
+  addMemberBtn.style.backgroundColor = "#4CAF50";
+  addMemberBtn.style.color = "white";
+  addMemberBtn.style.fontSize = "0.85rem";
+
+  membersHeader.appendChild(membersTitle);
+  membersHeader.appendChild(addMemberBtn);
+
+  membersSection.appendChild(membersHeader);
+
+  const membersList = document.createElement("div");
+  membersList.style.display = "grid";
+  membersList.style.gridTemplateColumns = "repeat(auto-fit, minmax(180px, 1fr))";
+  membersList.style.gap = "0.75rem";
+  membersList.style.marginTop = "0.75rem";
+
+  membersSection.appendChild(membersList);
+
+  const candidatesSection = document.createElement("div");
+  candidatesSection.style.marginTop = "1rem";
+
+  const candidateLabel = document.createElement("label");
+  candidateLabel.textContent = "Usuários com tarefas atribuídas";
+  candidateLabel.style.display = "block";
+  candidateLabel.style.marginBottom = "0.5rem";
+  candidatesSection.appendChild(candidateLabel);
+
+  const candidateSelect = document.createElement("select") as HTMLSelectElement;
+  candidateSelect.style.width = "100%";
+  candidateSelect.style.padding = "0.6rem";
+  candidateSelect.style.border = "1px solid #ccc";
+  candidateSelect.style.borderRadius = "4px";
+
+  candidatesSection.appendChild(candidateSelect);
+
+  const addMemberConfirm = document.createElement("button");
+  addMemberConfirm.textContent = "Adicionar membro à equipe";
+  addMemberConfirm.style.marginTop = "0.75rem";
+  addMemberConfirm.style.padding = "0.6rem 1rem";
+  addMemberConfirm.style.border = "none";
+  addMemberConfirm.style.borderRadius = "4px";
+  addMemberConfirm.style.cursor = "pointer";
+  addMemberConfirm.style.backgroundColor = "#0077CC";
+  addMemberConfirm.style.color = "white";
+  addMemberConfirm.disabled = true;
+
+  candidatesSection.appendChild(addMemberConfirm);
+
+  const reloadTeamDetails = async () => {
+    membersList.innerHTML = "";
+    candidateSelect.innerHTML = "";
+    addMemberConfirm.disabled = true;
+
+    try {
+      const allTeamMembers = await TeamMemberService.getTeamMembers();
+      const teamMembers = allTeamMembers.filter(
+        (member: any) => member.team_id === team.id,
+      );
+      const memberIds = new Set(teamMembers.map((member: any) => member.user_id));
+
+      const allUsers = await UserService.getUsers();
+      const allAssignees = await TaskAssigneeService.getTaskAssignees();
+      const assigneeUserIds = new Set(allAssignees.map((assignee) => assignee.user_id));
+
+      const memberUsers = allUsers.filter((user: IUser) => memberIds.has(user.getId()));
+      if (memberUsers.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "Nenhum membro cadastrado nesta equipe.";
+        empty.style.color = "#777";
+        membersList.appendChild(empty);
+      } else {
+        memberUsers.forEach((user) => {
+          const memberCard = document.createElement("div");
+          memberCard.style.backgroundColor = "#f5f5f5";
+          memberCard.style.border = "1px solid #ddd";
+          memberCard.style.borderRadius = "4px";
+          memberCard.style.padding = "0.75rem";
+
+          const memberName = document.createElement("strong");
+          memberName.textContent = user.getName();
+          memberName.style.display = "block";
+          memberName.style.marginBottom = "0.25rem";
+
+          const memberEmail = document.createElement("span");
+          memberEmail.textContent = (user as any).getEmail?.() || "Email indisponível";
+          memberEmail.style.color = "#555";
+          memberEmail.style.fontSize = "0.9rem";
+
+          memberCard.appendChild(memberName);
+          memberCard.appendChild(memberEmail);
+          membersList.appendChild(memberCard);
+        });
+      }
+
+      const candidateUsers = allUsers.filter(
+        (user: IUser) =>
+          assigneeUserIds.has(user.getId()) && !memberIds.has(user.getId()),
+      );
+
+      if (candidateUsers.length === 0) {
+        const option = document.createElement("option");
+        option.textContent = "Nenhum usuário elegível encontrado";
+        option.value = "";
+        candidateSelect.appendChild(option);
+        candidateSelect.disabled = true;
+      } else {
+        const placeholder = document.createElement("option");
+        placeholder.textContent = "Selecione um usuário...";
+        placeholder.value = "";
+        candidateSelect.appendChild(placeholder);
+        candidateSelect.disabled = false;
+
+        candidateUsers.forEach((user: IUser) => {
+          const option = document.createElement("option");
+          option.value = String(user.getId());
+          option.textContent = user.getName();
+          candidateSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao recarregar dados de equipe:", error);
+      const errorMsg = document.createElement("p");
+      errorMsg.textContent = "Erro ao carregar membros ou candidatos.";
+      errorMsg.style.color = "#e74c3c";
+      membersList.appendChild(errorMsg);
+    }
+  };
+
+  candidateSelect.addEventListener("change", () => {
+    addMemberConfirm.disabled = candidateSelect.value === "";
+  });
+
+  addMemberConfirm.addEventListener("click", async () => {
+    const selectedUserId = Number(candidateSelect.value);
+    if (!selectedUserId) return;
+
+    try {
+      await TeamMemberService.createTeamMember({
+        team_id: team.id,
+        user_id: selectedUserId,
+      });
+      showInfoBanner("Membro adicionado à equipe com sucesso.", "success-banner");
+      await reloadTeamDetails();
+    } catch (error) {
+      console.error("Erro ao adicionar membro de equipe:", error);
+      showInfoBanner("Erro ao adicionar membro de equipe.", "error-banner");
+    }
+  });
+
+  addMemberBtn.addEventListener("click", () => {
+    candidateSelect.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  content.appendChild(closeBtn);
+  content.appendChild(title);
+  content.appendChild(description);
+  content.appendChild(createdDate);
+  content.appendChild(membersSection);
+  content.appendChild(candidatesSection);
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) modal.remove();
+  });
+
+  await reloadTeamDetails();
+}
+

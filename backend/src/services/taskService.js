@@ -180,6 +180,14 @@ export const getTagsByTaskId = async (taskId) => {
   return relations;
 };
 
+export const getTasksByTagId = async (tagId) => {
+  const [tasks] = await db.query(
+    "SELECT t.* FROM task t INNER JOIN tags_task tt ON t.id = tt.task_id WHERE tt.tag_id = ?",
+    [tagId],
+  );
+  return tasks.map(mapTaskAPIResponse);
+};
+
 /* Função para remover etiqueta de todas as tarefas */
 export const removeTagFromAllTasks = async (tagId) => {
   const [result] = await db.query("DELETE FROM tags_task WHERE tag_id = ?", [

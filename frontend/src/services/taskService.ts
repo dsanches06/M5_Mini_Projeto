@@ -101,6 +101,11 @@ export class TaskService {
     return await fetchTasks.addTagToTask(taskId, tagData);
   }
 
+  /* Remove uma tag de uma tarefa na API */
+  static async removeTagFromTask(taskId: number, tagId: number): Promise<boolean> {
+    return await fetchTasks.removeTagFromTask(taskId, tagId);
+  }
+
   /* Cria um comentário em uma tarefa na API */
   static async createTaskComment(
     taskId: number,

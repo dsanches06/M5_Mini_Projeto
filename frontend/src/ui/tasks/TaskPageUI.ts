@@ -1,5 +1,6 @@
 import { TaskService } from "../../services/index.js";
-import { showTasksCounters, TaskDashboardUI } from "./index.js";
+import { showTasksCounters } from "./TaskCountersUI.js";
+import { TaskDashboardUI } from "./TaskDashboardUI.js";
 import {
   addElementInContainer,
   createSection,

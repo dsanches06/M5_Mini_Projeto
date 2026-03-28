@@ -1,5 +1,6 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { TagAPIResponse } from "./dto/index.js";
+import { BASE_URL } from "./utils/index.js";
+import { TaskAPIResponse, TagAPIResponse } from "./dto/index.js";
 
 const ENDPOINT = "tags";
 
@@ -34,4 +35,18 @@ export async function updateTag(
 /* Função para deletar uma tag */
 export async function deleteTag(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
+}
+
+export async function getTasksByTag(tagId: number): Promise<TaskAPIResponse[]> {
+  try {
+    const res = await fetch(`${BASE_URL}${ENDPOINT}/${tagId}/tasks`);
+    if (!res.ok) {
+      throw new Error(`ERRO: Não foi possível obter tarefas da tag ${tagId} - ${res.status}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao obter tarefas da tag:", error);
+    return [];
+  }
 }

@@ -5,6 +5,7 @@ import {
   loadInitialStatistics,
   loadInitialTeams,
   loadInitialSprints,
+  loadInitialTags,
 } from "./src/ui/gestUserTask/index.js";
 import { activateMenu } from "./src/ui/dom/index.js";
 
@@ -76,6 +77,17 @@ allMenuSprints.forEach((button) => {
     e.preventDefault();
     activateMenu("#menuSprints");
     await loadInitialSprints();
+  });
+});
+
+// menuTags
+const allMenuTags = document.querySelectorAll(
+  "#menuTags",
+) as NodeListOf<HTMLAnchorElement>;
+allMenuTags.forEach((button) => {
+  button.addEventListener("click", async () => {
+    activateMenu("#menuTags");
+    await loadInitialTags();
   });
 });
 
