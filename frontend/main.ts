@@ -3,16 +3,35 @@ import {
   loadAInitialTasks,
   loadInitialProjects,
   loadInitialStatistics,
+  loadInitialTeams,
+  loadInitialSprints,
 } from "./src/ui/gestUserTask/index.js";
 import { activateMenu } from "./src/ui/dom/index.js";
-import { setupCompleteStatisticsPage } from "./src/ui/statistics/StatisticsPageUI.js";
-import { ProjectService } from "./src/services/index.js";
 
 //inicializar a aplicação
 window.onload = async () => {
   activateMenu("#menuProjects");
   await loadInitialProjects();
+
+  // Configurar submenu de Projetos
+  setupProjectsSubmenu();
 };
+
+// Configurar o submenu de Projetos
+async function setupProjectsSubmenu(): Promise<void> {
+  const projectsBtn = document.querySelector("#menuProjects") as HTMLElement;
+  const submenu = document.querySelector("#projectsSubmenu") as HTMLElement;
+
+  if (projectsBtn && submenu) {
+    projectsBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      activateMenu("#menuProjects");
+      await loadInitialProjects();
+      submenu.classList.toggle("show");
+      projectsBtn.classList.toggle("expanded");
+    });
+  }
+}
 
 //obter o menu task
 const allMenuUsers = document.querySelectorAll(
@@ -36,14 +55,27 @@ allMenuTasks.forEach((button) => {
   });
 });
 
-// menuProjects
-const allMenuProjects = document.querySelectorAll(
-  "#menuProjects",
+// menuTeams
+const allMenuTeams = document.querySelectorAll(
+  "#menuTeams",
 ) as NodeListOf<HTMLAnchorElement>;
-allMenuProjects.forEach((button) => {
-  button.addEventListener("click", async () => {
-    activateMenu("#menuProjects");
-    await loadInitialProjects();
+allMenuTeams.forEach((button) => {
+  button.addEventListener("click", async (e) => {
+    e.preventDefault();
+    activateMenu("#menuTeams");
+    await loadInitialTeams();
+  });
+});
+
+// menuSprints
+const allMenuSprints = document.querySelectorAll(
+  "#menuSprints",
+) as NodeListOf<HTMLAnchorElement>;
+allMenuSprints.forEach((button) => {
+  button.addEventListener("click", async (e) => {
+    e.preventDefault();
+    activateMenu("#menuSprints");
+    await loadInitialSprints();
   });
 });
 

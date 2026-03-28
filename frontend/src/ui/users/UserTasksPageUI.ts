@@ -101,7 +101,7 @@ export async function loadUserTasksPage(
     const addTasksBtn = document.querySelector("#addTasksBtn") as HTMLElement;
     if (addTasksBtn) {
       addTasksBtn.addEventListener("click", () => {
-        renderTaskModal(user);
+        //renderTaskModal(user);
       });
     } else {
       console.warn("Elemento #addTasksBtn não foi renderizado no DOM.");

@@ -1,11 +1,5 @@
-/**
- * Exemplo de uso do StatisticPageUI
- * 
- * Este arquivo demonstra como usar a classe StatisticPageUI para exibir
- * múltiplos tipos de gráficos em sua aplicação.
- */
-
 import { StatisticPageUI } from "./StatisticUI.js";
+import { clearContainer, addElementInContainer } from "../dom/index.js";
 
 // ============================================
 // EXEMPLO 1: Inicialização básica
@@ -13,16 +7,18 @@ import { StatisticPageUI } from "./StatisticUI.js";
 export function initializeStatisticsPage(): void {
   // Certifique-se de que o HTML contém um elemento com id="statistics-container"
   const ui = new StatisticPageUI("statistics-container");
-  
+
   // Renderizar todos os gráficos
   ui.render();
-
 }
 
 // ============================================
 // EXEMPLO 2: Atualizar gráficos em tempo real
 // ============================================
-export function setupAutoUpdate(ui: StatisticPageUI, intervalMs: number = 5000): void {
+export function setupAutoUpdate(
+  ui: StatisticPageUI,
+  intervalMs: number = 5000,
+): void {
   setInterval(() => {
     ui.updateAllCharts();
   }, intervalMs);
@@ -31,7 +27,10 @@ export function setupAutoUpdate(ui: StatisticPageUI, intervalMs: number = 5000):
 // ============================================
 // EXEMPLO 3: Atualizar um gráfico específico
 // ============================================
-export function updateSpecificChart(ui: StatisticPageUI, chartName: string): void {
+export function updateSpecificChart(
+  ui: StatisticPageUI,
+  chartName: string,
+): void {
   // Possíveis valores: "overview", "status", "completion", "comparison"
   ui.updateChart(chartName);
 }
@@ -41,10 +40,10 @@ export function updateSpecificChart(ui: StatisticPageUI, chartName: string): voi
 // ============================================
 export function exportStatisticsData(ui: StatisticPageUI) {
   const data = ui.exportChartData();
-  
+
   // Converter para JSON e salvar/enviar
   const jsonData = JSON.stringify(data, null, 2);
-  
+
   return data;
 }
 
@@ -61,7 +60,7 @@ export function addControlButtons(ui: StatisticPageUI): void {
     margin-top: 2rem;
     flex-wrap: wrap;
   `;
-  
+
   // Botão para atualizar todos os gráficos
   const updateAllBtn = document.createElement("button");
   updateAllBtn.textContent = "🔄 Atualizar Todos";
@@ -84,7 +83,7 @@ export function addControlButtons(ui: StatisticPageUI): void {
   updateAllBtn.addEventListener("click", () => {
     ui.updateAllCharts();
   });
-  
+
   // Botão para exportar dados
   const exportBtn = document.createElement("button");
   exportBtn.textContent = "📥 Exportar Dados";
@@ -109,10 +108,10 @@ export function addControlButtons(ui: StatisticPageUI): void {
     // Opcional: Fazer download do arquivo JSON
     downloadJSON(data, "statistics.json");
   });
-  
+
   controlDiv.appendChild(updateAllBtn);
   controlDiv.appendChild(exportBtn);
-  
+
   const container = document.getElementById("statistics-container");
   if (container) {
     container.parentElement?.appendChild(controlDiv);
@@ -141,11 +140,11 @@ export function setupEventListeners(ui: StatisticPageUI): void {
   document.addEventListener("taskCreated", () => {
     ui.updateAllCharts();
   });
-  
+
   document.addEventListener("taskCompleted", () => {
     ui.updateAllCharts();
   });
-  
+
   document.addEventListener("taskDeleted", () => {
     ui.updateAllCharts();
   });
@@ -158,14 +157,14 @@ export function setupCompleteStatisticsPage(): void {
   try {
     // Limpar o container principal
     clearContainer("#containerSection");
-    
+
     // Criar container para as estatísticas
     const statisticsContainer = document.createElement("div");
     statisticsContainer.id = "statistics-container";
-    
+
     // Adicionar ao documento
     addElementInContainer("#containerSection", statisticsContainer);
-    
+
     // Importar CSS se ainda não estiver carregado
     if (!document.querySelector('link[href*="statistics.css"]')) {
       const link = document.createElement("link");
@@ -173,20 +172,19 @@ export function setupCompleteStatisticsPage(): void {
       link.href = "./src/styles/statistics.css";
       document.head.appendChild(link);
     }
-    
+
     // Inicializar UI
     const ui = new StatisticPageUI("statistics-container");
     ui.render();
-    
+
     // Adicionar controles
     addControlButtons(ui);
-    
+
     // Configurar auto-atualização (a cada 30 segundos)
     setupAutoUpdate(ui, 30000);
-    
+
     // Configurar event listeners
     setupEventListeners(ui);
-    
   } catch (error) {
     console.error("❌ Erro ao configurar dashboard:", error);
   }
@@ -197,23 +195,23 @@ export function setupCompleteStatisticsPage(): void {
 // ============================================
 /**
  * A classe StatisticPageUI suporta os seguintes tipos de gráficos:
- * 
+ *
  * 1. BAR CHART (Gráfico de Barras)
  *    - Ideal para comparar valores entre categorias
  *    - Usado em: Visão geral de tarefas
- * 
+ *
  * 2. PIE CHART (Gráfico de Pizza)
  *    - Ideal para mostrar proporções
  *    - Usado em: Distribuição por status
- * 
+ *
  * 3. LINE CHART (Gráfico de Linhas)
  *    - Ideal para mostrar tendências ao longo do tempo
  *    - Usado em: Comparação Ativas vs Completas
- * 
+ *
  * 4. DOUGHNUT CHART (Gráfico de Rosca)
  *    - Similar ao gráfico de pizza, mas com um furo no centro
  *    - Usado em: Taxa de conclusão
- * 
+ *
  * Todos os gráficos são desenhados usando HTML5 Canvas,
  * sem dependências externas, garantindo máxima compatibilidade.
  */

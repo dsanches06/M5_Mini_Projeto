@@ -1,7 +1,6 @@
-import { Project } from "../../projects/index.js";
+import { SprintService, ProjectStatusService, ProjectService } from "../../services/index.js";
 import { GlobalValidators } from "../../utils/index.js";
-import { ProjectService } from "../../services/index.js";
-import { loadProjectsPage } from "../projects/ProjectPageUI.js";
+import { loadSprintsPage } from "../sprints/SprintsPageUI.js";
 
 import {
   createButton,
@@ -12,13 +11,14 @@ import {
 } from "../dom/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 
-function setupProjectFormLogic(
+function setupSprintFormLogic(
   form: HTMLFormElement,
   fields: {
     name: HTMLInputElement;
     description: HTMLTextAreaElement;
     startDate: HTMLInputElement;
     endDate: HTMLInputElement;
+    statusId: HTMLSelectElement;
   },
   errors: {
     nameErr: HTMLElement;
@@ -27,7 +27,8 @@ function setupProjectFormLogic(
     endDateErr: HTMLElement;
   },
   modal: HTMLElement,
-  projectToEdit?: any,
+  projectId: number,
+  sprintToEdit?: any,
 ): void {
   form.onsubmit = async (e: Event) => {
     e.preventDefault();
@@ -48,13 +49,13 @@ function setupProjectFormLogic(
 
     // Validações
     if (!GlobalValidators.isNonEmpty(name.trim())) {
-      errors.nameErr.textContent = "O nome do projeto não pode estar vazio.";
+      errors.nameErr.textContent = "O nome do sprint não pode estar vazio.";
       isValid = false;
     }
 
     if (!GlobalValidators.minLength(name.trim(), 3)) {
       errors.nameErr.textContent =
-        "O nome do projeto deve ter pelo menos 3 caracteres.";
+        "O nome do sprint deve ter pelo menos 3 caracteres.";
       isValid = false;
     }
 
@@ -64,7 +65,7 @@ function setupProjectFormLogic(
     }
 
     if (!GlobalValidators.isNonEmpty(endDate)) {
-      errors.endDateErr.textContent = "A data de fim esperada é obrigatória.";
+      errors.endDateErr.textContent = "A data de fim é obrigatória.";
       isValid = false;
     }
 
@@ -80,51 +81,49 @@ function setupProjectFormLogic(
 
     // Verificação Final
     if (isValid) {
-      // o estado inicial do projeto será sempre "Ativo" (ID 1) ao ser criado
-      const projectStatusId = 1;
-
-      // Criar objeto do projeto (ID 0 será gerado pela base de dados)
-      const projectData = new Project(
-        projectToEdit?.id || 0, // ID existente ou placeholder para novo
-        name.trim(),
-        description || "",
-        projectStatusId, // Usar o ID do status selecionado
-        new Date(startDate),
-        new Date(endDate),
-      );
+      // Criar objeto do sprint (ID 0 será gerado pela base de dados)
+      const sprintData = {
+        id: sprintToEdit?.id || 0, // ID existente ou placeholder para novo
+        project_id: projectId, // Projeto obtido via argumento
+        name: name.trim(),
+        description: description || "",
+        status_id: parseInt(fields.statusId.value), // Status selecionado no dropdown
+        start_date: startDate,
+        end_date: endDate,
+      };
 
       try {
-        // Criar ou atualizar projeto via serviço (envia para a API)
-        if (projectToEdit) {
-          await ProjectService.updateProject(projectData);//ver isso
+        // Criar ou atualizar sprint via serviço (envia para a API)
+        if (sprintToEdit) {
+          await SprintService.updateSprint(sprintData.id, sprintData);
           showInfoBanner(
-            `INFO: O projeto ${name} foi atualizado com sucesso.`,
+            `INFO: O sprint ${name} foi atualizado com sucesso.`,
             "info-banner",
           );
         } else {
-          await ProjectService.createProject(projectData);
+          await SprintService.createSprint(sprintData);
           showInfoBanner(
-            `INFO: O projeto ${name} foi criado com sucesso.`,
+            `INFO: O sprint ${name} foi criado com sucesso.`,
             "info-banner",
           );
         }
 
-        // Obter todos os projetos e renderizar
-        const projects = await ProjectService.getProjects();
-        loadProjectsPage(projects);
+        // Obter todos os sprints e renderizar
+        const sprints = await SprintService.getSprints();
+        await loadSprintsPage(sprints);
 
         modal.remove();
       } catch (error) {
-        const action = projectToEdit ? "atualizar" : "criar";
+        const action = sprintToEdit ? "atualizar" : "criar";
         showInfoBanner(
-          `ERRO: Não foi possível ${action} o projeto ${name}.`,
+          `ERRO: Não foi possível ${action} o sprint ${name}.`,
           "error-banner",
         );
-        console.error(`Erro ao ${action} projeto:`, error);
+        console.error(`Erro ao ${action} sprint:`, error);
       }
     } else {
       showInfoBanner(
-        `ERRO: O projeto não foi criado. Verifique os erros no formulário.`,
+        `ERRO: O sprint não foi criado. Verifique os erros no formulário.`,
         "error-banner",
       );
     }
@@ -133,13 +132,14 @@ function setupProjectFormLogic(
 
 /**
  * Função Principal: Monta o Modal no DOM
- * @param projectToEdit - Projeto existente para edição (opcional). Se não fornecido, modo CREATE
+ * @param projectId - ID do projeto para o qual criar o sprint
+ * @param sprintToEdit - Sprint existente para edição (opcional). Se não fornecido, modo CREATE
  */
-export async function renderProjectModal(projectToEdit?: any): Promise<void> {
-  const modal = createSection("modalProjectForm") as HTMLElement;
+export async function renderSprintModal(projectId: number, sprintToEdit?: any): Promise<void> {
+  const modal = createSection("modalSprintForm") as HTMLElement;
   modal.classList.add("modal");
 
-  const content = createSection("modalProjectContent") as HTMLElement;
+  const content = createSection("modalSprintContent") as HTMLElement;
   content.classList.add("modal-content");
 
   const closeBtn = document.createElement("span") as HTMLSpanElement;
@@ -149,20 +149,20 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
 
   const titleHeading = createHeadingTitle(
     "h2",
-    projectToEdit ? "Editar Projeto" : "Adicionar Projeto",
+    sprintToEdit ? "Editar Sprint" : "Adicionar Sprint",
   ) as HTMLHeadingElement;
 
-  const form = createForm("formProject") as HTMLFormElement;
+  const form = createForm("formSprint") as HTMLFormElement;
 
   // Criação dos campos usando a função auxiliar
   const nameData = createInputGroup(
-    "Nome do Projeto",
-    "projectNameInput",
+    "Nome do Sprint",
+    "sprintNameInput",
     "text",
-    "inserir o nome do projeto",
+    "inserir o nome do sprint",
   );
-  if (projectToEdit) {
-    (nameData.input as HTMLInputElement).value = projectToEdit.name;
+  if (sprintToEdit) {
+    (nameData.input as HTMLInputElement).value = sprintToEdit.name;
   }
 
   // Criar descrição como textarea com 4 linhas
@@ -170,17 +170,17 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
   descriptionGroup.className = "form-group";
 
   const descriptionLabel = document.createElement("label");
-  descriptionLabel.htmlFor = "projectDescriptionInput";
+  descriptionLabel.htmlFor = "sprintDescriptionInput";
   descriptionLabel.textContent = "Descrição";
 
   const descriptionTextarea = document.createElement(
     "textarea",
   ) as HTMLTextAreaElement;
-  descriptionTextarea.id = "projectDescriptionInput";
+  descriptionTextarea.id = "sprintDescriptionInput";
   descriptionTextarea.rows = 4;
-  descriptionTextarea.placeholder = "inserir a descrição do projeto (opcional)";
-  if (projectToEdit) {
-    descriptionTextarea.value = projectToEdit.description || "";
+  descriptionTextarea.placeholder = "inserir a descrição do sprint (opcional)";
+  if (sprintToEdit) {
+    descriptionTextarea.value = sprintToEdit.description || "";
   }
 
   descriptionGroup.append(descriptionLabel, descriptionTextarea);
@@ -190,33 +190,63 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
     input: descriptionTextarea,
     errorSection: document.createElement("section"),
   };
-  descriptionData.errorSection.id = "projectDescriptionInputError";
+  descriptionData.errorSection.id = "sprintDescriptionInputError";
   descriptionData.errorSection.className = "error-message";
   descriptionGroup.append(descriptionData.errorSection);
 
   const startDateData = createInputGroup(
     "Data de Início",
-    "projectStartDateInput",
+    "sprintStartDateInput",
     "date",
     "selecionar data de início",
   );
-  if (projectToEdit) {
-    (startDateData.input as HTMLInputElement).value = projectToEdit.start_date || projectToEdit.startDate;
+  if (sprintToEdit) {
+    (startDateData.input as HTMLInputElement).value = sprintToEdit.start_date;
   }
 
   const endDateData = createInputGroup(
-    "Data de Fim Esperada",
-    "projectEndDateInput",
+    "Data de Fim",
+    "sprintEndDateInput",
     "date",
     "selecionar data de fim",
   );
-  if (projectToEdit) {
-    (endDateData.input as HTMLInputElement).value = projectToEdit.end_date || projectToEdit.endDate;
+  if (sprintToEdit) {
+    (endDateData.input as HTMLInputElement).value = sprintToEdit.end_date;
   }
+
+  // Criar select de Status
+  const statusGroup = document.createElement("section");
+  statusGroup.className = "form-group";
+
+  const statusLabel = document.createElement("label");
+  statusLabel.htmlFor = "sprintStatusInput";
+  statusLabel.textContent = "Estado";
+
+  const statusSelect = document.createElement(
+    "select",
+  ) as HTMLSelectElement;
+  statusSelect.id = "sprintStatusInput";
+
+  // Carregar estados da API
+  try {
+    const statuses = await ProjectStatusService.getProjectStatuses();
+    const defaultStatusId = sprintToEdit ? sprintToEdit.status_id : 1; // Status atual ou padrão
+    statuses.forEach((status: any) => {
+      const option = document.createElement("option");
+      option.value = String(status.id);
+      option.textContent = status.name;
+      if (status.id === defaultStatusId) option.selected = true;
+      statusSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar estados de projeto:", error);
+  }
+
+  statusGroup.append(statusLabel, statusSelect);
 
   const submitBtn = createButton(
     "button",
-    projectToEdit ? "Atualizar Projeto" : "Criar Projeto",
+    sprintToEdit ? "Atualizar Sprint" : "Criar Sprint",
     "submit",
   ) as HTMLButtonElement;
 
@@ -225,6 +255,7 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
     descriptionData.section,
     startDateData.section,
     endDateData.section,
+    statusGroup,
     submitBtn,
   );
 
@@ -233,13 +264,14 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
   document.body.appendChild(modal);
 
   // Ligar a lógica ao formulário
-  setupProjectFormLogic(
+  setupSprintFormLogic(
     form,
     {
       name: nameData.input,
       description: descriptionData.input,
       startDate: startDateData.input,
       endDate: endDateData.input,
+      statusId: statusSelect,
     },
     {
       nameErr: nameData.errorSection,
@@ -248,7 +280,8 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
       endDateErr: endDateData.errorSection,
     },
     modal,
-    projectToEdit,
+    projectId,
+    sprintToEdit,
   );
 
   // Fechar ao clicar fora

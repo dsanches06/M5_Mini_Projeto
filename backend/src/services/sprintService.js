@@ -36,18 +36,18 @@ export const getSprintById = async (sprintId) => {
 /* Função para criar sprint */
 export const createSprint = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO sprints (name, start_date, end_date) VALUES (?, ?, ?)",
-    [data.name, data.start_date, data.end_date],
+    "INSERT INTO sprints (project_id, name, description, start_date, end_date, status_id) VALUES (?, ?, ?, ?, ?, ?)",
+    [data.project_id, data.name, data.description, data.start_date, data.end_date, data.status_id],
   );
   return mapSprintAPIResponse({ id: result.insertId, ...data });
 };
 
 /* Função para atualizar sprint */
 export const updateSprint = async (sprintId, data) => {
-  const { name, start_date, end_date } = data;
+  const { project_id, name, description, start_date, end_date, status_id } = data;
   const [result] = await db.query(
-    "UPDATE sprints SET name=?, start_date=?, end_date=? WHERE id=?",
-    [name, start_date, end_date, sprintId],
+    "UPDATE sprints SET project_id=?, name=?, description=?, start_date=?, end_date=?, status_id=? WHERE id=?",
+    [project_id, name, description, start_date, end_date, status_id, sprintId],
   );
   return result.affectedRows;
 };

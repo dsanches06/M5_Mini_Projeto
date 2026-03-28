@@ -1,9 +1,10 @@
+import { TaskCommentAPIResponse } from "@api/dto/typesDTO.js";
 import * as fetchTasks from "../api/fetchTasks.js";
 
 /* Serviço para gerir comentários associados a tarefas */
 export class CommentService {
   /* Obtém comentários de uma tarefa da API */
-  static async getTaskComments(taskId: number): Promise<any[]> {
+  static async getTaskComments(taskId: number): Promise<TaskCommentAPIResponse[]> {
     return await fetchTasks.getTaskComments(taskId);
   }
 

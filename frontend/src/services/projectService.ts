@@ -1,7 +1,7 @@
 import * as fetchProjects from "../api/fetchProjects.js";
 import * as fetchProjectStatus from "../api/fetchProjectStatus.js";
 import { IProject, Project } from "../projects/index.js";
-import { ProjectStatusAPIResponse } from "../api/dto/index.js";
+import { ProjectAPIResponse, ProjectStatusAPIResponse } from "../api/dto/index.js";
 
 /* Serviço para gerenciar projetos */
 export class ProjectService {

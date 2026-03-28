@@ -1,24 +1,25 @@
+import { CategoryAPIResponse } from "@api/dto/typesDTO.js";
 import * as fetchCategories from "../api/fetchCategories.js";
 
 /* Serviço para gerenciar categorias */
 export class CategoryService {
   /* Função para obter a lista de categorias */
-  static async getCategories(): Promise<any[]> {
+  static async getCategories(): Promise<CategoryAPIResponse[]> {
     return await fetchCategories.getCategories();
   }
 
   /* Função para obter uma categoria por ID */
-  static async getCategoryById(id: number): Promise<any | null> {
+  static async getCategoryById(id: number): Promise<CategoryAPIResponse | null> {
     return await fetchCategories.getCategoryById(id);
   }
 
   /* Função para criar uma nova categoria */
-  static async createCategory(category: any): Promise<any | null> {
+  static async createCategory(category: any): Promise<CategoryAPIResponse | null> {
     return await fetchCategories.createCategory(category);
   }
 
   /* Função para atualizar uma categoria existente */
-  static async updateCategory(id: number, category: any): Promise<any | null> {
+  static async updateCategory(id: number, category: any): Promise<CategoryAPIResponse | null> {
     return await fetchCategories.updateCategory(id, category);
   }
 

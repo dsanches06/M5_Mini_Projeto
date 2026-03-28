@@ -1,5 +1,6 @@
 import { IUser } from "../../models/index.js";
 import { GlobalValidators } from "../../utils/index.js";
+import { TaskService } from "../../services/index.js";
 
 import {
   createButton,
@@ -24,9 +25,11 @@ function setupTaskFormLogic(
     typeErr: HTMLElement;
   },
   modal: HTMLElement,
+  projectId: number,
+  taskToEdit?: any,
   user?: IUser,
 ): void {
-  form.onsubmit = (e: Event) => {
+  form.onsubmit = async (e: Event) => {
     e.preventDefault();
 
     const title: string = fields.title.value;
@@ -61,11 +64,37 @@ function setupTaskFormLogic(
     }
 
     if (isValid) {
-      showInfoBanner(
-        `INFO: A tarefa "${title}" foi criada com sucesso.`,
-        "success-banner",
-      );
-      modal.remove();
+      const taskData = {
+        id: taskToEdit?.id || 0,
+        project_id: projectId,
+        title: title.trim(),
+        category: category.trim(),
+        type: type.trim(),
+      };
+
+      try {
+        if (taskToEdit) {
+          await TaskService.updateTask(taskToEdit.id,taskData);
+          showInfoBanner(
+            `INFO: A tarefa "${title}" foi atualizada com sucesso.`,
+            "success-banner",
+          );
+        } else {
+          await TaskService.createTask(taskData);
+          showInfoBanner(
+            `INFO: A tarefa "${title}" foi criada com sucesso.`,
+            "success-banner",
+          );
+        }
+        modal.remove();
+      } catch (error) {
+        const action = taskToEdit ? "atualizar" : "criar";
+        showInfoBanner(
+          `ERRO: Não foi possível ${action} a tarefa.`,
+          "error-banner",
+        );
+        console.error(`Erro ao ${action} tarefa:`, error);
+      }
     } else {
       showInfoBanner(
         `ERRO: Verifique os erros no formulário.`,
@@ -77,8 +106,11 @@ function setupTaskFormLogic(
 
 /**
  *  Função Principal: Monta o Modal no DOM
+ * @param projectId - ID do projeto ao qual a tarefa pertence (obrigatório)
+ * @param taskToEdit - Tarefa existente para edição (opcional). Se não fornecido, modo CREATE
+ * @param user - Utilizador atual (opcional)
  */
-export function renderTaskModal(user?: IUser): void {
+export function renderTaskModal(projectId: number, taskToEdit?: any, user?: IUser): void {
   const modal = createSection("modalTaskForm") as HTMLElement;
   modal.classList.add("modal");
 
@@ -92,7 +124,7 @@ export function renderTaskModal(user?: IUser): void {
 
   const titleHeading = createHeadingTitle(
     "h2",
-    "Adicionar Tarefa",
+    taskToEdit ? "Editar Tarefa" : "Adicionar Tarefa",
   ) as HTMLHeadingElement;
 
   const form = createForm("formTask") as HTMLFormElement;
@@ -104,15 +136,24 @@ export function renderTaskModal(user?: IUser): void {
     "text",
     "inserir o titulo da tarefa",
   );
+  if (taskToEdit) {
+    (titleData.input as HTMLInputElement).value = taskToEdit.title;
+  }
   const taskCategory = ["Trabalho", "Pessoal", "Estudo"];
   const categoryData = createSelectGroup("Cargo", "categoryID", taskCategory);
+  if (taskToEdit) {
+    categoryData.select.value = taskToEdit.category;
+  }
 
   const taskType = ["Bugs", "Feature", "Task"];
   const TypeData = createSelectGroup("Tipo", "typeID", taskType);
+  if (taskToEdit) {
+    TypeData.select.value = taskToEdit.type;
+  }
 
   const submitBtn = createButton(
     "button",
-    "Adicionar",
+    taskToEdit ? "Atualizar" : "Adicionar",
     "submit",
   ) as HTMLButtonElement;
 
@@ -140,6 +181,8 @@ export function renderTaskModal(user?: IUser): void {
       typeErr: TypeData.errorSection,
     },
     modal,
+    projectId,
+    taskToEdit,
     user,
   );
 

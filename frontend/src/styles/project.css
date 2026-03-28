@@ -296,3 +296,192 @@
   border-radius: 50%;
   margin-right: -10px;
 }
+
+/* ========== TEAMS CARD STYLES ========== */
+
+/* TEAMS GRID CONTAINER */
+.teams-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+
+/* TEAM CARD */
+.team-card {
+  background: #d0d0d0;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #b5b5b5;
+  transition: 0.2s;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+}
+
+.team-card:hover {
+  background: #c5c5c5;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transform: translateY(-3px);
+}
+
+.team-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.team-card h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #2c3e50;
+}
+
+/* TEAM STATUS */
+.team-status {
+  font-size: 12px;
+  color: #27ae60;
+  display: inline-block;
+  margin: 6px 0;
+  padding: 4px 8px;
+  background: #d5f4e6;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.team-status.status-ativo {
+  color: #27ae60;
+  background: #d5f4e6;
+}
+
+.team-status.status-inativo {
+  color: #e74c3c;
+  background: #fadbd8;
+}
+
+/* TEAM DESC */
+.team-desc {
+  font-size: 13px;
+  color: #95a5a6;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* TEAM INFO */
+.team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.team-info .created-date,
+.team-info .member-count {
+  display: flex;
+  align-items: center;
+}
+
+/* TEAM CARD FOOTER */
+.team-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+/* ========== SPRINTS CARD STYLES ========== */
+
+/* SPRINTS GRID CONTAINER */
+.sprints-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+
+/* SPRINT CARD */
+.sprint-card {
+  background: #d0d0d0;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #b5b5b5;
+  transition: 0.2s;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sprint-card:hover {
+  background: #c5c5c5;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transform: translateY(-3px);
+}
+
+.sprint-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sprint-card h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #2c3e50;
+}
+
+/* SPRINT STATUS */
+.sprint-status {
+  font-size: 12px;
+  color: #27ae60;
+  display: inline-block;
+  margin: 6px 0;
+  padding: 4px 8px;
+  background: #d5f4e6;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.sprint-status.status-ativo {
+  color: #27ae60;
+  background: #d5f4e6;
+}
+
+.sprint-status.status-em-progresso {
+  color: #f39c12;
+  background: #fdebd0;
+}
+
+.sprint-status.status-concluído {
+  color: #2980b9;
+  background: #d6eaf8;
+}
+
+/* SPRINT DESC */
+.sprint-desc {
+  font-size: 13px;
+  color: #95a5a6;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* SPRINT INFO */
+.sprint-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.sprint-info .start-date,
+.sprint-info .end-date {
+  display: flex;
+  align-items: center;
+}
+
+/* SPRINT CARD FOOTER */
+.sprint-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}

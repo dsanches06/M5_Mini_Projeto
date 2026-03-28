@@ -226,3 +226,82 @@
 .right a.menu-actived i {
   color: var(--color-primary);
 }
+
+/* Novo Submenu para Projetos */
+.menu-item {
+  position: relative;
+}
+
+.menu-item > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.menu-item > a .fa-chevron-down {
+  font-size: 12px;
+  transition: transform 0.3s;
+  margin-left: 8px;
+}
+
+.menu-item > a.expanded .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+.submenu[id$="Submenu"] {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 8px 29px;
+  font-size: 14px;
+  color: #333333;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.submenu[id$="Submenu"].show {
+  max-height: 200px;
+}
+
+.submenu[id$="Submenu"]::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 21px;
+  bottom: 8px;
+  width: 1px;
+  background-color: #dddddd;
+  opacity: 0.33;
+}
+
+.submenu[id$="Submenu"] a {
+  white-space: nowrap;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  transition: 0.3s;
+  color: #333333;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.submenu[id$="Submenu"] a:hover {
+  background-color: var(--color-hover);
+  color: #333333;
+}
+
+.submenu[id$="Submenu"] a.menu-actived {
+  background-color: #fff;
+  color: var(--color-primary);
+  border-radius: 5px;
+}
+
+.submenu[id$="Submenu"] a.menu-actived i {
+  color: var(--color-primary);
+}

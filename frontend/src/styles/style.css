@@ -170,6 +170,8 @@ main {
 .users-counters,
 .tasks-counters,
 .projects-counters,
+.teams-counters,
+.sprints-counters,
 #taskCounters,
 #userCountersTask {
   display: flex;

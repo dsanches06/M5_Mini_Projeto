@@ -146,11 +146,9 @@ export function mapSprintAPIResponse(data) {
     project_id: data.project_id,
     name: data.name,
     description: data.description,
+    status_id: data.status_id,
     start_date: data.start_date,
     end_date: data.end_date,
-    status: data.status,
-    created_at: data.created_at,
-    updated_at: data.updated_at,
   };
 }
 

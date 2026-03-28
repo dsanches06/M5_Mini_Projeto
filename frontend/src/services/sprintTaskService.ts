@@ -1,14 +1,16 @@
-import * as fetchSprintTasks from "../api/fetchSprintTasks.js";
+import { SprintTaskAPIResponse } from "../api/dto/index.js";
+import * as fetchSprintTasks from "../api/index.js";
 
 /* Serviço para gerenciar tarefas de sprint */
 export class SprintTaskService {
+
   /* Função para obter a lista de tarefas de sprint */
-  static async getSprintTasks(): Promise<any[]> {
+  static async getSprintTasks(): Promise<SprintTaskAPIResponse[]> {
     return await fetchSprintTasks.getSprintTasks();
   }
 
   /* Função para obter uma tarefa de sprint por ID */
-  static async getSprintTaskById(id: number): Promise<any | null> {
+  static async getSprintTaskById(id: number): Promise<SprintTaskAPIResponse | null> {
     return await fetchSprintTasks.getSprintTaskById(id);
   }
 

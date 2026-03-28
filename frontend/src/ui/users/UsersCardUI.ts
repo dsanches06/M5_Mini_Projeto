@@ -107,7 +107,7 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
       });
       
       // Carregar página de tarefas com apenas as tarefas atribuídas ao utilizador
-      await loadUserTasksPage(user, userAssignedTasks);
+      await loadUserTasksPage(user.getId());
 
     } catch (error) {
       console.error("Erro ao carregar tarefas do utilizador:", error);

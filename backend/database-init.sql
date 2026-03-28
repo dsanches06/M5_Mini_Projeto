@@ -107,8 +107,8 @@ CREATE TABLE tags (
 
 /* tags_Task (N:M) */
 CREATE TABLE tags_task (
-    task_id INT,
-    tag_id INT,
+    task_id INT NOT NULL,
+    tag_id INT NOT NULL,
     PRIMARY KEY (task_id , tag_id),
     FOREIGN KEY (task_id)
         REFERENCES task (id)
@@ -126,7 +126,7 @@ CREATE TABLE comment (
     user_id INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     edited_at DATETIME,
-    resolved TINYINT(1) DEFAULT 0,
+    resolved BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (task_id)
         REFERENCES task (id)
         ON DELETE CASCADE,
@@ -154,7 +154,7 @@ CREATE TABLE notification (
     user_id INT NOT NULL,
     title VARCHAR(200) NOT NULL,
     message TEXT NOT NULL,
-    is_read TINYINT(1) DEFAULT 0,
+    is_read BOOLEAN DEFAULT FALSE,
     sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id)
         REFERENCES users (id)
@@ -278,12 +278,17 @@ CREATE TABLE reminders (
 /* Sprints */
 CREATE TABLE sprints (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    project_id INT,
+    project_id INT NOT NULL,
     name VARCHAR(100),
-    start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    description TEXT,
+    status_id INT NOT NULL,
+    start_date DATETIME,
     end_date DATETIME,
     FOREIGN KEY (project_id)
         REFERENCES project (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (status_id)
+        REFERENCES project_status (id)
         ON DELETE CASCADE
 );
 
@@ -633,10 +638,10 @@ INSERT INTO task_dependencies (task_id, dependent_task_id, type) VALUES
 
 /* 6. Sprints e Sprint Tasks */
 /* Criar Sprints */
-INSERT INTO sprints (id, project_id, name, start_date, end_date) VALUES 
-(1, 1, 'Sprint 01 - Core Gestão', '2026-02-01', '2026-02-15'),
-(2, 1, 'Sprint 02 - Refinamento', '2026-02-16', '2026-03-01'),
-(3, 2, 'Sprint Alpha - Delivery', '2026-02-01', '2026-02-28');
+INSERT INTO sprints (id, project_id, name, description, status_id, start_date, end_date) VALUES 
+(1, 1, 'Sprint 01 - Core Gestão', 'Implementação das funcionalidades core de gestão de projetos', 3, '2026-02-01', '2026-02-15'),
+(2, 1, 'Sprint 02 - Refinamento', 'Refinamento e otimização das funções existentes', 1, '2026-02-16', '2026-03-01'),
+(3, 2, 'Sprint Alpha - Delivery', 'Primeira entrega do projeto alpha com features iniciais', 2, '2026-02-01', '2026-02-28');
 
 /* Associar Tarefas às Sprints (sprint_tasks) */
 INSERT INTO sprint_tasks (sprint_id, task_id) VALUES 

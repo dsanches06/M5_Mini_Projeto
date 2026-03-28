@@ -1,24 +1,25 @@
+import { FavoriteTaskAPIResponse } from "@api/dto/typesDTO.js";
 import * as fetchFavoriteTasks from "../api/fetchFavoriteTasks.js";
 
 /* Serviço para gerenciar tarefas favoritas */
 export class FavoriteTaskService {
   /* Função para obter a lista de tarefas favoritas */
-  static async getFavoriteTasks(): Promise<any[]> {
+  static async getFavoriteTasks(): Promise<FavoriteTaskAPIResponse[]> {
     return await fetchFavoriteTasks.getFavoriteTasks();
   }
 
   /* Função para obter uma tarefa favorita por ID */
-  static async getFavoriteTaskById(id: number): Promise<any | null> {
+  static async getFavoriteTaskById(id: number): Promise<FavoriteTaskAPIResponse | null> {
     return await fetchFavoriteTasks.getFavoriteTaskById(id);
   }
 
   /* Função para criar uma nova tarefa favorita */
-  static async createFavoriteTask(favoriteTask: any): Promise<any | null> {
+  static async createFavoriteTask(favoriteTask: any): Promise<FavoriteTaskAPIResponse | null> {
     return await fetchFavoriteTasks.createFavoriteTask(favoriteTask);
   }
 
   /* Função para atualizar uma tarefa favorita existente */
-  static async updateFavoriteTask(id: number, favoriteTask: any): Promise<any | null> {
+  static async updateFavoriteTask(id: number, favoriteTask: any): Promise<FavoriteTaskAPIResponse | null> {
     return await fetchFavoriteTasks.updateFavoriteTask(id, favoriteTask);
   }
 

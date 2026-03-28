@@ -13,18 +13,18 @@ export const getTeamById = async (teamId) => {
 
 export const createTeam = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO team (name, description) VALUES (?, ?)",
+    "INSERT INTO teams (name, description) VALUES (?, ?)",
     [data.name, data.description]
   );
   return mapTeamAPIResponse({ id: result.insertId, ...data });
 };
 
 export const updateTeam = async (id, data) => {
-  const [result] = await db.query("UPDATE team SET ? WHERE id = ?", [data, id]);
+  const [result] = await db.query("UPDATE teams SET ? WHERE id = ?", [data, id]);
   return result.affectedRows;
 };
 
 export const deleteTeam = async (id) => {
-  const [result] = await db.query("DELETE FROM team WHERE id = ?", [id]);
+  const [result] = await db.query("DELETE FROM teams WHERE id = ?", [id]);
   return result.affectedRows;
 };

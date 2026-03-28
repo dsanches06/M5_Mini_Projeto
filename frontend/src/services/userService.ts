@@ -1,5 +1,5 @@
 import { UserStatsAPIResponse } from "../api/dto/index.js";
-import { IUser } from "../models/index.js";
+import { IUser, UserClass } from "../models/index.js";
 import Notifications from "../notifications/Notifications.js";
 import {
   apiCreateUser,
@@ -53,7 +53,7 @@ export class UserService {
   /* Função para atualizar um usuário */
   static async updateUser(
     userId: number,
-    userData: Partial<IUser>,
+    userData: any,
   ): Promise<IUser | null> {
     return await apiUpdateUser(userId, userData);
   }

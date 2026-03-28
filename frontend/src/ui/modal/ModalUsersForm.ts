@@ -32,6 +32,7 @@ function setupFormLogic(
     roleErr: HTMLElement;
   },
   modal: HTMLElement,
+  userToEdit?: any,
 ): void {
   form.onsubmit = async (e: Event) => {
     e.preventDefault();
@@ -80,15 +81,6 @@ function setupFormLogic(
       isValid = false;
     }
 
-    // // Validar se já existe utilizador com o mesmo nome
-    // const existingUserByName = UserService.getAllUsers().find(
-    //   (user) => user.getName().toLowerCase() === name.toLowerCase(),
-    // );
-    // if (existingUserByName) {
-    //   errors.nameErr.textContent = `Já existe um utilizador com o nome "${name}".`;
-    //   isValid = false;
-    // }
-
     // Validar se já existe utilizador com o mesmo email
     const existingUserByEmail = false;
     if (existingUserByEmail) {
@@ -127,8 +119,22 @@ function setupFormLogic(
         };
         
         try {
-          // Criar utilizador via API
-          const newUser = await UserService.createUser(userData);
+          // Criar ou atualizar utilizador via API
+          let newUser;
+          if (userToEdit) {
+            await UserService.updateUser(userToEdit.id, userData);
+            newUser = await UserService.getUserById(userToEdit.id);
+            showInfoBanner(
+              `${newUser!.getName()} foi atualizado com sucesso.`,
+              "success-banner",
+            );
+          } else {
+            newUser = await UserService.createUser(userData);
+            showInfoBanner(
+              `${newUser!.getName()} foi adicionado com sucesso.`,
+              "success-banner",
+            );
+          }
           
           if (newUser) {
             // Recarregar lista de utilizadores da API
@@ -136,11 +142,6 @@ function setupFormLogic(
             await renderUsers(users as UserClass[]);
             // Atualizar contadores
             await showUsersCounters("utilizadores");
-            
-            showInfoBanner(
-              `${newUser.getName()} foi adicionado com sucesso.`,
-              "success-banner",
-            );
           } else {
             showInfoBanner(
               `ERRO: ${name} não foi adicionado.`,
@@ -148,9 +149,9 @@ function setupFormLogic(
             );
           }
         } catch (error) {
-          console.error("Erro ao criar utilizador:", error);
+          console.error("Erro ao criar/atualizar utilizador:", error);
           showInfoBanner(
-            `ERRO: Não foi possível criar o utilizador. Por favor, tente novamente.`,
+            `ERRO: Não foi possível processar o utilizador. Por favor, tente novamente.`,
             "error-banner",
           );
         }
@@ -167,8 +168,9 @@ function setupFormLogic(
 
 /**
  *  Função Principal: Monta o Modal no DOM
+ * @param userToEdit - Utilizador existente para edição (opcional). Se não fornecido, modo CREATE
  */
-export function renderUserModal(): void {
+export function renderUserModal(userToEdit?: any): void {
   const modal = createSection("modalUserForm") as HTMLElement;
   modal.classList.add("modal");
 
@@ -182,7 +184,7 @@ export function renderUserModal(): void {
 
   const title = createHeadingTitle(
     "h2",
-    "Adicionar Utilizador",
+    userToEdit ? "Editar Utilizador" : "Adicionar Utilizador",
   ) as HTMLHeadingElement;
 
   const form = createForm("formUser") as HTMLFormElement;
@@ -194,22 +196,34 @@ export function renderUserModal(): void {
     "text",
     "inserir o nome",
   );
+  if (userToEdit) {
+    (nameData.input as HTMLInputElement).value = userToEdit.name;
+  }
   const emailData = createInputGroup(
     "Email",
     "emailInput",
     "email",
     "inserir o email",
   );
+  if (userToEdit) {
+    (emailData.input as HTMLInputElement).value = userToEdit.email;
+  }
   const selectGenderData = createSelectGroup("Gender", "selectGender", [
     "Masculino",
     "Feminino",
   ]);
+  if (userToEdit) {
+    selectGenderData.select.value = userToEdit.gender;
+  }
   const selectRoleData = createSelectGroup("Role", "selectRole", [
     "ADMIN",
     "MANAGER",
     "MEMBER",
     "VIEWER",
   ]);
+  if (userToEdit) {
+    selectRoleData.select.value = userToEdit.role;
+  }
 
   // Container para colocar lado a lado
   const selectsContainer = document.createElement("div");
@@ -219,7 +233,7 @@ export function renderUserModal(): void {
 
   const submitBtn = createButton(
     "button",
-    "Adicionar",
+    userToEdit ? "Atualizar" : "Adicionar",
     "submit",
   ) as HTMLButtonElement;
 
@@ -244,6 +258,7 @@ export function renderUserModal(): void {
       roleErr: selectRoleData.errorSection,
     },
     modal,
+    userToEdit,
   );
 
   // Fechar ao clicar fora

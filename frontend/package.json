@@ -16,10 +16,10 @@
     "test:ci": "vitest --run"
   },
   "devDependencies": {
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.5.0",
     "copyfiles": "^2.4.1",
-    "jsdom": "^28.0.0",
+    "jsdom": "^29.0.1",
     "shx": "^0.4.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.2"
   }
 }

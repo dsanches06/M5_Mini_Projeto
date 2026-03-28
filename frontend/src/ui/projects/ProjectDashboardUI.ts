@@ -4,6 +4,7 @@ import {
   UserService,
   TeamService,
   TeamMemberService,
+  SprintService,
 } from "../../services/index.js";
 import { ITask } from "../../tasks/index.js";
 import { IUser } from "../../models/index.js";
@@ -16,6 +17,7 @@ import {
   LegendItem,
   DEFAULT_COLORS,
 } from "../../api/utils/index.js";
+import { renderSprintModal } from "../modal/index.js";
 
 // =======================
 // INIT
@@ -25,10 +27,207 @@ export async function renderProjectDashboard(id: number): Promise<HTMLElement> {
   root.id = "dashboardProject";
   root.innerHTML = "";
 
-  const gantt = await createGantt(id);
-  root.appendChild(gantt);
+  // Criar container principal com abas/seções
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.flexDirection = "column";
+  container.style.gap = "2rem";
+  container.style.padding = "1rem";
 
+  // Seção de Sprints
+  const sprintsSection = await createSprintsSection(id);
+  container.appendChild(sprintsSection);
+
+  // Seção de Gantt Chart de Tarefas
+  const gantt = await createGantt(id);
+  container.appendChild(gantt);
+
+  root.appendChild(container);
   return root;
+}
+
+// =======================
+// SPRINTS SECTION
+// =======================
+async function createSprintsSection(projectId: number): Promise<HTMLElement> {
+  const section = document.createElement("div");
+  section.className = "sprints-section";
+  section.style.borderTop = "2px solid #ccc";
+  section.style.paddingTop = "1rem";
+
+  try {
+    // Carregar sprints do projeto
+    const allSprints = await SprintService.getSprints();
+    const projectSprints = allSprints.filter((s: any) => s.project_id === projectId);
+
+    // Criar header com título e botão
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.justifyContent = "space-between";
+    header.style.alignItems = "center";
+    header.style.marginBottom = "1rem";
+
+    const title = document.createElement("h3");
+    title.textContent = `Sprints (${projectSprints.length})`;
+    title.style.margin = "0";
+
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "+ Novo Sprint";
+    addBtn.style.padding = "0.5rem 1rem";
+    addBtn.style.backgroundColor = "#4CAF50";
+    addBtn.style.color = "white";
+    addBtn.style.border = "none";
+    addBtn.style.borderRadius = "4px";
+    addBtn.style.cursor = "pointer";
+    addBtn.style.fontSize = "0.9rem";
+
+    addBtn.addEventListener("click", async () => {
+      await renderSprintModal(projectId);
+    });
+
+    addBtn.addEventListener("mouseenter", () => {
+      addBtn.style.backgroundColor = "#45a049";
+    });
+
+    addBtn.addEventListener("mouseleave", () => {
+      addBtn.style.backgroundColor = "#4CAF50";
+    });
+
+    header.appendChild(title);
+    header.appendChild(addBtn);
+
+    section.appendChild(header);
+
+    // Renderizar sprints em cards/lista
+    if (projectSprints.length === 0) {
+      const emptyMsg = document.createElement("p");
+      emptyMsg.textContent = "Nenhum sprint criado ainda. Clique em '+ Novo Sprint' para começar.";
+      emptyMsg.style.color = "#999";
+      emptyMsg.style.fontStyle = "italic";
+      section.appendChild(emptyMsg);
+    } else {
+      const sprintsList = document.createElement("div");
+      sprintsList.style.display = "grid";
+      sprintsList.style.gridTemplateColumns = "repeat(auto-fill, minmax(300px, 1fr))";
+      sprintsList.style.gap = "1rem";
+
+      projectSprints.forEach((sprint: any) => {
+        const sprintCard = createSprintCard(sprint, projectId);
+        sprintsList.appendChild(sprintCard);
+      });
+
+      section.appendChild(sprintsList);
+    }
+  } catch (error) {
+    console.error("Erro ao carregar sprints:", error);
+    const errorMsg = document.createElement("p");
+    errorMsg.textContent = "Erro ao carregar sprints do projeto";
+    errorMsg.style.color = "#e74c3c";
+    section.appendChild(errorMsg);
+  }
+
+  return section;
+}
+
+// =======================
+// SPRINT CARD
+// =======================
+function createSprintCard(sprint: any, projectId: number): HTMLElement {
+  const card = document.createElement("div");
+  card.style.backgroundColor = "#f9f9f9";
+  card.style.border = "1px solid #ddd";
+  card.style.borderRadius = "4px";
+  card.style.padding = "1rem";
+  card.style.cursor = "pointer";
+
+  const name = document.createElement("h4");
+  name.textContent = sprint.name;
+  name.style.margin = "0 0 0.5rem 0";
+  name.style.color = "#333";
+
+  const description = document.createElement("p");
+  description.textContent = sprint.description || "Sem descrição";
+  description.style.margin = "0 0 0.75rem 0";
+  description.style.color = "#666";
+  description.style.fontSize = "0.9rem";
+
+  const dates = document.createElement("p");
+  const start = new Date(sprint.start_date).toLocaleDateString("pt-BR");
+  const end = new Date(sprint.end_date).toLocaleDateString("pt-BR");
+  dates.textContent = `${start} a ${end}`;
+  dates.style.margin = "0";
+  dates.style.fontSize = "0.85rem";
+  dates.style.color = "#999";
+
+  const status = document.createElement("span");
+  status.textContent = sprint.status_id === 1 ? "Ativo" : "Inativo";
+  status.style.display = "inline-block";
+  status.style.marginTop = "0.75rem";
+  status.style.padding = "0.25rem 0.75rem";
+  status.style.backgroundColor = sprint.status_id === 1 ? "#4CAF50" : "#999";
+  status.style.color = "white";
+  status.style.borderRadius = "3px";
+  status.style.fontSize = "0.8rem";
+
+  // Botões de ação
+  const actionButtons = document.createElement("div");
+  actionButtons.style.display = "flex";
+  actionButtons.style.gap = "0.5rem";
+  actionButtons.style.marginTop = "1rem";
+
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Editar";
+  editBtn.style.padding = "0.4rem 0.8rem";
+  editBtn.style.backgroundColor = "#2196F3";
+  editBtn.style.color = "white";
+  editBtn.style.border = "none";
+  editBtn.style.borderRadius = "3px";
+  editBtn.style.cursor = "pointer";
+  editBtn.style.fontSize = "0.85rem";
+
+  editBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    await renderSprintModal(projectId, sprint);
+  });
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Apagar";
+  deleteBtn.style.padding = "0.4rem 0.8rem";
+  deleteBtn.style.backgroundColor = "#f44336";
+  deleteBtn.style.color = "white";
+  deleteBtn.style.border = "none";
+  deleteBtn.style.borderRadius = "3px";
+  deleteBtn.style.cursor = "pointer";
+  deleteBtn.style.fontSize = "0.85rem";
+
+  deleteBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (confirm(`Tem a certeza que deseja apagar o sprint "${sprint.name}"?`)) {
+      try {
+        await SprintService.deleteSprint(sprint.id);
+        showInfoBanner(`Sprint "${sprint.name}" foi apagado com sucesso.`, "success-banner");
+        // Recarregar a seção de sprints
+        const dashboardElement = document.querySelector("#dashboardProject");
+        if (dashboardElement) {
+          const projectDashboard = await renderProjectDashboard(projectId);
+          dashboardElement.replaceWith(projectDashboard);
+        }
+      } catch (error) {
+        showInfoBanner(`Erro ao apagar sprint: ${error}`, "error-banner");
+      }
+    }
+  });
+
+  actionButtons.appendChild(editBtn);
+  actionButtons.appendChild(deleteBtn);
+
+  card.appendChild(name);
+  card.appendChild(description);
+  card.appendChild(dates);
+  card.appendChild(status);
+  card.appendChild(actionButtons);
+
+  return card;
 }
 
 // =======================
