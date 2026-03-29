@@ -74,16 +74,13 @@ export async function removeAllCompletedTask(): Promise<ITask[]> {
     }
 
     // Deletar cada tarefa completada via API
-    const deletePromises = completedTasks.map((task) =>
-      TaskService.deleteTask(task.getId())
-        .then(() => {
-        })
-        .catch((error) => {
-          console.error(`Erro ao deletar tarefa "${task.getTitle()}":`, error);
-        }),
-    );
-
-    await Promise.all(deletePromises);
+    for (const task of completedTasks) {
+      try {
+        await TaskService.deleteTask(task.getId());
+      } catch (error) {
+        console.error(`Erro ao deletar tarefa "${task.getTitle()}":`, error);
+      }
+    }
 
     const deletedCount = completedTasks.length;
     showInfoBanner(

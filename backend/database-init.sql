@@ -367,15 +367,11 @@ INSERT INTO project_status (name, flow_order) VALUES
 ('Terminado', 3);
 
 INSERT INTO project (name, description, project_status_id, start_date, end_date_expected) VALUES 
-('Sistema Gestão Escolar','Plataforma para gestão escolar',1,'2026-02-01','2026-09-01'),
-('App Delivery','Aplicação para entregas locais',2,'2026-02-01','2026-07-01'),
-('E-commerce de Artesanato', 'Plataforma para venda de produtos.', 1, DATE_ADD(NOW(), INTERVAL 5 DAY), '2026-12-15 23:59:59'),
-('Portal de Voluntariado', 'Website para conectar ONGs.', 1, DATE_ADD(NOW(), INTERVAL 12 DAY), '2026-08-10 19:00:00'),
-('Monitor de Gastos Energéticos', 'Sistema IoT.', 3, DATE_ADD(NOW(), INTERVAL 20 DAY), '2027-01-30 14:00:00'),
-('Migração de Base de Dados Antiga', 'Migração crítica.', 2, '2023-10-01', '2023-12-15'),
-('Redesign do Site Institucional', 'Atualização interface.', 1, '2024-01-10', '2024-03-01'),
-('Manutenção de Servidores Legados', 'Correção vulnerabilidades.', 3, '2023-05-20', '2023-06-10'),
-('Implementação de Firewall Interna', 'Regras de segurança.', 1, '2024-02-15', '2024-02-28');
+('Sistema Gestão Escolar', 'Plataforma para gestão escolar', 1, '2026-01-15', '2026-09-01'), 
+('App Delivery', 'Aplicação para entregas locais', 2, '2026-02-01', '2026-07-01'), 
+('E-commerce de Artesanato', 'Plataforma para venda de produtos.', 1, DATE_ADD(NOW(), INTERVAL 5 DAY), '2026-12-15 23:59:59'), 
+('Portal de Voluntariado', 'Website para conectar ONGs.', 1, DATE_ADD(NOW(), INTERVAL 12 DAY), '2026-08-10 19:00:00'), 
+('Monitor de Gastos Energéticos', 'Sistema IoT.', 3, DATE_ADD(NOW(), INTERVAL 20 DAY), '2027-01-30 14:00:00');
 
 /* 3. Task Meta-data */
 INSERT INTO task_status (name, flow_order) VALUES 
@@ -398,37 +394,38 @@ INSERT INTO categories (name, flow_order) VALUES
 ('Infraestrutura',3);
 
 /* 4. Tasks (Expandido para 30 tarefas) */
-INSERT INTO task (id, title, description, task_status_id, priority_id, category_id, project_id, due_date, completed_at, estimated_hours, created_at) VALUES
-(1, 'Módulo de Notas', 'Boletim escolar', 2, 4, 1, 1, '2026-03-15', NULL, 15.0, '2026-02-01'),
-(11, 'Implementação de CSS', 'Estilização mockups', 5, 2, 2, 7, '2024-02-15', '2024-02-14', 20.0, '2024-01-15'),
-(2, 'Integração de Mapas', 'API Google Maps', 2, 4, 2, 2, '2026-04-10', NULL, 20.0, '2026-02-01'),
-(3, 'Checkout Transacional', 'Pagamento e frete', 1, 4, 1, 3, '2026-05-20', NULL, 12.0, NOW()),
-(4, 'Catálogo de Produtos', 'Upload de imagens', 1, 3, 2, 3, '2026-05-10', NULL, 8.0, NOW()),
-(5, 'Filtro de ONGs', 'Busca por categoria', 1, 2, 1, 4, '2026-06-15', NULL, 10.0, NOW()),
-(9, 'Mapeamento de Tabelas', 'De/Para de campos', 5, 4, 1, 6, '2023-11-01', '2023-10-28', 10.0, '2023-10-01'),
-(10, 'Limpeza de Dados', 'Remover duplicados', 5, 3, 1, 6, '2023-11-15', '2023-11-10', 12.0, '2023-10-10'),
-(6, 'Perfil do Voluntário', 'Dashboard de usuário', 1, 3, 2, 4, '2026-06-30', NULL, 14.0, NOW()),
-(7, 'Configuração de Hub IoT', 'Setup hardware', 2, 4, 3, 5, '2026-12-20', NULL, 25.0, NOW()),
-(8, 'Gráficos de Consumo', 'Dados em tempo real', 1, 3, 1, 5, '2027-01-15', NULL, 18.0, NOW()),
-(12, 'Auditoria de Logs', 'Verificação acessos', 5, 4, 3, 8, '2023-06-05', '2023-06-04', 5.0, '2023-05-25'),
-(13, 'Update SSL', 'Certificados', 5, 3, 3, 8, '2023-06-08', '2023-06-07', 2.0, '2023-06-01'),
-(14, 'Bloqueio de IPs Externos', 'Regras deny-all', 5, 4, 3, 9, '2024-02-25', '2024-02-24', 4.0, '2024-02-15'),
-(15, 'Testes de Intrusão', 'Validar regras', 5, 4, 3, 9, '2024-02-28', '2024-02-28', 8.0, '2024-02-20'),
-(16, 'Menu Responsivo', 'Adaptação para tablets', 1, 2, 2, 1, '2026-03-20', NULL, 6.0, NOW()),
-(17, 'Otimização de SVGs', 'Reduzir peso das imagens', 2, 1, 2, 7, '2026-04-01', NULL, 4.0, NOW()),
-(18, 'Fix: Erro de Login', 'Corrigir timeout no mobile', 1, 4, 2, 1, '2026-03-10', NULL, 3.0, NOW()),
-(19, 'Nova Rota de API', 'Endpoint para histórico', 1, 3, 1, 2, '2026-04-15', NULL, 8.0, NOW()),
-(20, 'Indexação de Banco', 'Melhorar busca de produtos', 2, 4, 1, 3, '2026-05-05', NULL, 10.0, NOW()),
-(21, 'Migração v2', 'Upgrade da lib de Stripe', 1, 3, 1, 3, '2026-05-25', NULL, 12.0, NOW()),
-(22, 'Documentação PDF', 'Gerar manual do usuário', 1, 2, 1, 4, '2026-07-10', NULL, 20.0, NOW()),
-(23, 'Análise de Custos', 'Levantamento para Proj 6', 1, 4, 1, 6, '2026-08-01', NULL, 15.0, NOW()),
-(24, 'Ata de Sprint', 'Revisão da sprint 4', 5, 1, 1, 4, '2026-02-20', '2026-02-20', 2.0, '2026-02-19'),
-(25, 'Redesign Logo', 'Nova versão vetorial', 1, 2, 2, 4, '2026-07-15', NULL, 10.0, NOW()),
-(26, 'Dark Mode Specs', 'Definição de cores dark', 2, 3, 2, 4, '2026-07-20', NULL, 8.0, NOW()),
-(27, 'Stress Test', 'Teste de carga no Hub', 1, 4, 3, 5, '2026-12-30', NULL, 16.0, NOW()),
-(28, 'Patch de Kernel', 'Atualização segurança OS', 5, 4, 3, 8, '2023-07-01', '2023-06-30', 4.0, '2023-06-25'),
-(29, 'Firewall Policy', 'Review de portas abertas', 1, 3, 3, 9, '2026-04-10', NULL, 6.0, NOW()),
-(30, 'Simulação de Invasão', 'Phishing interno teste', 2, 4, 3, 9, '2026-05-01', NULL, 20.0, NOW());
+INSERT INTO task (title, description, task_status_id, priority_id, category_id, project_id, due_date, completed_at, estimated_hours, created_at) VALUES
+('Módulo de Notas', 'Boletim escolar', 2, 4, 1, 1, '2026-03-20', NULL, 15.0, '2026-02-01'),
+('Implementação de CSS', 'Estilização mockups', 5, 2, 2, 1, '2026-02-15', '2026-02-14', 20.0, '2026-01-15'),
+('Integração de Mapas', 'API Google Maps', 2, 4, 2, 2, '2026-04-10', NULL, 20.0, '2026-02-01'),
+('Checkout Transacional', 'Pagamento e frete', 1, 4, 1, 3, DATE_ADD(NOW(), INTERVAL 15 DAY), NULL, 12.0, NOW()),
+('Catálogo de Produtos', 'Upload de imagens', 1, 3, 2, 3, '2026-05-10', NULL, 8.0, NOW()),
+('Filtro de ONGs', 'Busca por categoria', 1, 2, 1, 4, '2026-06-15', NULL, 10.0, NOW()),
+('Mapeamento de Tabelas', 'Organização de campos', 5, 4, 1, 1, '2026-11-01', '2026-10-28', 10.0, '2026-10-01'),
+('Limpeza de Dados', 'Remover duplicados', 5, 3, 1, 1, '2026-11-15', '2026-11-10', 12.0, '2026-10-10'),
+('Perfil do Voluntário', 'Dashboard de usuário', 1, 3, 2, 4, '2026-06-30', NULL, 14.0, NOW()),
+('Configuração de Hub IoT', 'Setup hardware', 2, 4, 3, 5, '2026-12-20', NULL, 25.0, NOW()),
+('Gráficos de Consumo', 'Dados em tempo real', 1, 3, 1, 5, '2027-01-15', NULL, 18.0, NOW()),
+('Auditoria de Logs', 'Verificação acessos', 5, 4, 3, 5, '2026-06-05', '2026-06-04', 5.0, '2026-05-25'),
+('Update SSL', 'Certificados', 5, 3, 3, 3, '2026-06-08', '2026-06-07', 2.0, '2026-06-01'),
+('Bloqueio de IPs Externos', 'Regras deny-all', 5, 4, 3, 5, '2026-02-25', '2026-02-24', 4.0, '2026-02-15'),
+('Testes de Intrusão', 'Validar regras', 5, 4, 3, 5, '2026-02-28', '2026-02-28', 8.0, '2026-02-20'),
+('Menu Responsivo', 'Adaptação para tablets', 1, 2, 2, 1, DATE_ADD(NOW(), INTERVAL 10 DAY), NULL, 6.0, NOW()),
+('Otimização de SVGs', 'Reduzir peso das imagens', 2, 1, 2, 1, '2026-04-01', NULL, 4.0, NOW()),
+('Fix: Erro de Login', 'Corrigir timeout no mobile', 1, 4, 2, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), NULL, 3.0, NOW()),
+('Nova Rota de API', 'Endpoint para histórico', 1, 3, 1, 2, '2026-04-15', NULL, 8.0, NOW()),
+('Indexação de Banco', 'Melhorar busca de produtos', 2, 4, 1, 3, '2026-05-05', NULL, 10.0, NOW()),
+('Migração v2', 'Upgrade da lib de Stripe', 1, 3, 1, 3, '2026-05-25', NULL, 12.0, NOW()),
+('Documentação PDF', 'Gerar manual do usuário', 1, 2, 1, 4, '2026-07-10', NULL, 20.0, NOW()),
+('Análise de Custos', 'Levantamento financeiro', 1, 4, 1, 1, '2026-08-01', NULL, 15.0, NOW()),
+('Ata de Sprint', 'Revisão da sprint 4', 5, 1, 1, 4, '2026-02-20', '2026-02-20', 2.0, '2026-02-19'),
+('Redesign Logo', 'Nova versão vetorial', 1, 2, 2, 4, '2026-07-15', NULL, 10.0, NOW()),
+('Dark Mode Specs', 'Definição de cores dark', 2, 3, 2, 4, '2026-07-20', NULL, 8.0, NOW()),
+('Stress Test', 'Teste de carga no Hub', 1, 4, 3, 5, '2026-12-30', NULL, 16.0, NOW()),
+('Patch de Kernel', 'Atualização segurança OS', 5, 4, 3, 5, '2026-07-01', '2026-06-30', 4.0, '2026-06-25'),
+('Firewall Policy', 'Review de portas abertas', 1, 3, 3, 5, '2026-04-10', NULL, 6.0, NOW()),
+('Simulação de Invasão', 'Phishing interno teste', 2, 4, 3, 5, '2026-05-01', NULL, 20.0, NOW());
+
 
 /* 5. Assignees (Ajustados para as Equipas) */
 /* 5. Task Assignees (Sincronização Final com Time Logs e Users 1-20) */
@@ -638,16 +635,26 @@ INSERT INTO task_dependencies (task_id, dependent_task_id, type) VALUES
 
 /* 6. Sprints e Sprint Tasks */
 /* Criar Sprints */
-INSERT INTO sprints (id, project_id, name, description, status_id, start_date, end_date) VALUES 
-(1, 1, 'Sprint 01 - Core Gestão', 'Implementação das funcionalidades core de gestão de projetos', 3, '2026-02-01', '2026-02-15'),
-(2, 1, 'Sprint 02 - Refinamento', 'Refinamento e otimização das funções existentes', 1, '2026-02-16', '2026-03-01'),
-(3, 2, 'Sprint Alpha - Delivery', 'Primeira entrega do projeto alpha com features iniciais', 2, '2026-02-01', '2026-02-28');
+INSERT INTO sprints (project_id, name, description, status_id, start_date, end_date) VALUES 
+(1, 'Sprint 1', 'Setup inicial', 2, '2026-01-15', '2026-01-30'), 
+(1, 'Sprint 2', 'Módulos principais', 2, '2026-02-01', '2026-02-15'), 
+(1, 'Sprint 3', 'Integrações', 2, '2026-02-16', '2026-03-01'), 
+(1, 'Sprint 4', 'Testes finais', 1, '2026-03-02', '2026-03-20'), 
+(2, 'Sprint 1', 'Base app', 2, '2026-02-01', '2026-02-10'), 
+(2, 'Sprint 2', 'Pedidos', 2, '2026-02-11', '2026-02-25'), 
+(2, 'Sprint 3', 'Tracking', 2, '2026-02-26', '2026-03-10'), 
+(3, 'Sprint 1', 'Catálogo', 2, '2026-03-01', '2026-03-15'), 
+(3, 'Sprint 2', 'Checkout', 2, '2026-03-16', '2026-03-30');
 
-/* Associar Tarefas às Sprints (sprint_tasks) */
-INSERT INTO sprint_tasks (sprint_id, task_id) VALUES 
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), -- Tarefas da primeira fase do Proj 1
-(2, 11), (2, 13),                       -- Tarefas de refinamento do Proj 1
-(3, 12), (3, 14), (3, 15);              -- Tarefas do Proj 2
+
+INSERT INTO sprint_tasks (sprint_id, task_id) VALUES
+ (1,1),(1,16),(1,18), 
+ (2,1),(2,16),(3,18),
+ (3,1), (4,1),(5,2),
+ (5,19),(6,2),(6,19),
+ (6,20),(7,19),(8,3),(8,4),
+ (9,3),(9,20),(9,21);
+
 
 /* 7. Histórico de Estados (Task Status History) */
 INSERT INTO task_status_history (task_id, previous_status_id, new_status_id, changed_at) VALUES 
@@ -657,36 +664,23 @@ INSERT INTO task_status_history (task_id, previous_status_id, new_status_id, cha
 
 /* 8. Registo de Tempo (Time Logs) */
 INSERT INTO time_logs (task_id, user_id, hours, description, logged_at) VALUES 
--- Tarefas 1-10
-(1, 1, 4.50, 'Desenvolvimento inicial do módulo de notas.', '2026-02-05 10:00:00'),
-(2, 4, 6.00, 'Configuração da API de mapas e testes de rota.', '2026-02-06 14:30:00'),
-(3, 13, 3.00, 'Configuração inicial do Stripe para checkout.', '2026-02-07 09:00:00'), -- Nuno Costa (13)
-(4, 14, 5.50, 'Criação do catálogo e upload de imagens.', '2026-02-08 11:15:00'), -- Olga Ferreira (14)
-(5, 19, 8.00, 'Análise de requisitos para filtros de ONGs.', '2026-02-09 16:00:00'), -- Vera Batista (19)
-(6, 9, 4.00, 'Design das interfaces do dashboard do utilizador.', '2026-06-10 10:00:00'),
-(7, 15, 7.25, 'Montagem e calibração do hardware IoT.', '2026-12-05 13:00:00'), -- Paulo Ribeiro (15)
-(8, 16, 2.00, 'Desenvolvimento dos gráficos de consumo real.', '2026-12-15 15:45:00'), -- Rita Carvalho (16)
-(9, 10, 3.50, 'Mapeamento de campos da base legado para nova.', '2023-10-05 09:30:00'),
-(10, 1, 4.00, 'Execução de scripts para limpeza de duplicados.', '2023-11-05 17:00:00'),
--- Tarefas 11-20
-(11, 2, 2.50, 'Implementação de CSS e responsividade.', '2024-02-01 11:00:00'),
-(12, 7, 1.50, 'Análise de logs de segurança do servidor.', '2023-05-30 10:30:00'),
-(13, 8, 5.00, 'Renovação e teste de certificados SSL.', '2023-06-05 14:00:00'),
-(14, 15, 6.00, 'Configuração de regras deny-all no firewall.', '2024-02-20 16:20:00'), -- Paulo Ribeiro (15)
-(15, 16, 4.00, 'Execução de pentest e relatório final.', '2024-02-28 09:00:00'), -- Rita Carvalho (16)
-(16, 11, 3.00, 'Ajustes de media queries no menu.', '2026-03-05 09:00:00'), -- Laura Pinto (11)
-(17, 12, 2.00, 'Compressão e limpeza de ficheiros SVG.', '2026-03-20 11:00:00'), -- Marco Silva (12)
-(18, 3, 1.50, 'Debugging de crash no login Android.', '2026-03-01 15:30:00'),
-(19, 5, 4.00, 'Implementação do endpoint GET /history.', '2026-04-05 10:00:00'),
-(20, 6, 6.50, 'Criação de índices na tabela de produtos.', '2026-04-20 14:00:00'),
--- Tarefas 21-30
-(21, 13, 8.00, 'Refatoração da integração com Stripe v2.', '2026-05-15 09:00:00'), -- Nuno Costa (13)
-(22, 10, 5.00, 'Redação do manual de ajuda ao utilizador.', '2026-06-20 10:00:00'),
-(23, 19, 2.50, 'Cálculo de orçamento para infraestrutura.', '2026-07-25 16:00:00'), -- Vera Batista (19)
-(24, 20, 1.00, 'Escrita de ata e envio por email.', '2026-02-20 10:00:00'), -- Zé Santos (20)
-(25, 17, 6.00, 'Esboços e vetorização da nova marca.', '2026-07-05 14:30:00'), -- Sofia Teixeira (17)
-(26, 18, 3.00, 'Definição da paleta de cores para modo escuro.', '2026-07-10 09:00:00'), -- Tiago Monteiro (18)
-(27, 7, 10.00, 'Execução de testes de carga contínuos.', '2026-12-25 18:00:00'),
-(28, 8, 3.00, 'Aplicação de patches de segurança ao Linux.', '2023-06-28 11:00:00'),
-(29, 15, 2.50, 'Revisão das políticas de tráfego de entrada.', '2026-03-25 15:00:00'), -- Paulo Ribeiro (15)
-(30, 16, 12.00, 'Preparação de ambiente de phishing controlado.', '2026-04-15 10:00:00'); -- Rita Carvalho (16)
+(1, 1, 4.5, 'Implementação inicial', '2026-02-02 10:00:00'), -- Módulo de Notas
+(1, 1, 3.0, 'Correções', '2026-02-03 14:00:00'), 
+(3, 4, 5.0, 'Integração API mapas', '2026-02-04 11:00:00'), -- Integração de Mapas
+(4, 13, 6.5, 'Checkout backend', '2026-02-05 15:00:00'), -- Checkout Transacional
+(16, 11, 2.0, 'UI responsiva', '2026-03-01 10:00:00'), -- Menu Responsivo
+(18, 3, 1.5, 'Fix login bug', '2026-02-25 16:00:00'), -- Fix: Erro de Login
+(20, 6, 3.5, 'Indexação DB', '2026-04-15 11:00:00'), -- Indexação de Banco
+(1, 2, 6.0, 'Feature extra', '2026-02-06'),
+(16, 11, 5.5, 'UI melhorias', '2026-03-02'), 
+(18, 3, 4.0, 'Bug fixing', '2026-03-03'), 
+(3, 4, 2.5, 'Refactor API', '2026-02-07'),
+(19, 5, 3.0, 'Nova rota', '2026-02-08'), -- Nova Rota de API
+(4, 13, 8.0, 'Checkout upgrade', '2026-02-10'), 
+(5, 14, 7.5, 'Catálogo expansão', '2026-02-11'), -- Catálogo de Produtos
+(20, 6, 6.0, 'DB tuning', '2026-02-12'), 
+(6, 19, 1.5, 'Filtro básico', '2026-02-13'), -- Filtro de ONGs
+(9, 9, 2.0, 'UI simples', '2026-02-14'), -- Perfil do Voluntário
+(10, 15, 4.0, 'Infra setup', '2026-02-15'), -- Configuração de Hub IoT
+(11, 16, 3.5, 'Monitor config', '2026-02-16'), -- Gráficos de Consumo
+(12, 10, 2.5, 'Migração análise', '2026-02-17'); -- Auditoria de Logs

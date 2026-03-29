@@ -5,6 +5,7 @@ import {
   createHeadingTitle,
   clearContainer,
 } from "../dom/index.js";
+import { getAvatarPath } from "../../helpers/index.js";
 import { loadTasksPage } from "./TaskPageUI.js";
 
 export async function loadTaskDetailPage(taskId: number): Promise<void> {
@@ -22,21 +23,17 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
   section.className = "task-detail-page";
 
   try {
-    const [task, users] = await Promise.all([
-      TaskService.getTaskById(taskId),
-      UserService.getUsers(),
-    ]);
+    const task = await TaskService.getTaskById(taskId);
+    const users = await UserService.getUsers();
 
     const projectId = task.getProject?.()?.getId?.() ?? 0;
     const project = projectId
       ? await ProjectService.getProjectById(projectId)
       : task.getProject?.();
 
-    const [tags, comments, assignees] = await Promise.all([
-      TaskService.getTaskTags(taskId),
-      CommentService.getTaskComments(taskId),
-      TaskAssigneeService.getTaskAssignees(),
-    ]);
+    const tags = await TaskService.getTaskTags(taskId);
+    const comments = await CommentService.getTaskComments(taskId);
+    const assignees = await TaskAssigneeService.getTaskAssignees();
 
     const assigneeList = assignees
       .filter((assignee) => assignee.task_id === taskId)
@@ -45,66 +42,95 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
         return {
           name: user ? user.getName() : `Usuário ${assignee.user_id}`,
           id: assignee.user_id,
+          gender: user ? user.getGender() : "Male",
         };
       });
 
-    const taskInfo = document.createElement("div");
-    taskInfo.className = "task-detail-info";
-    taskInfo.innerHTML = `
-      <div class="task-detail-header">
-        <div>
-          <h3>${task.getTitle()}</h3>
-          <span class="task-status task-detail-status">${task.getStatus()}</span>
-        </div>
-        <div class="task-detail-project">
-          <strong>Projeto:</strong>
-          <span>${project?.getName ? project.getName() : "Projeto desconhecido"}</span>
-        </div>
+    const backButton = document.createElement("button");
+    backButton.type = "button";
+    backButton.className = "task-detail-back-button";
+    backButton.textContent = "← Voltar";
+    backButton.addEventListener("click", async () => {
+      await loadTasksPage();
+    });
+
+    const page = document.createElement("div");
+    page.className = "task-page";
+
+    const header = document.createElement("div");
+    header.className = "task-header";
+    header.innerHTML = `
+      <div>
+        <span class="task-label">DETALHES DA TAREFA</span>
+        <h3>${task.getTitle()}</h3>
+        <span class="task-status task-detail-status">${task.getStatus()}</span>
       </div>
-      <div class="task-detail-meta">
-        <div><strong>Descrição:</strong> ${task.getDescription() || "Sem descrição"}</div>
-        <div><strong>Categoria:</strong> ${task.getTaskCategory ? task.getTaskCategory() : "Sem categoria"}</div>
-        <div><strong>Responsáveis:</strong> ${assigneeList.length > 0 ? assigneeList.map((item) => item.name).join(", ") : "Sem responsáveis"}</div>
+      <div class="task-members">
+        ${assigneeList.length > 0
+          ? assigneeList
+              .map(
+                (assignee) =>
+                  `<img src="${getAvatarPath(assignee.id, assignee.gender)}" title="${assignee.name}" alt="${assignee.name}" />`,
+              )
+              .join("")
+          : `<span class="task-members-empty">Sem responsáveis</span>`}
       </div>
     `;
 
-    const tagsBlock = document.createElement("div");
-    tagsBlock.className = "task-detail-tags";
-    if (tags.length > 0) {
-      tagsBlock.innerHTML = `<strong>Tags:</strong>`;
-      const tagsWrapper = document.createElement("div");
-      tagsWrapper.className = "task-tags task-detail-tags-list";
-      tags.forEach((tag) => {
-        const pill = document.createElement("span");
-        pill.className = "task-tag-pill";
-        pill.textContent = tag.name || "Tag";
-        tagsWrapper.appendChild(pill);
-      });
-      tagsBlock.appendChild(tagsWrapper);
-    } else {
-      tagsBlock.innerHTML = `<strong>Tags:</strong> <span>Sem tags</span>`;
-    }
-
-    const commentsSection = document.createElement("div");
-    commentsSection.className = "task-detail-comments";
-    commentsSection.innerHTML = `
-      <div class="task-detail-comments-header">
-        <h4>Comentários</h4>
+    const left = document.createElement("div");
+    left.className = "task-left";
+    left.innerHTML = `
+      <div class="task-detail-left-tags">
+        ${tags.length > 0
+          ? tags
+              .map(
+                (tag) =>
+                  `<span class="task-tag-pill">${tag.name || "Tag"}</span>`,
+              )
+              .join("")
+          : `<span class="task-detail-no-tags">Sem tags</span>`}
+      </div>
+      <p class="task-description">${task.getDescription() || "Sem descrição"}</p>
+      <div class="task-fields">
+        <div class="field">
+          <span>Projeto</span>
+          <strong>${project?.getName ? project.getName() : "Projeto desconhecido"}</strong>
+        </div>
+        <div class="field">
+          <span>Categoria</span>
+          <strong>${task.getTaskCategory ? task.getTaskCategory() : "Sem categoria"}</strong>
+        </div>
+        <div class="field">
+          <span>Responsáveis</span>
+          <strong>${assigneeList.length > 0 ? assigneeList.map((item) => item.name).join(", ") : "Sem responsáveis"}</strong>
+        </div>
       </div>
     `;
+
+    const right = document.createElement("div");
+    right.className = "task-right";
+
+    const commentsHeader = document.createElement("div");
+    commentsHeader.className = "task-detail-comments-header";
+    commentsHeader.innerHTML = `<h4>Comentários</h4><span>${comments.length} comentário${comments.length === 1 ? "" : "s"}</span>`;
 
     const commentsList = document.createElement("div");
-    commentsList.className = "task-detail-comments-list";
+    commentsList.className = "comments-list";
 
     if (comments.length > 0) {
       comments.forEach((comment) => {
         const author = users.find((user) => user.getId() === comment.user_id);
         const commentCard = document.createElement("div");
-        commentCard.className = "task-detail-comment-item";
+        commentCard.className = "comment";
         commentCard.innerHTML = `
-          <div class="comment-author">${author ? author.getName() : "Usuário desconhecido"}</div>
-          <div class="comment-content">${comment.content}</div>
-          <div class="comment-meta">${comment.created_at ? new Date(comment.created_at).toLocaleString() : "Sem data"}</div>
+          <img class="avatar" src="${getAvatarPath(comment.user_id, author?.getGender() ?? "Male")}" alt="${author?.getName() || "Usuário"}" />
+          <div class="bubble">
+            <div class="comment-header">
+              <strong>${author ? author.getName() : "Usuário desconhecido"}</strong>
+              <span>${comment.created_at ? new Date(comment.created_at).toLocaleString() : "Sem data"}</span>
+            </div>
+            <div class="comment-text">${comment.content}</div>
+          </div>
         `;
         commentsList.appendChild(commentCard);
       });
@@ -115,7 +141,11 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
       commentsList.appendChild(emptyComment);
     }
 
-    commentsSection.appendChild(commentsList);
+    right.append(commentsHeader, commentsList);
+
+    const body = document.createElement("div");
+    body.className = "task-body";
+    body.append(left, right);
 
     const commentForm = document.createElement("form");
     commentForm.className = "task-detail-comment-form";
@@ -157,19 +187,12 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
       }
     });
 
-    const backButton = document.createElement("button");
-    backButton.type = "button";
-    backButton.className = "task-detail-back-button";
-    backButton.textContent = "← Voltar";
-    backButton.addEventListener("click", async () => {
-      await loadTasksPage();
-    });
+    const commentInputWrapper = document.createElement("div");
+    commentInputWrapper.className = "comment-input";
+    commentInputWrapper.appendChild(commentForm);
 
-    section.appendChild(backButton);
-    section.appendChild(taskInfo);
-    section.appendChild(tagsBlock);
-    section.appendChild(commentsSection);
-    section.appendChild(commentForm);
+    page.append(header, body, commentInputWrapper);
+    section.append(backButton, page);
   } catch (error) {
     section.innerHTML = `
       <div class="empty-state">

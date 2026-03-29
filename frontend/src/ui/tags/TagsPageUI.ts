@@ -21,25 +21,34 @@ export async function loadTagsPage(tags: any[]): Promise<void> {
   const searchContainer = createSearchContainer(
     "searchTagsContainer",
     { id: "searchTag", placeholder: "Procurar tag..." },
-    [
-      { id: "createTagBtn", text: "Criar tag" },
-      { id: "refreshTagsBtn", text: "Atualizar" },
-    ],
+    [],
   );
   searchContainer.classList.add("search-add-container");
   addElementInContainer("#containerSection", searchContainer);
 
   const createInputSection = createSection("tagCreateSection");
   createInputSection.classList.add("form-group");
+
   const tagLabel = document.createElement("label");
   tagLabel.setAttribute("for", "newTagName");
   tagLabel.textContent = "Nome da tag";
+
+  const createRow = document.createElement("div");
+  createRow.className = "tag-create-row";
+
   const newTagName = createInput("newTagName", "text") as HTMLInputElement;
   newTagName.placeholder = "Ex: Urgente";
-  newTagName.style.width = "100%";
+  newTagName.autocomplete = "off";
+
+  const createTagBtn = createButton("createTagBtn", "Criar tag", "button");
+  createTagBtn.classList.add("btn", "primary");
+
+  createRow.append(newTagName, createTagBtn);
+
   const newTagError = createSection("newTagNameError");
   newTagError.className = "error-message";
-  createInputSection.append(tagLabel, newTagName, newTagError);
+
+  createInputSection.append(tagLabel, createRow, newTagError);
   addElementInContainer("#containerSection", createInputSection);
 
   const listSection = createSection("tagsListSection");
@@ -64,42 +73,26 @@ export async function loadTagsPage(tags: any[]): Promise<void> {
     });
   }
 
-  const createTagBtn = document.querySelector(
-    "#createTagBtn",
-  ) as HTMLButtonElement | null;
-  if (createTagBtn) {
-    createTagBtn.addEventListener("click", async () => {
-      newTagError.textContent = "";
-      const name = newTagName.value.trim();
-      if (!name) {
-        newTagError.textContent = "Informe um nome para a tag.";
-        return;
-      }
+  createTagBtn.addEventListener("click", async () => {
+    newTagError.textContent = "";
+    const name = newTagName.value.trim();
+    if (!name) {
+      newTagError.textContent = "Informe um nome para a tag.";
+      return;
+    }
 
-      try {
-        await TagService.createTag({ name });
-        showInfoBanner(`Tag "${name}" criada com sucesso.`, "success-banner");
-        newTagName.value = "";
-        const allTags = await TagService.getTags();
-        renderTagsList(allTags);
-      } catch (error) {
-        showInfoBanner("Erro ao criar tag.", "error-banner");
-        console.error(error);
-      }
-    });
-  }
-
-  const refreshTagsBtn = document.querySelector(
-    "#refreshTagsBtn",
-  ) as HTMLButtonElement | null;
-  if (refreshTagsBtn) {
-    refreshTagsBtn.addEventListener("click", async () => {
+    try {
+      await TagService.createTag({ name });
+      showInfoBanner(`Tag "${name}" criada com sucesso.`, "success-banner");
+      newTagName.value = "";
       const allTags = await TagService.getTags();
       renderTagsList(allTags);
-      newTagName.value = "";
-      searchTagInput && (searchTagInput.value = "");
-    });
-  }
+    } catch (error) {
+      showInfoBanner("Erro ao criar tag.", "error-banner");
+      console.error(error);
+    }
+  });
+
 }
 
 function renderTagsList(tags: any[]): void {

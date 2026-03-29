@@ -9,7 +9,7 @@ import {
   TaskService,
   TimeLogService,
 } from "../../services/index.js";
-import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
+import { getAvatarPath, showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
 import { IUser } from "../../models/index.js";
 import { ITask } from "../../tasks/index.js";
 
@@ -182,9 +182,8 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
       img.className = "avatar-img";
 
       // Selecionar pasta baseado no gender
-      const folder = member.gender === "Female" ? "woman" : "man";
       const randomValue = (index % 4) + 1; // 1-4
-      img.src = `./src/assets/${folder}-${randomValue}.png`;
+      img.src = getAvatarPath(member.userId, member.gender, randomValue);
       img.alt = member.user.getName();
       img.title = member.user.getName();
 

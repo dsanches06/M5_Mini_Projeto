@@ -25,6 +25,7 @@ import reminderRoutes from "./routes/reminderRoutes.js";
 import sprintTaskRoutes from "./routes/sprintTaskRoutes.js";
 import mentionRoutes from "./routes/mentionRoutes.js";
 import timeLogRoutes from "./routes/timeLogRoutes.js";
+import statisticsRoutes from "./routes/statisticsRoutes.js";
 import logger from "./middlewares/loggerMiddleware.js";
 
 const app = express();
@@ -64,6 +65,7 @@ app.use("/reminders", reminderRoutes);
 app.use("/sprint_tasks", sprintTaskRoutes);
 app.use("/mentions", mentionRoutes);
 app.use("/time_logs", timeLogRoutes);
+app.use("/statistics/ranking", statisticsRoutes);
 
 /* Iniciar o servidor */
 const PORT = process.env.PORT || 3000;

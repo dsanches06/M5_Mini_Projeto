@@ -23,3 +23,4 @@ export * from "./fetchReminders.js";
 export * from "./fetchSprintTasks.js";
 export * from "./fetchMentions.js";
 export * from "./fetchTimeLogs.js";
+export * from "./fetchStatistics.js";

@@ -4,12 +4,12 @@ import { clearContainer, addElementInContainer } from "../dom/index.js";
 // ============================================
 // EXEMPLO 1: Inicialização básica
 // ============================================
-export function initializeStatisticsPage(): void {
+export async function initializeStatisticsPage(): Promise<void> {
   // Certifique-se de que o HTML contém um elemento com id="statistics-container"
   const ui = new StatisticPageUI("statistics-container");
 
   // Renderizar todos os gráficos
-  ui.render();
+  await ui.render();
 }
 
 // ============================================
@@ -20,116 +20,8 @@ export function setupAutoUpdate(
   intervalMs: number = 5000,
 ): void {
   setInterval(() => {
-    ui.updateAllCharts();
+    void ui.updateAllCharts();
   }, intervalMs);
-}
-
-// ============================================
-// EXEMPLO 3: Atualizar um gráfico específico
-// ============================================
-export function updateSpecificChart(
-  ui: StatisticPageUI,
-  chartName: string,
-): void {
-  // Possíveis valores: "overview", "status", "completion", "comparison"
-  ui.updateChart(chartName);
-}
-
-// ============================================
-// EXEMPLO 4: Exportar dados para análise
-// ============================================
-export function exportStatisticsData(ui: StatisticPageUI) {
-  const data = ui.exportChartData();
-
-  // Converter para JSON e salvar/enviar
-  const jsonData = JSON.stringify(data, null, 2);
-
-  return data;
-}
-
-// ============================================
-// EXEMPLO 5: Adicionar botões de controle
-// ============================================
-export function addControlButtons(ui: StatisticPageUI): void {
-  const controlDiv = document.createElement("div");
-  controlDiv.className = "statistics-controls";
-  controlDiv.style.cssText = `
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2rem;
-    flex-wrap: wrap;
-  `;
-
-  // Botão para atualizar todos os gráficos
-  const updateAllBtn = document.createElement("button");
-  updateAllBtn.textContent = "🔄 Atualizar Todos";
-  updateAllBtn.style.cssText = `
-    padding: 0.75rem 1.5rem;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-  `;
-  updateAllBtn.addEventListener("mouseenter", (e) => {
-    (e.target as HTMLElement).style.background = "#2980b9";
-  });
-  updateAllBtn.addEventListener("mouseleave", (e) => {
-    (e.target as HTMLElement).style.background = "#3498db";
-  });
-  updateAllBtn.addEventListener("click", () => {
-    ui.updateAllCharts();
-  });
-
-  // Botão para exportar dados
-  const exportBtn = document.createElement("button");
-  exportBtn.textContent = "📥 Exportar Dados";
-  exportBtn.style.cssText = `
-    padding: 0.75rem 1.5rem;
-    background: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-  `;
-  exportBtn.addEventListener("mouseenter", (e) => {
-    (e.target as HTMLElement).style.background = "#27ae60";
-  });
-  exportBtn.addEventListener("mouseleave", (e) => {
-    (e.target as HTMLElement).style.background = "#2ecc71";
-  });
-  exportBtn.addEventListener("click", () => {
-    const data = exportStatisticsData(ui);
-    // Opcional: Fazer download do arquivo JSON
-    downloadJSON(data, "statistics.json");
-  });
-
-  controlDiv.appendChild(updateAllBtn);
-  controlDiv.appendChild(exportBtn);
-
-  const container = document.getElementById("statistics-container");
-  if (container) {
-    container.parentElement?.appendChild(controlDiv);
-  }
-}
-
-// ============================================
-// HELPER: Download de arquivo JSON
-// ============================================
-function downloadJSON(data: object, filename: string): void {
-  const jsonString = JSON.stringify(data, null, 2);
-  const blob = new Blob([jsonString], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
 }
 
 // ============================================
@@ -138,22 +30,22 @@ function downloadJSON(data: object, filename: string): void {
 export function setupEventListeners(ui: StatisticPageUI): void {
   // Atualizar gráficos quando uma tarefa é criada/atualizada
   document.addEventListener("taskCreated", () => {
-    ui.updateAllCharts();
+    void ui.updateAllCharts();
   });
 
   document.addEventListener("taskCompleted", () => {
-    ui.updateAllCharts();
+    void ui.updateAllCharts();
   });
 
   document.addEventListener("taskDeleted", () => {
-    ui.updateAllCharts();
+    void ui.updateAllCharts();
   });
 }
 
 // ============================================
 // EXEMPLO 7: Setup completo
 // ============================================
-export function setupCompleteStatisticsPage(): void {
+export async function setupCompleteStatisticsPage(): Promise<void> {
   try {
     // Limpar o container principal
     clearContainer("#containerSection");
@@ -175,10 +67,7 @@ export function setupCompleteStatisticsPage(): void {
 
     // Inicializar UI
     const ui = new StatisticPageUI("statistics-container");
-    ui.render();
-
-    // Adicionar controles
-    addControlButtons(ui);
+    await ui.render();
 
     // Configurar auto-atualização (a cada 30 segundos)
     setupAutoUpdate(ui, 30000);

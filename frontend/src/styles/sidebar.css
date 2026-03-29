@@ -14,7 +14,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 80px;
+  width: 64px;
   border-radius: 18px;
   transition: 0.4s;
   background: #ffffff;
@@ -46,7 +46,7 @@
 .left {
   z-index: 1;
   left: 0;
-  width: 80px;
+  width: 64px;
   background: #ffffff;
 }
 
@@ -89,7 +89,7 @@
 /* Right Sidebar */
 
 .right {
-  left: 76px;
+  left: 60px;
   height: 100%;
   position: relative;
 }

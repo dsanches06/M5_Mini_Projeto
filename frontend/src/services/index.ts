@@ -15,7 +15,7 @@ export * from "./reminderService.js";
 export * from "./searchService.js";
 export * from "./sprintService.js";
 export * from "./sprintTaskService.js";
-export * from "./statisticsService.js";
+export * from "./statisticService.js";
 export * from "./SystemConfig.js";
 export * from "./tagService.js";
 export * from "./tagTaskService.js";

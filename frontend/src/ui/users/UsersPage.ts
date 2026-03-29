@@ -58,21 +58,21 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
 
   allUsersBtn.addEventListener("click", async () => {
     const currentUsers = await UserService.getUsers();
-    clearContainer("#containerSection > :nth-child(4)");
+    clearContainer("#usersContainer");
     await renderUsers(currentUsers as UserClass[]);
     await showUsersCounters("utilizadores");
   });
 
   ativeUsersBtn.addEventListener("click", async () => {
     const activeUsers = await getActiveUsers();
-    clearContainer("#containerSection > :nth-child(4)");
+    clearContainer("#usersContainer");
     await renderUsers(activeUsers as UserClass[]);
     await showUsersCounters("ativos", activeUsers as UserClass[]);
   });
 
   unableUsersBtn.addEventListener("click", async () => {
     const inactiveUsers = await getInactiveUsers();
-    clearContainer("#containerSection > :nth-child(4)");
+    clearContainer("#usersContainer");
     await renderUsers(inactiveUsers as UserClass[]);
     await showUsersCounters("inativos", inactiveUsers as UserClass[]);
   });
@@ -90,7 +90,7 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
     sortUsersBtn.addEventListener("click", async () => {
       const sortedUsers = await sortUsersByName(isAscending);
       isAscending = !isAscending;
-      clearContainer("#containerSection > :nth-child(4)");
+      clearContainer("#usersContainer");
       await renderUsers(sortedUsers as UserClass[]);
       await showUsersCounters("filtrados", sortedUsers as UserClass[]);
       sortUsersBtn.textContent = isAscending ? "Ordenar Z-A" : "Ordenar A-Z";
@@ -105,12 +105,12 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
       const name = searchUser.value.toLowerCase();
       if (name.trim() === "") {
         const allUsers = await UserService.getUsers();
-        clearContainer("#containerSection > :nth-child(4)");
+        clearContainer("#usersContainer");
         await renderUsers(allUsers as UserClass[]);
         await showUsersCounters("utilizadores");
       } else {
         const filteredUsers = await searchUserByName(name);
-        clearContainer("#containerSection > :nth-child(4)");
+        clearContainer("#usersContainer");
         await renderUsers(filteredUsers as UserClass[]);
         await showUsersCounters("filtrados", filteredUsers as UserClass[]);
       }

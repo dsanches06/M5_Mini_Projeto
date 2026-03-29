@@ -13,7 +13,6 @@ import { activateMenu } from "./src/ui/dom/index.js";
 window.onload = async () => {
   activateMenu("#menuProjects");
   await loadInitialProjects();
-
   // Configurar submenu de Projetos
   setupProjectsSubmenu();
 };
@@ -26,6 +25,7 @@ async function setupProjectsSubmenu(): Promise<void> {
   if (projectsBtn && submenu) {
     projectsBtn.addEventListener("click", async (e) => {
       e.preventDefault();
+      e.stopPropagation();
       activateMenu("#menuProjects");
       await loadInitialProjects();
       submenu.classList.toggle("show");

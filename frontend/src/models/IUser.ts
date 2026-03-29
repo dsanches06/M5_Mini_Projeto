@@ -9,5 +9,6 @@ export interface IUser {
   getRole(): UserRole;
   getEmail(): string;
   getPhone(): number;
+  getGender(): string;
   getCreatedAt(): Date;
 }

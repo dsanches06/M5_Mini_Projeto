@@ -1,7 +1,6 @@
 import { ITask } from "../../tasks/index.js";
 import { IProject } from "../../projects/index.js";
 import { IUser } from "../../models/index.js";
-import { loadTaskDetailPage } from "./TaskDetailPageUI.js";
 import { createTaskCard } from "./TaskCardUI.js";
 import { ProjectService, TaskService, UserService } from "../../services/index.js";
 

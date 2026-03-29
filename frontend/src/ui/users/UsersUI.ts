@@ -10,10 +10,11 @@ const usersContainer = createSection("usersContainer") as HTMLElement;
 export async function renderUsers(users: IUser[]): Promise<HTMLElement> {
   usersContainer.innerHTML = "";
   
-  // Criar todos os cartões de utilizador de forma assíncrona
-  const userCards = await Promise.all(
-    users.map((user) => createUserCard(user as UserClass))
-  );
+  // Criar todos os cartões de utilizador de forma sequencial
+  const userCards: HTMLElement[] = [];
+  for (const user of users) {
+    userCards.push(await createUserCard(user as UserClass));
+  }
   
   // Adicionar todos os cartões ao container
   userCards.forEach((card) => usersContainer.appendChild(card));

@@ -2,8 +2,9 @@ import {
   ProjectService,
   TaskService,
   SprintService,
+  SprintTaskService,
 } from "../../services/index.js";
-import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
+import { showInfoBanner } from "../../helpers/index.js";
 import { renderSprintModal, renderTaskModal } from "../modal/index.js";
 import { createHeadingTitle } from "../dom/index.js";
 import { renderSprintsCards } from "../sprints/index.js";
@@ -201,3 +202,4 @@ async function createTasksSection(projectId: number): Promise<HTMLElement> {
 
   return section;
 }
+

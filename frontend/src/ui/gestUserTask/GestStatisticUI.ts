@@ -8,5 +8,5 @@ export async function loadInitialStatistics(): Promise<void> {
   // Limpa o container antes de mostrar os projetos
   clearContainer("#containerSection");
   // carrega a pagina dinamica de projetos
-  setupCompleteStatisticsPage();
+  await setupCompleteStatisticsPage();
 }

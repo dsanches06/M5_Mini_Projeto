@@ -4,6 +4,8 @@ import {
   UserService,
   TeamService,
   TeamMemberService,
+  SprintService,
+  SprintTaskService,
 } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
@@ -31,6 +33,8 @@ export async function renderProjectGantt(
 
   try {
     const tasks = await TaskService.getTasksByProject(projectId);
+    const sprints = await SprintService.getSprints();
+    const sprintTaskRelations = await SprintTaskService.getSprintTasks();
     const users = await UserService.getUsers();
 
     let teams = [];
@@ -51,6 +55,8 @@ export async function renderProjectGantt(
       });
     });
 
+    const teamMemberIds = new Set<number>(teamMembers.map((member: any) => member.user_id));
+
     const filteredTeams = teams.filter((team: any) => {
       return teamMembers.some(
         (member: any) =>
@@ -69,7 +75,36 @@ export async function renderProjectGantt(
       userMap.set(user.getId(), user.getName());
     });
 
-    const ganttTasks = transformTasksToGantt(tasks, 6, userMap, ganttColors);
+    const projectSprints = sprints.filter(
+      (sprint: any) => sprint.project_id === projectId || sprint.projectId === projectId,
+    );
+
+    const tasksBySprint = projectSprints.map((sprint: any) => ({
+      sprint,
+      tasks: tasks.filter((task: any) =>
+        sprintTaskRelations.some(
+          (relation: any) =>
+            relation.sprint_id === sprint.id &&
+            (task.getId?.() ?? task.id) === relation.task_id,
+        ),
+      ),
+    }));
+
+    const unassignedTasks = tasks.filter(
+      (task: any) =>
+        !sprintTaskRelations.some(
+          (relation: any) => (task.getId?.() ?? task.id) === relation.task_id,
+        ),
+    );
+
+    const ganttTasks = transformSprintsToGantt(
+      tasksBySprint,
+      unassignedTasks,
+      6,
+      userMap,
+      ganttColors,
+      teamMemberIds,
+    );
     wrapper.appendChild(createTasks(ganttTasks, 6));
   } catch (error) {
     const errorMsg = document.createElement("p");
@@ -82,42 +117,84 @@ export async function renderProjectGantt(
   return wrapper;
 }
 
-function transformTasksToGantt(
-  tasks: any[],
+function getGanttAssigneeLabel(
+  assignees: any[],
+  userMap: Map<number, string>,
+  teamMemberIds: Set<number>,
+): string {
+  if (assignees.length === 0) {
+    return "Sem atribuição";
+  }
+
+  const teamAssignees = assignees.filter((assignee: any) =>
+    teamMemberIds.has(assignee.user_id),
+  );
+
+  const chosenAssignees = teamAssignees.length > 0 ? teamAssignees : assignees;
+
+  return chosenAssignees
+    .map((assignee: any) =>
+      userMap.get(assignee.user_id) || `User ${assignee.user_id}`,
+    )
+    .join(", ");
+}
+
+function transformSprintsToGantt(
+  sprintsWithTasks: Array<{ sprint: any; tasks: any[] }>,
+  unassignedTasks: any[],
   weeks: number,
   userMap: Map<number, string>,
   ganttColors: LegendItem[],
+  teamMemberIds: Set<number>,
 ): GanttTask[] {
   const colors =
     ganttColors.length > 0 ? ganttColors.map((c) => c.color) : DEFAULT_COLORS;
 
-  return tasks.map((task: any, taskIndex: number) => {
-    const assignees = task.getAssignees?.() || [];
+  const sprintRows = sprintsWithTasks
+    .filter((group) => group.tasks.length > 0)
+    .map((group: any, groupIndex: number) => ({
+      name: group.sprint.name || `Sprint ${group.sprint.id}`,
+      activities: group.tasks.map((task: any, taskIndex: number) => {
+        const assignees = task.getAssignees?.() || [];
+        const assigneeLabel = getGanttAssigneeLabel(
+          assignees,
+          userMap,
+          teamMemberIds,
+        );
 
-    const activities: ActivityBar[] =
-      assignees.length > 0
-        ? assignees.map((assignee: any, assigneeIndex: number) => ({
-            label: `Activity ${assigneeIndex + 1}`,
-            name: userMap.get(assignee.user_id) || `User ${assignee.user_id}`,
-            start: assigneeIndex % weeks,
-            duration: Math.min(2, weeks - (assigneeIndex % weeks)),
-            color: colors[assigneeIndex % colors.length],
-          }))
-        : [
-            {
-              label: "Activity 1",
-              name: "Unassigned",
-              start: 0,
-              duration: 1,
-              color: colors[0],
-            },
-          ];
+        return {
+          label: task.title || `Tarefa ${task.getId?.() ?? task.id}`,
+          name: assigneeLabel,
+          start: taskIndex % weeks,
+          duration: Math.min(2, weeks - (taskIndex % weeks)),
+          color: colors[(groupIndex + taskIndex) % colors.length],
+        };
+      }),
+    }));
 
-    return {
-      name: `TASK ${taskIndex + 1}`,
-      activities,
-    };
-  });
+  if (unassignedTasks.length > 0) {
+    sprintRows.push({
+      name: "Sem Sprint",
+      activities: unassignedTasks.map((task: any, taskIndex: number) => {
+        const assignees = task.getAssignees?.() || [];
+        const assigneeLabel = getGanttAssigneeLabel(
+          assignees,
+          userMap,
+          teamMemberIds,
+        );
+
+        return {
+          label: task.title || `Tarefa ${task.getId?.() ?? task.id}`,
+          name: assigneeLabel,
+          start: taskIndex % weeks,
+          duration: Math.min(2, weeks - (taskIndex % weeks)),
+          color: colors[taskIndex % colors.length],
+        };
+      }),
+    });
+  }
+
+  return sprintRows;
 }
 
 async function createHeader(projectId: number): Promise<HTMLElement> {

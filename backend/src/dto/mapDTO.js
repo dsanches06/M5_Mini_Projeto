@@ -298,3 +298,33 @@ export function mapCategoryAPIResponse(data) {
     description: data.description,
   };
 }
+
+/* Mapeia a resposta da API para ranking de horas */
+export function mapRankingMoreHoursAPIResponse(data) {
+  return {
+    projeto: data.projeto,
+    utilizador: data.utilizador,
+    total_horas_reais: data.total_horas_reais,
+    ranking: data.ranking,
+  };
+}
+
+/* Mapeia a resposta da API para ranking de horas de aumento */
+export function mapRankingIncreaseHoursAPIResponse(data) {
+  return {
+    utilizador: data.utilizador,
+    data_dia: data.data_dia,
+    horas_dia: data.horas_dia,
+    horas_dia_anterior: data.horas_dia_anterior,
+    ranking_do_dia: data.ranking_do_dia,
+  };
+}
+
+/* Mapeia a resposta da API para média de horas */
+export function mapAverageAPIResponse(data) {
+  return {
+    projeto: data.projeto,
+    total_horas_projeto: data.total_horas_projeto,
+    media_geral_sistema: data.media_geral_sistema,
+  };
+}

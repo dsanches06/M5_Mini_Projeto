@@ -14,23 +14,25 @@
   --color-warning: #ffc107;
 }
 
-.statistics-page {
-  padding: 2rem;
+#statistics-container.statistics-page {
+  padding: 0.8rem 0.6rem;
   background: var(--color-bg);
   min-height: 100vh;
   font-family: "Arial Black", Gadget, sans-serif;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 /* Cabeçalho */
-.statistics-header {
+#statistics-container .statistics-header {
   text-align: center;
   color: var(--color-text);
-  margin-bottom: 3rem;
+  margin-bottom: 1.4rem;
   animation: slideDown 0.6s ease-out;
 }
 
-.statistics-header h1 {
-  font-size: 2.5rem;
+#statistics-container .statistics-header h1 {
+  font-size: 1.7rem;
   margin: 0;
   font-weight: 700;
   background-color: rgba(0, 0, 0, 0.7);
@@ -38,32 +40,28 @@
   text-shadow: 0px 2px 3px rgba(255, 255, 255, 0.3);
   -webkit-background-clip: text;
   background-clip: text;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
-.statistics-header p {
-  font-size: 1.1rem;
+#statistics-container .statistics-header p {
+  font-size: 0.95rem;
   margin: 0;
   color: var(--color-muted);
 }
 
 /* Grid de gráficos */
-.charts-grid {
+#statistics-container .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
-  gap: 2rem;
-  max-width: 1400px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  max-width: 980px;
   margin: 0 auto;
 }
 
-@media (max-width: 1024px) {
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
-}
+
 
 /* Contêiner de gráfico */
-.chart-container {
+#statistics-container .chart-container {
   background: var(--color-white);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -79,24 +77,25 @@
 }
 
 /* Cabeçalho do gráfico */
-.chart-header {
+#statistics-container .chart-header {
   background-color: var(--color-primary);
   color: var(--color-white);
-  padding: 1.5rem;
+  padding: 0.7rem 0.8rem 0.65rem;
   border-bottom: 2px solid var(--color-secondary);
 }
 
-.chart-header h2 {
+#statistics-container .chart-header h2,
+#statistics-container .chart-header h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-white);
 }
 
 /* Corpo do gráfico */
-.chart-body {
-  padding: 1.5rem;
-  min-height: 320px;
+#statistics-container .chart-body {
+  padding: 0.75rem;
+  min-height: 190px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,31 +132,5 @@
   }
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .statistics-page {
-    padding: 1rem;
-  }
-
-  .statistics-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .statistics-header p {
-    font-size: 1rem;
-  }
-
-  .charts-grid {
-    gap: 1rem;
-  }
-
-  .chart-container {
-    border-radius: 8px;
-  }
-
-  .chart-body {
-    min-height: 250px;
-  }
-}
 
 

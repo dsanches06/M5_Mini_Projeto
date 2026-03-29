@@ -16,6 +16,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": ["src/**/*", "main.ts"],
+  "include": ["src/**/*", "main.ts", "src/tasks"],
   "exclude": ["node_modules", "dist", "testes"]
 }

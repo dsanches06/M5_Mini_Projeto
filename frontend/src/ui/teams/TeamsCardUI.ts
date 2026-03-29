@@ -1,8 +1,13 @@
 import { addElementInContainer, clearContainer } from "../dom/index.js";
-import { UserService, TeamMemberService, TaskAssigneeService, TeamService } from "../../services/index.js";
+import {
+  UserService,
+  TeamMemberService,
+  TaskAssigneeService,
+  TeamService,
+} from "../../services/index.js";
 import { IUser } from "../../models/index.js";
 import { renderTeamModal } from "../modal/index.js";
-import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
+import { getAvatarPath, showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
 
 /* Renderiza as equipes em cards na Grid principal */
 export async function renderTeamsCards(teams: any[]): Promise<void> {
@@ -64,10 +69,17 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
   deleteBtn.setAttribute("aria-label", "Excluir equipe");
   deleteBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    if (await showConfirmDialog(`Tem certeza que deseja excluir a equipe "${team.name}"?`)) {
+    if (
+      await showConfirmDialog(
+        `Tem certeza que deseja excluir a equipe "${team.name}"?`,
+      )
+    ) {
       try {
         await TeamService.deleteTeam(team.id);
-        showInfoBanner(`Equipe "${team.name}" removida com sucesso.`, "success-banner");
+        showInfoBanner(
+          `Equipe "${team.name}" removida com sucesso.`,
+          "success-banner",
+        );
         const currentTeams = await TeamService.getTeams();
         await renderTeamsCards(currentTeams);
       } catch (error) {
@@ -76,19 +88,30 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
     }
   });
 
-  const detailsBtn = document.createElement("button");
-  detailsBtn.className = "icon-button";
-  detailsBtn.innerHTML = `<i class="fas fa-users-cog"></i>`;
-  detailsBtn.title = "Gerenciar equipe";
-  detailsBtn.setAttribute("aria-label", "Gerenciar equipe");
-  detailsBtn.addEventListener("click", async (e) => {
+  const addTeamMemberBtn = document.createElement("button");
+  addTeamMemberBtn.className = "icon-button";
+  addTeamMemberBtn.innerHTML = `<i class="fas fa-user-plus"></i>`;
+  addTeamMemberBtn.title = "Adicionar membro";
+  addTeamMemberBtn.setAttribute("aria-label", "Adicionar membro");
+  addTeamMemberBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    await renderTeamDetailsModal(team);
+  });
+
+  const deleteTeamMemberBtn = document.createElement("button");
+  deleteTeamMemberBtn.className = "icon-button";
+  deleteTeamMemberBtn.innerHTML = `<i class="fas fa-user-minus"></i>`;
+  deleteTeamMemberBtn.title = "Remover membro";
+  deleteTeamMemberBtn.setAttribute("aria-label", "Remover membro");
+  deleteTeamMemberBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
     await renderTeamDetailsModal(team);
   });
 
   actions.appendChild(editBtn);
   actions.appendChild(deleteBtn);
-  actions.appendChild(detailsBtn);
+  actions.appendChild(addTeamMemberBtn);
+  actions.appendChild(deleteTeamMemberBtn);
   header.appendChild(title);
   mainSection.appendChild(header);
 
@@ -131,7 +154,8 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
         userMap.set(user.getId(), user);
       });
 
-      const members: Array<{ userId: number; gender: string; user: IUser }> = [];
+      const members: Array<{ userId: number; gender: string; user: IUser }> =
+        [];
       teamMembers.forEach((member: any) => {
         const user = userMap.get(member.user_id);
         if (user) {
@@ -148,9 +172,8 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
         const img = document.createElement("img");
         img.className = "avatar-img";
 
-        const folder = member.gender === "Female" ? "woman" : "man";
         const randomValue = (index % 4) + 1;
-        img.src = `./src/assets/${folder}-${randomValue}.png`;
+        img.src = getAvatarPath(member.userId, member.gender, randomValue);
         img.alt = member.user.getName();
         img.title = member.user.getName();
 
@@ -245,7 +268,8 @@ async function renderTeamDetailsModal(team: any): Promise<void> {
 
   const membersList = document.createElement("div");
   membersList.style.display = "grid";
-  membersList.style.gridTemplateColumns = "repeat(auto-fit, minmax(180px, 1fr))";
+  membersList.style.gridTemplateColumns =
+    "repeat(auto-fit, minmax(180px, 1fr))";
   membersList.style.gap = "0.75rem";
   membersList.style.marginTop = "0.75rem";
 
@@ -291,13 +315,19 @@ async function renderTeamDetailsModal(team: any): Promise<void> {
       const teamMembers = allTeamMembers.filter(
         (member: any) => member.team_id === team.id,
       );
-      const memberIds = new Set(teamMembers.map((member: any) => member.user_id));
+      const memberIds = new Set(
+        teamMembers.map((member: any) => member.user_id),
+      );
 
       const allUsers = await UserService.getUsers();
       const allAssignees = await TaskAssigneeService.getTaskAssignees();
-      const assigneeUserIds = new Set(allAssignees.map((assignee) => assignee.user_id));
+      const assigneeUserIds = new Set(
+        allAssignees.map((assignee) => assignee.user_id),
+      );
 
-      const memberUsers = allUsers.filter((user: IUser) => memberIds.has(user.getId()));
+      const memberUsers = allUsers.filter((user: IUser) =>
+        memberIds.has(user.getId()),
+      );
       if (memberUsers.length === 0) {
         const empty = document.createElement("p");
         empty.textContent = "Nenhum membro cadastrado nesta equipe.";
@@ -317,7 +347,8 @@ async function renderTeamDetailsModal(team: any): Promise<void> {
           memberName.style.marginBottom = "0.25rem";
 
           const memberEmail = document.createElement("span");
-          memberEmail.textContent = (user as any).getEmail?.() || "Email indisponível";
+          memberEmail.textContent =
+            (user as any).getEmail?.() || "Email indisponível";
           memberEmail.style.color = "#555";
           memberEmail.style.fontSize = "0.9rem";
 
@@ -374,7 +405,10 @@ async function renderTeamDetailsModal(team: any): Promise<void> {
         team_id: team.id,
         user_id: selectedUserId,
       });
-      showInfoBanner("Membro adicionado à equipe com sucesso.", "success-banner");
+      showInfoBanner(
+        "Membro adicionado à equipe com sucesso.",
+        "success-banner",
+      );
       await reloadTeamDetails();
     } catch (error) {
       console.error("Erro ao adicionar membro de equipe:", error);
@@ -401,4 +435,3 @@ async function renderTeamDetailsModal(team: any): Promise<void> {
 
   await reloadTeamDetails();
 }
-

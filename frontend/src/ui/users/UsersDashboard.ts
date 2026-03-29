@@ -1,7 +1,7 @@
 import { ITask } from "../../tasks/index.js";
 import { TaskStatus } from "../../tasks/TaskStatus.js";
 import { IUser } from "../../models/index.js";
-import { renderModalEditTask } from "../modal/index.js";
+import { loadTaskDetailPage } from "../tasks/TaskDetailPageUI.js";
 import { getCardBorderColor, setCardBorderColor } from "../../helpers/index.js";
 
 export class UsersDashboard {
@@ -96,7 +96,7 @@ export class UsersDashboard {
       const taskId = card.getAttribute("data-task-id");
       const task = this.tasks.find(t => t.getId().toString() === taskId);
       
-      if (task) renderModalEditTask(task, this.user);
+      if (task) loadTaskDetailPage(task.getId());
     };
   }
 

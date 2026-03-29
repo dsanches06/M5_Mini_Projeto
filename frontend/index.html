@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="./src/styles/statistics.css" />
     <link rel="stylesheet" href="./src/styles/project.css" />
     <link rel="stylesheet" href="./src/styles/gantt.css" />
-    <link rel="stylesheet" href="./src/styles/taskdetail.css" />
     <script src="./dist/main.js" type="module" defer></script>
     <script
       src="https://kit.fontawesome.com/874e9efdc5.js"
@@ -57,7 +56,7 @@
                 <span>Projetos</span>
                 <i class="fas fa-chevron-down submenu-toggle-icon"></i>
               </a>
-              <div class="submenu" id="projectsSubmenu" style="display: none;">
+              <div class="submenu" id="projectsSubmenu">
                 <a id="menuTeams" class="js-link submenu-link">
                   <i class="fas fa-users"></i>
                   <span>Equipas</span>
@@ -93,17 +92,5 @@
       <p>&copy; 2026 Developed by Danilson Sanches @upskill217</p>
     </footer>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script>
-      const projectsToggle = document.querySelector('#menuProjects');
-      const projectsSubmenu = document.querySelector('#projectsSubmenu');
-
-      if (projectsToggle && projectsSubmenu) {
-        projectsToggle.addEventListener('click', (event) => {
-          event.preventDefault();
-          const isOpen = projectsSubmenu.classList.toggle('show');
-          projectsToggle.classList.toggle('expanded', isOpen);
-        });
-      }
-    </script>
   </body>
 </html>

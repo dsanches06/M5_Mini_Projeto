@@ -55,7 +55,6 @@ export type TaskStatsAPIResponse = {
   completedPercentage: string;
 };
 
-
 /** Type para representar comentário de tarefa vindo da API */
 export type TaskCommentAPIResponse = {
   id: number;
@@ -248,4 +247,28 @@ export type CategoryAPIResponse = {
   id: number;
   name: string;
   description?: string;
+};
+
+/* Type para representar ranking de horas mais reais vindo da API */
+export type RankingMoreHoursAPIResponse = {
+  projeto: string;
+  utilizador: string;
+  total_horas_reais: number;
+  ranking: number;
+};
+
+/* Mapeia a resposta da API para ranking de horas de aumento */
+export type RankingIncreaseHoursAPIResponse = {
+  utilizador: string;
+  data_dia: string;
+  horas_dia: number;
+  horas_dia_anterior: number;
+  ranking_do_dia: number;
+};
+
+/* Type para representar ranking de horas acima da média vindo da API */
+export type RankingAboveAverageAPIResponse = {
+  projeto: string;
+  total_horas_projeto: number;
+  media_geral_sistema: number;
 };

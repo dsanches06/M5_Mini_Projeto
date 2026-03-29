@@ -1,19 +1,16 @@
 import { UserService, TaskService } from "../../services/index.js";
 import { UserClass } from "../../models/index.js";
-import { showInfoBanner } from "../../helpers/index.js";
+import { getAvatarPath, showInfoBanner } from "../../helpers/index.js";
 import { renderUsers, showUsersCounters } from "./index.js";
-import { createSection } from "../dom/index.js";
-import { removeUserByID, toggleUserState } from "../gestUserTask/index.js";
-import { loadTasksPage } from "../tasks/index.js";
+import { toggleUserState } from "../gestUserTask/index.js";
 import { showUserDetails } from "../modal/index.js";
 import { TaskAssigneeAPIResponse } from "../../api/dto/typesDTO.js";
-import { renderDashboard } from "../dashboard/RenderDashBoardUI.js";
 import { loadUserTasksPage } from "./index.js";
 
 /* Criar cartão de utilizador */
 export async function createUserCard(user: UserClass): Promise<HTMLElement> {
-  const divUserCard = createSection("sectionUserCard") as HTMLElement;
-  divUserCard.className = "cardContainer";
+  const divUserCard = document.createElement("section") as HTMLElement;
+  divUserCard.className = "cardContainer sectionUserCard";
 
   const card = document.createElement("div") as HTMLElement;
   card.className = "card";
@@ -27,9 +24,8 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   content1.className = "content";
 
   const randomValue = Math.floor(Math.random() * 4) + 1;
-  const imageFolder = user.getGender() === "Male" ? "man" : "woman";
   const img = document.createElement("img") as HTMLImageElement;
-  img.src = `./src/assets/${imageFolder}-${randomValue}.png`;
+  img.src = getAvatarPath(user.getId(), user.getGender(), randomValue);
   img.alt = "User Avatar";
 
   const h3 = document.createElement("h3") as HTMLElement;
