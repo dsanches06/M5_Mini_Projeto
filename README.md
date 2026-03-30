@@ -1,54 +1,44 @@
 # Projeto 2 - API Completa com Banco de Dados
 
-Uma API RESTful completa desenvolvida com Node.js, Express e MySQL para gerenciar tarefas, utilizadores, tags e comentários.
+Uma API RESTful criada com Node.js, Express e MySQL para gerir tarefas, utilizadores, tags, comentários, projetos e sprints.
 
-## � Como Obter o Projeto
+## 📌 Visão Geral
 
-### Clonar do GitHub
+Este projeto está organizado como um monorepo com duas pastas principais:
+
+- `backend/` - API em Node.js + Express com MySQL
+- `frontend/` - aplicação em TypeScript + Vite
+
+## 🚀 Começando
+
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/dsanches06/M5_Mini_Projeto.git
 cd M5_Mini_Projeto
 ```
 
-Ou use HTTPS:
+### 2. Instalar dependências
 
-```bash
-git clone https://github.com/dsanches06/M5_Mini_Projeto.git
-cd M5_Mini_Projeto
-```
-
-## �📋 Tecnologias Utilizadas
-
-- **Node.js** - Runtime JavaScript
-- **Express** - Framework web
-- **MySQL** - Banco de dados relacional
-- **Nodemon** - Monitor de desenvolvimento
-- **Dotenv** - Variáveis de ambiente
-
-## 🚀 Como Iniciar
-
-### 1. Instalar Dependências
+No diretório raiz:
 
 ```bash
 npm install
 ```
 
-Instala todas as dependências necessárias listadas em `package.json`.
+Isso instala as dependências para o `backend` e o `frontend`, pois o projeto utiliza npm workspaces.
 
-### 2. Configurar Banco de Dados
+### 3. Configurar o banco de dados
 
-Execute o script de inicialização do banco:
+No MySQL, execute o script de criação de tabelas:
 
 ```bash
-mysql -u seu_usuario < database-init.sql
+mysql -u seu_usuario -p < backend/database-init.sql
 ```
 
-Ou importe o arquivo `database-init.sql` no seu cliente MySQL.
+### 4. Configurar variáveis de ambiente
 
-### 3. Configurar Variáveis de Ambiente
-
-Crie o arquivo `.env` em `src/`:
+Crie um arquivo `.env` dentro de `backend/src/` com o seguinte conteúdo:
 
 ```env
 DB_HOST=localhost
@@ -58,65 +48,55 @@ DB_NAME=database
 PORT=3000
 ```
 
-### 4. Iniciar o Servidor
+### 5. Executar o backend
+
+No diretório raiz:
 
 ```bash
 npm start
 ```
 
-O servidor rodará em: `http://localhost:3000`
+Ou diretamente:
 
-**Nota:** O servidor reinicia automaticamente ao salvar arquivos (nodemon ativado).
+```bash
+npm run start:backend
+```
 
-### 5. Parar o Servidor
+O backend irá rodar em `http://localhost:3000`.
 
-Pressione `Ctrl+C` no terminal.
+### 6. Executar o frontend
+
+No diretório raiz:
+
+```bash
+npm run start:frontend
+```
+
+O frontend é servido pelo Vite, normalmente em `http://localhost:5173`.
+
+## 🧩 Scripts importantes
+
+- `npm install` - instalar dependências de todo o monorepo
+- `npm start` - iniciar o backend
+- `npm run start:backend` - iniciar apenas o backend
+- `npm run start:frontend` - iniciar apenas o frontend
+- `npm run build:frontend` - construir o frontend para produção
 
 ## 📁 Estrutura do Projeto
 
 ```
 M5_Mini_Projeto/
-├── package.json           # Dependências e scripts
-├── database-init.sql      # Script de inicialização do banco de dados
-├── test-api-full.ps1      # Script de testes automatizados (PowerShell)
-│
+├── package.json           # Workspace npm
 ├── backend/               # API RESTful com Node.js e Express
 │   ├── package.json
 │   ├── database-init.sql
-│   ├── test-api-full.ps1
 │   └── src/
-│       ├── .env                   # Variáveis de ambiente (CRIAR MANUALMENTE)
-│       ├── app.js                 # Aplicação Express principal
-│       ├── db.js                  # Configuração do banco de dados
-│       ├── controllers/           # Controladores das rotas
-│       │   ├── taskController.js
-│       │   ├── tagController.js
-│       │   ├── userController.js
-│       │   ├── projectController.js
-│       │   ├── sprintController.js
-│       │   ├── notificationController.js
-│       │   └── commentController.js
-│       ├── middlewares/           # Middlewares personalizados
-│       │   ├── checkUserExists.js
-│       │   └── loggerMiddleware.js
-│       ├── routes/                # Definição das rotas
-│       │   ├── taskRoutes.js
-│       │   ├── tagRoutes.js
-│       │   ├── userRoutes.js
-│       │   ├── projectRoutes.js
-│       │   ├── sprintRoutes.js
-│       │   ├── notificationRoutes.js
-│       │   └── commentRoutes.js
-│       └── services/              # Lógica de negócio
-│           ├── taskService.js
-│           ├── tagService.js
-│           ├── userService.js
-│           ├── projectService.js
-│           ├── sprintService.js
-│           ├── notificationService.js
-│           ├── commentService.js
-│           └── otherServices.js
-│
+│       ├── app.js
+│       ├── db.js
+│       ├── controllers/
+│       ├── middlewares/
+│       ├── routes/
+│       └── services/
 └── frontend/              # Interface com TypeScript e Vite
     ├── package.json
     ├── tsconfig.json
@@ -124,76 +104,7 @@ M5_Mini_Projeto/
     ├── index.html
     ├── main.ts
     ├── src/
-    │   ├── assets/                # Imagens e recursos estáticos
-    │   ├── attachments/           # Serviços de anexos
-    │   │   └── Attachment.ts
-    │   ├── comments/              # Serviços de comentários
-    │   │   └── Comment.ts
-    │   ├── dashboards/            # Configurações de dashboard
-    │   │   ├── DashboardColumn.ts
-    │   │   └── DashboardConfig.ts
-    │   ├── helpers/               # Funções auxiliares
-    │   │   ├── Buffer.ts
-    │   │   ├── fakeData.ts
-    │   │   ├── generateRandomColor.ts
-    │   │   ├── getTaskByFilter.ts
-    │   │   ├── infoBanner.ts
-    │   │   └── index.ts
-    │   ├── logs/                  # Sistema de logging
-    │   │   └── SystemLogger.ts
-    │   ├── models/                # Modelos de dados
-    │   │   ├── BaseEntity.ts
-    │   │   ├── IUser.ts
-    │   │   ├── UserClass.ts
-    │   │   └── index.ts
-    │   ├── notifications/         # Sistema de notificações
-    │   │   └── Notifications.ts
-    │   ├── security/              # Segurança e permissões
-    │   │   ├── PermissionService.ts
-    │   │   ├── UserRole.ts
-    │   │   └── index.ts
-    │   ├── services/              # Serviços de negócio
-    │   │   ├── assignmentService.ts
-    │   │   ├── attachmentService.ts
-    │   │   ├── automationRulesService.ts
-    │   │   ├── backupService.ts
-    │   │   ├── BusinessRules.ts
-    │   │   ├── commentService.ts
-    │   │   ├── deadLineService.ts
-    │   │   ├── notificationService.ts
-    │   │   ├── searchService.ts
-    │   │   ├── statisticsService.ts
-    │   │   ├── SystemConfig.ts
-    │   │   └── index.ts
-    │   ├── styles/                # Folhas de estilo CSS
-    │   ├── tasks/                 # Componentes de tarefas
-    │   ├── ui/                    # Componentes UI reutilizáveis
-    │   └── utils/                 # Utilitários gerais
-    │
-    └── testes/                    # Testes com Vitest
-        ├── assignmentService.test.ts
-        ├── attachmentService.test.ts
-        ├── automationRulesService.test.ts
-        ├── backupService.test.ts
-        ├── businessRules.test.ts
-        ├── commentService.test.ts
-        ├── deadLineService.test.ts
-        ├── dependencyGraph.test.ts
-        ├── entityList.test.ts
-        ├── favorites.test.ts
-        ├── notificationService.test.ts
-        ├── paginator.test.ts
-        ├── priorityManager.test.ts
-        ├── ratingSystem.test.ts
-        ├── searchService.test.ts
-        ├── simpleCache.test.ts
-        ├── statisticsService.test.ts
-        ├── systemConfig.test.ts
-        ├── tagManager.test.ts
-        ├── taskService.test.ts
-        ├── taskUtils.test.ts
-        ├── userService.test.ts
-        └── watcherSystem.test.ts
+    └── testes/
 ```
 
 ## 📡 Documentação das Rotas
@@ -208,13 +119,6 @@ M5_Mini_Projeto/
 | DELETE | `/tasks/:id` | Deletar tarefa |
 | GET | `/tasks/stats` | Buscar estatísticas |
 
-**Exemplo - Criar tarefa:**
-```bash
-curl -X POST http://localhost:3000/tasks \
-  -H "Content-Type: application/json" \
-  -d '{"titulo":"Nova Tarefa","responsavel":"João","categoria":"Backend"}'
-```
-
 ### Tags
 
 | Método | Rota | Descrição |
@@ -223,13 +127,6 @@ curl -X POST http://localhost:3000/tasks \
 | POST | `/tags` | Criar nova tag |
 | DELETE | `/tags/:id` | Deletar tag |
 | GET | `/tags/:id/tasks` | Buscar tarefas por tag |
-
-**Exemplo - Criar tag:**
-```bash
-curl -X POST http://localhost:3000/tags \
-  -H "Content-Type: application/json" \
-  -d '{"nome":"nova-tag"}'
-```
 
 ### Utilizadores (Users)
 
@@ -242,13 +139,6 @@ curl -X POST http://localhost:3000/tags \
 | PATCH | `/users/:id` | Alternar status (ativo/inativo) |
 | GET | `/users/stats` | Buscar estatísticas |
 
-**Exemplo - Criar utilizador:**
-```bash
-curl -X POST http://localhost:3000/users \
-  -H "Content-Type: application/json" \
-  -d '{"nome":"João Silva","email":"joao@example.com","telefone":"987654321"}'
-```
-
 ### Comentários (em Tarefas)
 
 | Método | Rota | Descrição |
@@ -257,13 +147,6 @@ curl -X POST http://localhost:3000/users \
 | GET | `/tasks/:id/comments` | Buscar comentários |
 | DELETE | `/tasks/:id/comments/:commentId` | Deletar comentário |
 
-**Exemplo - Criar comentário:**
-```bash
-curl -X POST http://localhost:3000/tasks/1/comments \
-  -H "Content-Type: application/json" \
-  -d '{"userId":1,"conteudo":"Esse é um comentário de teste"}'
-```
-
 ### Tags em Tarefas
 
 | Método | Rota | Descrição |
@@ -271,13 +154,6 @@ curl -X POST http://localhost:3000/tasks/1/comments \
 | POST | `/tasks/:id/tags` | Adicionar tag à tarefa |
 | GET | `/tasks/:id/tags` | Buscar tags da tarefa |
 | DELETE | `/tasks/:id/tags` | Remover tag da tarefa |
-
-**Exemplo - Adicionar tag:**
-```bash
-curl -X POST http://localhost:3000/tasks/1/tags \
-  -H "Content-Type: application/json" \
-  -d '{"tagId":1}'
-```
 
 ### Busca e Ordenação
 
@@ -290,11 +166,6 @@ curl -X POST http://localhost:3000/tasks/1/tags \
 - `search` - Termo de busca (opcional)
 - `sort` - Ordenação: `asc` (crescente) ou `desc` (decrescente)
 
-**Exemplo - Buscar tarefas com filtro:**
-```bash
-curl "http://localhost:3000/tasks?search=API&sort=asc"
-```
-
 ### Projetos
 
 | Método | Rota | Descrição |
@@ -303,13 +174,6 @@ curl "http://localhost:3000/tasks?search=API&sort=asc"
 | POST | `/projects` | Criar novo projeto |
 | PUT | `/projects/:id` | Atualizar projeto |
 | DELETE | `/projects/:id` | Deletar projeto |
-
-**Exemplo - Criar projeto:**
-```bash
-curl -X POST http://localhost:3000/projects \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Novo Projeto","descricao":"Descrição do projeto"}'
-```
 
 ### Sprints
 
@@ -320,13 +184,6 @@ curl -X POST http://localhost:3000/projects \
 | PUT | `/sprints/:id` | Atualizar sprint |
 | DELETE | `/sprints/:id` | Deletar sprint |
 
-**Exemplo - Criar sprint:**
-```bash
-curl -X POST http://localhost:3000/sprints \
-  -H "Content-Type: application/json" \
-  -d '{"nome":"Sprint 1","dataInicio":"2024-01-01","dataFim":"2024-01-14"}'
-```
-
 ### Notificações
 
 | Método | Rota | Descrição |
@@ -336,18 +193,15 @@ curl -X POST http://localhost:3000/sprints \
 | PUT | `/notifications/:id` | Marcar notificação como lida |
 | DELETE | `/notifications/:id` | Deletar notificação |
 
-**Exemplo - Criar notificação:**
-```bash
-curl -X POST http://localhost:3000/notifications \
-  -H "Content-Type: application/json" \
-  -d '{"userId":1,"mensagem":"Você foi atribuído a uma tarefa"}'
-```
+## 🧪 Testes
+
+Use ferramentas como Postman ou Insomnia para testar os endpoints HTTP.
+
+## ✅ Autor
+
+Desenvolvido por **Danilson Sanches** @upskill217
 
 ## 🧪 Testando a API
-
-### Com cURL
-
-Use os exemplos fornecidos em cada seção de rotas. Você pode executá-los diretamente no terminal ou PowerShell.
 
 ### Com PowerShell (Recomendado)
 
