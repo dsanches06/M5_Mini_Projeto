@@ -95,7 +95,7 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
   addTeamMemberBtn.setAttribute("aria-label", "Adicionar membro");
   addTeamMemberBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    await renderTeamDetailsModal(team);
+    await renderTeamMemberModal(team, "add");
   });
 
   const deleteTeamMemberBtn = document.createElement("button");
@@ -105,7 +105,7 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
   deleteTeamMemberBtn.setAttribute("aria-label", "Remover membro");
   deleteTeamMemberBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
-    await renderTeamDetailsModal(team);
+    await renderTeamMemberModal(team, "remove");
   });
 
   actions.appendChild(editBtn);
@@ -204,234 +204,131 @@ async function createTeamCard(team: any): Promise<HTMLElement> {
   return card;
 }
 
-async function renderTeamDetailsModal(team: any): Promise<void> {
-  const modal = document.createElement("section") as HTMLElement;
-  modal.className = "modal";
-  modal.id = "modalTeamDetails";
+async function renderTeamMemberModal(
+  team: any,
+  action: "add" | "remove",
+): Promise<void> {
+  try {
+    const teamId = team.id;
+    const allUsers = await UserService.getUsers();
+    const allAssignees = await TaskAssigneeService.getTaskAssignees();
+    const assigneeUserIds = new Set(
+      allAssignees.map((assignee) => assignee.user_id),
+    );
 
-  const content = document.createElement("div");
-  content.className = "modal-content";
-  content.style.maxWidth = "700px";
-  content.style.padding = "1.5rem";
-  content.style.position = "relative";
+    const allTeamMembers = await TeamMemberService.getTeamMembers();
+    const teamMembers = allTeamMembers.filter(
+      (member: any) => member.team_id === teamId,
+    );
+    const memberIds = new Set(
+      teamMembers.map((member: any) => member.user_id),
+    );
 
-  const closeBtn = document.createElement("span");
-  closeBtn.className = "close";
-  closeBtn.innerHTML = "&times;";
-  closeBtn.style.position = "absolute";
-  closeBtn.style.top = "1rem";
-  closeBtn.style.right = "1rem";
-  closeBtn.style.cursor = "pointer";
-  closeBtn.style.fontSize = "1.5rem";
-  closeBtn.onclick = () => modal.remove();
+    const availableUsers =
+      action === "add"
+        ? allUsers.filter((user: IUser) => !memberIds.has(user.getId()))
+        : allUsers.filter((user: IUser) => memberIds.has(user.getId()));
 
-  const title = document.createElement("h2");
-  title.textContent = team.name || "Equipe";
-  title.style.marginTop = "0";
+    const modal = document.createElement("section");
+    modal.className = "modal team-member-selection-modal";
+    modal.id = `teamMemberModal-${teamId}-${action}`;
 
-  const description = document.createElement("p");
-  description.textContent = team.description || "Sem descrição disponível.";
-  description.style.color = "#555";
+    const content = document.createElement("div");
+    content.className = "modal-content";
+    content.style.maxWidth = "1040px";
+    content.style.width = "95%";
+    content.style.padding = "42px";
 
-  const createdDate = document.createElement("p");
-  const dateValue = team.createdAt || team.created_at || new Date();
-  createdDate.textContent = `Criada em: ${new Date(dateValue).toLocaleDateString("pt-BR")}`;
-  createdDate.style.color = "#777";
-  createdDate.style.marginTop = "0.25rem";
+    const title = document.createElement("h2");
+    title.textContent =
+      action === "add" ? "Selecionar usuário para adicionar à equipe" : "Selecionar usuário para remover da equipe";
 
-  const membersSection = document.createElement("div");
-  membersSection.style.marginTop = "1rem";
+    const list = document.createElement("div");
+    list.className = "team-member-selection-list";
+    list.style.display = "grid";
+    list.style.gridTemplateColumns = "repeat(3, minmax(260px, 1fr))";
+    list.style.gap = "1rem";
+    list.style.marginTop = "1rem";
 
-  const membersHeader = document.createElement("div");
-  membersHeader.style.display = "flex";
-  membersHeader.style.justifyContent = "space-between";
-  membersHeader.style.alignItems = "center";
+    availableUsers.forEach((user: IUser) => {
+      const row = document.createElement("div");
+      row.className = "team-member-selection-row";
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.alignItems = "center";
+      row.style.padding = "0.8rem 1rem";
+      row.style.background = "#f7f7f7";
+      row.style.border = "1px solid rgba(0,0,0,0.08)";
+      row.style.borderRadius = "8px";
 
-  const membersTitle = document.createElement("h3");
-  membersTitle.textContent = "Membros da equipe";
-  membersTitle.style.margin = "0";
+      const label = document.createElement("span");
+      label.textContent = user.getName();
+      label.style.fontSize = "0.95rem";
+      label.style.color = "#1f2937";
+      label.style.flex = "1";
 
-  const addMemberBtn = document.createElement("button");
-  addMemberBtn.textContent = "+ Adicionar membro";
-  addMemberBtn.style.padding = "0.4rem 0.9rem";
-  addMemberBtn.style.border = "none";
-  addMemberBtn.style.borderRadius = "4px";
-  addMemberBtn.style.cursor = "pointer";
-  addMemberBtn.style.backgroundColor = "#4CAF50";
-  addMemberBtn.style.color = "white";
-  addMemberBtn.style.fontSize = "0.85rem";
-
-  membersHeader.appendChild(membersTitle);
-  membersHeader.appendChild(addMemberBtn);
-
-  membersSection.appendChild(membersHeader);
-
-  const membersList = document.createElement("div");
-  membersList.style.display = "grid";
-  membersList.style.gridTemplateColumns =
-    "repeat(auto-fit, minmax(180px, 1fr))";
-  membersList.style.gap = "0.75rem";
-  membersList.style.marginTop = "0.75rem";
-
-  membersSection.appendChild(membersList);
-
-  const candidatesSection = document.createElement("div");
-  candidatesSection.style.marginTop = "1rem";
-
-  const candidateLabel = document.createElement("label");
-  candidateLabel.textContent = "Usuários com tarefas atribuídas";
-  candidateLabel.style.display = "block";
-  candidateLabel.style.marginBottom = "0.5rem";
-  candidatesSection.appendChild(candidateLabel);
-
-  const candidateSelect = document.createElement("select") as HTMLSelectElement;
-  candidateSelect.style.width = "100%";
-  candidateSelect.style.padding = "0.6rem";
-  candidateSelect.style.border = "1px solid #ccc";
-  candidateSelect.style.borderRadius = "4px";
-
-  candidatesSection.appendChild(candidateSelect);
-
-  const addMemberConfirm = document.createElement("button");
-  addMemberConfirm.textContent = "Adicionar membro à equipe";
-  addMemberConfirm.style.marginTop = "0.75rem";
-  addMemberConfirm.style.padding = "0.6rem 1rem";
-  addMemberConfirm.style.border = "none";
-  addMemberConfirm.style.borderRadius = "4px";
-  addMemberConfirm.style.cursor = "pointer";
-  addMemberConfirm.style.backgroundColor = "#0077CC";
-  addMemberConfirm.style.color = "white";
-  addMemberConfirm.disabled = true;
-
-  candidatesSection.appendChild(addMemberConfirm);
-
-  const reloadTeamDetails = async () => {
-    membersList.innerHTML = "";
-    candidateSelect.innerHTML = "";
-    addMemberConfirm.disabled = true;
-
-    try {
-      const allTeamMembers = await TeamMemberService.getTeamMembers();
-      const teamMembers = allTeamMembers.filter(
-        (member: any) => member.team_id === team.id,
+      const button = document.createElement("button");
+      button.className = "btn primary";
+      button.innerHTML =
+        action === "add"
+          ? `<i class="fas fa-plus"></i>`
+          : `<i class="fas fa-minus"></i>`;
+      button.title = action === "add" ? "Adicionar membro" : "Remover membro";
+      button.setAttribute(
+        "aria-label",
+        action === "add" ? "Adicionar membro" : "Remover membro",
       );
-      const memberIds = new Set(
-        teamMembers.map((member: any) => member.user_id),
-      );
-
-      const allUsers = await UserService.getUsers();
-      const allAssignees = await TaskAssigneeService.getTaskAssignees();
-      const assigneeUserIds = new Set(
-        allAssignees.map((assignee) => assignee.user_id),
-      );
-
-      const memberUsers = allUsers.filter((user: IUser) =>
-        memberIds.has(user.getId()),
-      );
-      if (memberUsers.length === 0) {
-        const empty = document.createElement("p");
-        empty.textContent = "Nenhum membro cadastrado nesta equipe.";
-        empty.style.color = "#777";
-        membersList.appendChild(empty);
-      } else {
-        memberUsers.forEach((user) => {
-          const memberCard = document.createElement("div");
-          memberCard.style.backgroundColor = "#f5f5f5";
-          memberCard.style.border = "1px solid #ddd";
-          memberCard.style.borderRadius = "4px";
-          memberCard.style.padding = "0.75rem";
-
-          const memberName = document.createElement("strong");
-          memberName.textContent = user.getName();
-          memberName.style.display = "block";
-          memberName.style.marginBottom = "0.25rem";
-
-          const memberEmail = document.createElement("span");
-          memberEmail.textContent =
-            (user as any).getEmail?.() || "Email indisponível";
-          memberEmail.style.color = "#555";
-          memberEmail.style.fontSize = "0.9rem";
-
-          memberCard.appendChild(memberName);
-          memberCard.appendChild(memberEmail);
-          membersList.appendChild(memberCard);
-        });
-      }
-
-      const candidateUsers = allUsers.filter(
-        (user: IUser) =>
-          assigneeUserIds.has(user.getId()) && !memberIds.has(user.getId()),
-      );
-
-      if (candidateUsers.length === 0) {
-        const option = document.createElement("option");
-        option.textContent = "Nenhum usuário elegível encontrado";
-        option.value = "";
-        candidateSelect.appendChild(option);
-        candidateSelect.disabled = true;
-      } else {
-        const placeholder = document.createElement("option");
-        placeholder.textContent = "Selecione um usuário...";
-        placeholder.value = "";
-        candidateSelect.appendChild(placeholder);
-        candidateSelect.disabled = false;
-
-        candidateUsers.forEach((user: IUser) => {
-          const option = document.createElement("option");
-          option.value = String(user.getId());
-          option.textContent = user.getName();
-          candidateSelect.appendChild(option);
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao recarregar dados de equipe:", error);
-      const errorMsg = document.createElement("p");
-      errorMsg.textContent = "Erro ao carregar membros ou candidatos.";
-      errorMsg.style.color = "#e74c3c";
-      membersList.appendChild(errorMsg);
-    }
-  };
-
-  candidateSelect.addEventListener("change", () => {
-    addMemberConfirm.disabled = candidateSelect.value === "";
-  });
-
-  addMemberConfirm.addEventListener("click", async () => {
-    const selectedUserId = Number(candidateSelect.value);
-    if (!selectedUserId) return;
-
-    try {
-      await TeamMemberService.createTeamMember({
-        team_id: team.id,
-        user_id: selectedUserId,
+      button.style.marginLeft = "0";
+      button.style.padding = "0";
+      button.style.width = "34px";
+      button.style.height = "34px";
+      button.style.display = "inline-flex";
+      button.style.alignItems = "center";
+      button.style.justifyContent = "center";
+      button.style.fontSize = "1rem";
+      button.style.minWidth = "auto";
+      button.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        try {
+          if (action === "add") {
+            await TeamMemberService.createTeamMember({
+              team_id: teamId,
+              user_id: user.getId(),
+            });
+            showInfoBanner(`Usuário "${user.getName()}" adicionado à equipe.`, "success");
+          } else {
+            const teamMember = teamMembers.find(
+              (m: any) => m.user_id === user.getId(),
+            );
+            if (teamMember && teamMember.id) {
+              await TeamMemberService.deleteTeamMember(teamMember.id);
+              showInfoBanner(`Usuário "${user.getName()}" removido da equipe.`, "success");
+            }
+          }
+          modal.remove();
+          window.location.reload();
+        } catch (error) {
+          showInfoBanner("Erro ao atualizar membro da equipe.", "error");
+          console.error("Erro ao atualizar membro da equipe:", error);
+        }
       });
-      showInfoBanner(
-        "Membro adicionado à equipe com sucesso.",
-        "success-banner",
-      );
-      await reloadTeamDetails();
-    } catch (error) {
-      console.error("Erro ao adicionar membro de equipe:", error);
-      showInfoBanner("Erro ao adicionar membro de equipe.", "error-banner");
-    }
-  });
 
-  addMemberBtn.addEventListener("click", () => {
-    candidateSelect.scrollIntoView({ behavior: "smooth", block: "center" });
-  });
+      row.append(label, button);
+      list.appendChild(row);
+    });
 
-  content.appendChild(closeBtn);
-  content.appendChild(title);
-  content.appendChild(description);
-  content.appendChild(createdDate);
-  content.appendChild(membersSection);
-  content.appendChild(candidatesSection);
-  modal.appendChild(content);
-  document.body.appendChild(modal);
+    content.append(title, list);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    modal.style.display = "block";
 
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) modal.remove();
-  });
-
-  await reloadTeamDetails();
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.remove();
+      }
+    });
+  } catch (error) {
+    showInfoBanner("Erro ao abrir o modal de membros.", "error");
+    console.error("Erro ao renderizar modal de membros:", error);
+  }
 }

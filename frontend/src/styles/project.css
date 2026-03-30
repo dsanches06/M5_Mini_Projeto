@@ -449,20 +449,20 @@
 
 /* SPRINTS GRID CONTAINER */
 .sprints-grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 16px;
   width: 100%;
   max-width: 1180px;
   margin-left: auto;
   margin-right: auto;
+  justify-content: flex-start;
 }
 
 /* SPRINT CARD */
 .sprint-card {
-  width: 100%;
-  max-width: 260px;
+  width: 260px;
   background: #d0d0d0;
   border-radius: 10px;
   padding: 10px;

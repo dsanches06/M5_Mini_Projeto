@@ -84,12 +84,13 @@ CREATE TABLE task (
         ON DELETE CASCADE
 );
 
-/* Task Assignees (N:M) */
+/* Task Assignees (1:N with max 1 user por task) */
 CREATE TABLE task_assignees (
     task_id INT NOT NULL,
     user_id INT NOT NULL,
     assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (task_id , user_id),
+    UNIQUE KEY uniq_task_assignment (task_id),
     FOREIGN KEY (task_id)
         REFERENCES task (id)
         ON DELETE CASCADE,
@@ -430,45 +431,36 @@ INSERT INTO task (title, description, task_status_id, priority_id, category_id, 
 /* 5. Assignees (Ajustados para as Equipas) */
 /* 5. Task Assignees (Sincronização Final com Time Logs e Users 1-20) */
 INSERT INTO task_assignees (task_id, user_id, assigned_at) VALUES
--- Bloco 1: Frontend (Equipa 1: Ana, Bruno, Catarina, Laura, Marco)
 (1, 1, '2026-02-01'),   -- Ana Martins
-(10, 1, '2023-10-01'),  -- Ana Martins (Limpeza DB)
-(11, 2, '2024-01-15'),  -- Bruno Alves
-(16, 11, '2026-03-01'), -- Laura Pinto
-(17, 12, '2026-03-15'), -- Marco Silva
-(18, 3, '2026-02-25'),  -- Catarina Dias
-
--- Bloco 2: Backend (Equipa 2: Diogo, Eduarda, Fabio, Nuno, Olga)
 (2, 4, '2026-02-01'),   -- Diogo Rocha
 (3, 13, '2026-02-02'),  -- Nuno Costa
 (4, 14, '2026-02-05'),  -- Olga Ferreira
-(19, 5, '2026-04-01'),  -- Eduarda Gomes
-(20, 6, '2026-04-15'),  -- Fabio Lopes
-(21, 13, '2026-05-01'), -- Nuno Costa
-
--- Bloco 3: QA & Segurança (Equipa 3: Gabriela, Hugo, Paulo, Rita)
-(7, 15, '2026-11-20'),  -- Paulo Ribeiro (Hub IoT)
-(8, 16, '2026-12-01'),  -- Rita Carvalho (Gráficos)
+(5, 19, '2026-04-01'),  -- Vera Batista
+(6, 9, '2026-06-01'),   -- Inês Duarte
+(7, 15, '2026-11-20'),  -- Paulo Ribeiro
+(8, 16, '2026-12-01'),  -- Rita Carvalho
+(9, 10, '2023-10-01'),  -- Jorge Mota
+(10, 1, '2023-10-01'),  -- Ana Martins
+(11, 2, '2024-01-15'),  -- Bruno Alves
 (12, 7, '2023-05-25'),  -- Gabriela Vaz
 (13, 8, '2023-06-01'),  -- Hugo Neves
 (14, 15, '2024-02-15'), -- Paulo Ribeiro
 (15, 16, '2024-02-20'), -- Rita Carvalho
-(27, 7, '2026-12-15'),  -- Gabriela Vaz (Stress Test)
-(28, 8, '2023-06-20'),  -- Hugo Neves
-(29, 15, '2026-03-20'), -- Paulo Ribeiro
-(30, 16, '2026-04-10'), -- Rita Carvalho
-
--- Bloco 4: Design (Equipa 4: Inês, Sofia, Tiago)
-(6, 9, '2026-06-01'),   -- Inês Duarte
-(25, 17, '2026-07-01'), -- Sofia Teixeira
-(26, 18, '2026-07-05'), -- Tiago Monteiro
-
--- Bloco 5: Gestão (Equipa 5: Jorge, Vera, Zé)
-(5, 19, '2026-06-01'),  -- Vera Batista
-(9, 10, '2023-10-01'),  -- Jorge Mota
+(16, 11, '2026-03-01'), -- Laura Pinto
+(17, 12, '2026-03-15'), -- Marco Silva
+(18, 3, '2026-02-25'),  -- Catarina Dias
+(19, 5, '2026-04-01'),  -- Eduarda Gomes
+(20, 6, '2026-04-15'),  -- Fabio Lopes
+(21, 13, '2026-05-01'), -- Nuno Costa
 (22, 10, '2026-06-15'), -- Jorge Mota
 (23, 19, '2026-07-20'), -- Vera Batista
-(24, 20, '2026-02-18'); -- Zé Santos
+(24, 20, '2026-02-18'), -- Zé Santos
+(25, 17, '2026-07-01'), -- Sofia Teixeira
+(26, 18, '2026-07-05'), -- Tiago Monteiro
+(27, 7, '2026-12-15'),  -- Gabriela Vaz
+(28, 8, '2023-06-20'),  -- Hugo Neves
+(29, 15, '2026-03-20'), -- Paulo Ribeiro
+(30, 16, '2026-04-10'); -- Rita Carvalho
 
 INSERT INTO tags (id, name, color) VALUES
 (1, 'Urgente', 'Vermelho'),

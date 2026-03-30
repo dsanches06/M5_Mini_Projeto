@@ -8,7 +8,12 @@ import {
 } from "../../helpers/index.js";
 import { loadTaskDetailPage } from "./TaskDetailPageUI.js";
 import { renderTaskModal } from "../modal/index.js";
-import { TaskService, TaskAssigneeService, TagService, UserService } from "../../services/index.js";
+import {
+  TaskService,
+  TaskAssigneeService,
+  TagService,
+  UserService,
+} from "../../services/index.js";
 
 export async function createTaskCard(
   task: ITask,
@@ -79,14 +84,12 @@ async function buildTaskCard(
   card.className = "task-card";
   card.setAttribute("data-task-id", task.getId().toString());
 
-
   // Container principal flexível: conteúdo à esquerda, botões à direita
   const mainRow = document.createElement("div");
   mainRow.style.display = "flex";
   mainRow.style.flexDirection = "row";
   mainRow.style.justifyContent = "space-between";
   mainRow.style.alignItems = "flex-start";
-
 
   // Conteúdo principal (esquerda) - agora com expand/collapse
   const contentCol = document.createElement("div");
@@ -101,18 +104,6 @@ async function buildTaskCard(
   const title = document.createElement("span");
   title.className = "task-title";
   title.textContent = task.getTitle();
-
-  // Botão de expandir/recolher
-  const toggleBtn = document.createElement("button");
-  toggleBtn.className = "icon-button";
-  toggleBtn.innerHTML = `<i class='fas fa-chevron-down'></i>`;
-  toggleBtn.title = "Expandir/Recolher detalhes";
-  toggleBtn.style.marginLeft = "8px";
-
-  // Container para detalhes (responsável, status, tags)
-  const detailsDiv = document.createElement("div");
-  detailsDiv.className = "task-details";
-  detailsDiv.style.display = "none";
 
   // Responsável
   const user = document.createElement("span");
@@ -142,23 +133,12 @@ async function buildTaskCard(
     console.error("Erro ao carregar tags da tarefa:", error);
   }
 
-  detailsDiv.append(user, status);
-  if (tagsWrapper) detailsDiv.appendChild(tagsWrapper);
-
   // Por padrão, só mostra número, título e botão toggle
-  contentCol.append(number, title, toggleBtn);
-  contentCol.appendChild(detailsDiv);
+  contentCol.append(number, title, user, status);
 
-  // Toggle expand/collapse
-  let expanded = false;
-  toggleBtn.onclick = (e) => {
-    e.stopPropagation();
-    expanded = !expanded;
-    detailsDiv.style.display = expanded ? "block" : "none";
-    toggleBtn.innerHTML = expanded
-      ? `<i class='fas fa-chevron-up'></i>`
-      : `<i class='fas fa-chevron-down'></i>`;
-  };
+  if (tagsWrapper) {
+    contentCol.appendChild(tagsWrapper);
+  }
 
   // Botões (direita)
   const buttonContainer = document.createElement("div");
@@ -209,28 +189,6 @@ async function buildTaskCard(
     }
   });
 
-  const assignResponsibleBtn = document.createElement("button");
-  assignResponsibleBtn.className = "icon-button";
-  assignResponsibleBtn.innerHTML = `<i class="fas fa-user-plus"></i>`;
-  assignResponsibleBtn.title = "Atribuir responsável";
-  assignResponsibleBtn.setAttribute("aria-label", "Atribuir responsável");
-  assignResponsibleBtn.addEventListener("click", async (event) => {
-    event.stopPropagation();
-    //await handleTaskAssigneeAssign(task);
-  });
-
-  const removeResponsibleBtn = document.createElement("button");
-  removeResponsibleBtn.className = "icon-button";
-  removeResponsibleBtn.innerHTML = `<i class="fas fa-user-minus"></i>`;
-  removeResponsibleBtn.title = "Remover responsável";
-  removeResponsibleBtn.setAttribute("aria-label", "Remover responsável");
-  removeResponsibleBtn.addEventListener("click", async (event) => {
-    event.stopPropagation();
-   // await handleTaskAssigneeRemove(task);
-  });
-  const currentAssignees = task.getAssignees?.() || [];
-  removeResponsibleBtn.style.display = currentAssignees.length > 0 ? "" : "none";
-
   const addTagBtn = document.createElement("button");
   addTagBtn.className = "icon-button";
   addTagBtn.innerHTML = `<i class="fas fa-tags"></i><i class="fa-sharp fa-solid fa-plus"></i>`;
@@ -253,8 +211,6 @@ async function buildTaskCard(
 
   buttonContainer.appendChild(editBtn);
   buttonContainer.appendChild(deleteBtn);
-  buttonContainer.appendChild(assignResponsibleBtn);
-  buttonContainer.appendChild(removeResponsibleBtn);
   buttonContainer.appendChild(addTagBtn);
   buttonContainer.appendChild(deleteTagBtn);
 
@@ -296,127 +252,90 @@ async function renderTaskTagModal(
 
     const content = document.createElement("div");
     content.className = "modal-content";
-    content.style.maxWidth = "460px";
-
-    const closeBtn = document.createElement("span");
-    closeBtn.className = "close";
-    closeBtn.innerHTML = "&times;";
-    closeBtn.onclick = () => modal.remove();
+    content.style.maxWidth = "1040px";
+    content.style.width = "95%";
+    content.style.padding = "42px";
 
     const title = document.createElement("h2");
     title.textContent =
-      action === "add" ? "Adicionar tags à tarefa" : "Remover tags da tarefa";
+      action === "add" ? "Selecionar tag para adicionar à tarefa" : "Selecionar tag para remover da tarefa";
 
-    const description = document.createElement("p");
-    description.textContent =
-      action === "add"
-        ? "Selecione uma ou mais tags para adicionar à tarefa."
-        : "Selecione uma ou mais tags para remover desta tarefa.";
-    description.style.marginBottom = "1rem";
+    const list = document.createElement("div");
+    list.className = "task-tag-selection-list";
+    list.style.display = "grid";
+    list.style.gridTemplateColumns = "repeat(3, minmax(260px, 1fr))";
+    list.style.gap = "1rem";
+    list.style.marginTop = "1rem";
 
-    const form = document.createElement("form");
-    form.style.display = "flex";
-    form.style.flexDirection = "column";
-    form.style.gap = "1rem";
+    availableTags.forEach((tag: any) => {
+      const row = document.createElement("div");
+      row.className = "task-tag-selection-row";
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.alignItems = "center";
+      row.style.padding = "0.8rem 1rem";
+      row.style.background = "#f7f7f7";
+      row.style.border = "1px solid rgba(0,0,0,0.08)";
+      row.style.borderRadius = "8px";
 
-    const tagsContainer = document.createElement("div");
-    tagsContainer.style.display = "grid";
-    tagsContainer.style.gridTemplateColumns = "1fr";
-    tagsContainer.style.gap = "0.5rem";
-    tagsContainer.style.maxHeight = "260px";
-    tagsContainer.style.overflowY = "auto";
-    tagsContainer.style.padding = "0.4rem 0";
+      const label = document.createElement("span");
+      label.textContent = tag.name;
+      label.style.fontSize = "0.95rem";
+      label.style.color = "#1f2937";
+      label.style.flex = "1";
 
-    if (availableTags.length === 0) {
-      const emptyMessage = document.createElement("p");
-      emptyMessage.textContent =
+      const button = document.createElement("button");
+      button.className = "btn primary";
+      button.innerHTML =
         action === "add"
-          ? "Não há tags disponíveis para adicionar."
-          : "Esta tarefa não possui tags para remover.";
-      emptyMessage.style.margin = "0";
-      emptyMessage.style.color = "#5c5c5c";
-      tagsContainer.appendChild(emptyMessage);
-    } else {
-      availableTags.forEach((tag: any) => {
-        const tagOption = document.createElement("label");
-        tagOption.style.display = "flex";
-        tagOption.style.alignItems = "center";
-        tagOption.style.gap = "0.6rem";
-        tagOption.style.padding = "0.65rem 0.75rem";
-        tagOption.style.border = "1px solid #d1d5db";
-        tagOption.style.borderRadius = "6px";
-        tagOption.style.backgroundColor = "#fff";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = String(tag.id);
-        checkbox.style.cursor = "pointer";
-
-        const tagLabel = document.createElement("span");
-        tagLabel.textContent = tag.name;
-        tagLabel.style.fontSize = "0.95rem";
-        tagLabel.style.color = "#1f2937";
-
-        tagOption.append(checkbox, tagLabel);
-        tagsContainer.appendChild(tagOption);
-      });
-    }
-
-    const buttonGroup = document.createElement("div");
-    buttonGroup.style.display = "flex";
-    buttonGroup.style.justifyContent = "flex-end";
-    buttonGroup.style.gap = "0.75rem";
-
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.className = "icon-button";
-    cancelButton.textContent = "Cancelar";
-    cancelButton.addEventListener("click", () => modal.remove());
-
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.className = "icon-button";
-    submitButton.textContent = action === "add" ? "Adicionar" : "Remover";
-
-    buttonGroup.append(cancelButton, submitButton);
-    form.append(tagsContainer, buttonGroup);
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const selectedTagIds = Array.from(
-        tagsContainer.querySelectorAll("input[type=checkbox]:checked"),
-      ).map((input) => Number((input as HTMLInputElement).value));
-
-      if (selectedTagIds.length === 0) {
-        showInfoBanner("Selecione ao menos uma tag.", "error");
-        return;
-      }
-
-      try {
-        if (action === "add") {
-          for (const tagId of selectedTagIds) {
-            await TaskService.addTagToTask(taskId, { tagId });
+          ? `<i class="fas fa-plus"></i>`
+          : `<i class="fas fa-minus"></i>`;
+      button.title = action === "add" ? "Adicionar tag" : "Remover tag";
+      button.setAttribute(
+        "aria-label",
+        action === "add" ? "Adicionar tag" : "Remover tag",
+      );
+      button.style.marginLeft = "0";
+      button.style.padding = "0";
+      button.style.width = "34px";
+      button.style.height = "34px";
+      button.style.display = "inline-flex";
+      button.style.alignItems = "center";
+      button.style.justifyContent = "center";
+      button.style.fontSize = "1rem";
+      button.style.minWidth = "auto";
+      button.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        try {
+          if (action === "add") {
+            await TaskService.addTagToTask(taskId, { tagId: tag.id });
+            showInfoBanner(`Tag "${tag.name}" adicionada à tarefa.`, "success");
+          } else {
+            await TaskService.removeTagFromTask(taskId, tag.id);
+            showInfoBanner(`Tag "${tag.name}" removida da tarefa.`, "success");
           }
-          showInfoBanner("Tags adicionadas com sucesso.", "success");
-        } else {
-          for (const tagId of selectedTagIds) {
-            await TaskService.removeTagFromTask(taskId, tagId);
-          }
-          showInfoBanner("Tags removidas com sucesso.", "success");
+          modal.remove();
+          window.location.reload();
+        } catch (error) {
+          showInfoBanner("Erro ao atualizar tag da tarefa.", "error");
+          console.error("Erro ao atualizar tag da tarefa:", error);
         }
-        modal.remove();
-        window.location.reload();
-      } catch (error) {
-        showInfoBanner("Erro ao atualizar tags da tarefa.", "error");
-        console.error("Erro ao atualizar tags da tarefa:", error);
-      }
+      });
+
+      row.append(label, button);
+      list.appendChild(row);
     });
 
-    content.append(closeBtn, title, description, form);
+    content.append(title, list);
     modal.appendChild(content);
     document.body.appendChild(modal);
     modal.style.display = "block";
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.remove();
+      }
+    });
   } catch (error) {
     showInfoBanner("Erro ao abrir o modal de tags.", "error");
     console.error("Erro ao renderizar modal de tags:", error);

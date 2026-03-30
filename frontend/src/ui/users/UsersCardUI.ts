@@ -1,4 +1,4 @@
-import { UserService, TaskService } from "../../services/index.js";
+import { UserService, TaskService, TaskAssigneeService } from "../../services/index.js";
 import { UserClass } from "../../models/index.js";
 import { getAvatarPath, showInfoBanner } from "../../helpers/index.js";
 import { renderUsers, showUsersCounters } from "./index.js";
@@ -48,9 +48,6 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   const face2 = document.createElement("div");
   face2.className = "face face2";
 
-  const content2 = document.createElement("div");
-  content2.className = "content";
-
   const number = document.createElement("span");
   number.className = "number";
   number.textContent = user.getId().toString();
@@ -69,10 +66,6 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   status.style.color = user.isActive() ? "green" : "red";
   status.style.fontWeight = "10";
 
-  const viewTask = document.createElement("div");
-  viewTask.className = "view-task";
-  viewTask.title = "Ver tarefas";
-
   const tasks = document.createElement("span");
   tasks.className = "tasks";
 
@@ -90,23 +83,40 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
     console.error("Erro ao carregar tarefas para o contador");
   }
 
+  // Container principal flexível: conteúdo à esquerda, botões à direita
+  const mainRow = document.createElement("div") as HTMLElement;
+  mainRow.style.display = "flex";
+  mainRow.style.flexDirection = "row";
+  mainRow.style.justifyContent = "space-between";
+  mainRow.style.alignItems = "flex-start";
 
-  // Ícone de olho para abrir modal de detalhes
-  const eyeOpenIcon = document.createElement("i") as HTMLElement;
-  eyeOpenIcon.className = "fas fa-eye fa-lg";
-  eyeOpenIcon.style.cursor = "pointer";
-  eyeOpenIcon.title = "Ver detalhes do utilizador";
-  eyeOpenIcon.addEventListener("click", (event) => {
+  // Conteúdo principal (esquerda)
+  const contentCol = document.createElement("div") as HTMLElement;
+  contentCol.className = "content";
+  contentCol.append(number, name, email, status, tasks);
+
+  // Botões (direita)
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-container";
+
+  // Botão para ver detalhes
+  const detailsBtn = document.createElement("button");
+  detailsBtn.className = "icon-button";
+  detailsBtn.innerHTML = `<i class="fas fa-eye"></i>`;
+  detailsBtn.title = "Ver detalhes do utilizador";
+  detailsBtn.setAttribute("aria-label", "Ver detalhes do utilizador");
+  detailsBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     showUserDetails(user);
   });
 
-  // Ícone de tarefas para abrir página de tarefas do usuário
-  const taskIcon = document.createElement("i") as HTMLElement;
-  taskIcon.className = "fas fa-tasks fa-lg";
-  taskIcon.style.cursor = "pointer";
-  taskIcon.title = "Ver tarefas do utilizador";
-  taskIcon.addEventListener("click", async (event) => {
+  // Botão para ver tarefas
+  const tasksBtn = document.createElement("button");
+  tasksBtn.className = "icon-button";
+  tasksBtn.innerHTML = `<i class="fas fa-tasks"></i>`;
+  tasksBtn.title = "Ver tarefas do utilizador";
+  tasksBtn.setAttribute("aria-label", "Ver tarefas do utilizador");
+  tasksBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     try {
       await loadUserTasksPage(user.getId());
@@ -119,51 +129,76 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
     }
   });
 
-  // Container para todos os botões alinhados à direita e em coluna
-  const buttonContainer = document.createElement("div");
-  buttonContainer.className = "button-container";
-  // Não precisa de estilos inline, será ajustado no CSS
+  // Botão para adicionar atribuição de tarefa (task_assignee)
+  const assignTaskBtn = document.createElement("button");
+  assignTaskBtn.className = "icon-button";
+  assignTaskBtn.innerHTML = `<i class="fas fa-tasks"></i><i class="fas fa-plus"></i>`;
+  assignTaskBtn.title = "Gerenciar atribuições de tarefas";
+  assignTaskBtn.setAttribute("aria-label", "Gerenciar atribuições de tarefas");
+  assignTaskBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await renderTaskAssignModal(user, "assign");
+  });
 
-  // Sub-container para ícones de ação (olho e tarefas)
-  const actionIcons = document.createElement("div");
-  actionIcons.style.display = "flex";
-  actionIcons.style.gap = "8px";
-  actionIcons.appendChild(eyeOpenIcon);
-  actionIcons.appendChild(taskIcon);
+  // Botão para remover atribuição de tarefa (task_assignee)
+  const removeAssignTaskBtn = document.createElement("button");
+  removeAssignTaskBtn.className = "icon-button";
+  removeAssignTaskBtn.innerHTML = `<i class="fas fa-tasks"></i><i class="fas fa-minus"></i>`;
+  removeAssignTaskBtn.title = "Gerenciar atribuições de tarefas";
+  removeAssignTaskBtn.setAttribute("aria-label", "Gerenciar atribuições de tarefas");
+  removeAssignTaskBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await renderTaskAssignModal(user, "assign");
+  });
 
-  // Botões de ativar/desativar e remover
-  const cardBtn = userCardBtn(user);
-  cardBtn.className = "btnGroup";
+  // Botão para togglear estado (ativo/inativo)
+  const toggleBtn = document.createElement("button");
+  toggleBtn.className = "icon-button";
+  toggleBtn.innerHTML = user.isActive()
+    ? `<i class="fa-solid fa-toggle-on fa-lg"></i>`
+    : `<i class="fa-solid fa-toggle-off fa-lg"></i>`;
+  toggleBtn.title = "Ativar ou desativar utilizador";
+  toggleBtn.setAttribute("aria-label", "Ativar ou desativar utilizador");
+  toggleBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await toggleUserState(user.getId());
+    const users = await UserService.getUsers();
+    await renderUsers(users as UserClass[]);
+    await showUsersCounters("utilizadores");
+  });
 
-  // Adiciona os ícones e botões ao container principal
-  buttonContainer.appendChild(actionIcons);
-  buttonContainer.appendChild(cardBtn);
+  // Botão para remover
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "icon-button";
+  deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+  deleteBtn.title = "Remover utilizador";
+  deleteBtn.setAttribute("aria-label", "Remover utilizador");
+  deleteBtn.style.color = "#ff4c4c";
+  deleteBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (1 > 0) {
+      showInfoBanner(
+        "Utilizador com tarefas pendentes não pode ser removido.",
+        "error-banner",
+      );
+    } else {
+      try {
+        showInfoBanner("Utilizador removido com sucesso.", "info-banner");
+        const users = await UserService.getUsers();
+        await renderUsers(users as UserClass[]);
+        await showUsersCounters("utilizadores");
+      } catch (error) {
+        showInfoBanner("Erro ao remover utilizador.", "error-banner");
+      }
+    }
+  });
 
-  // Container principal flexível: conteúdo à esquerda, botões à direita
-  const mainRow = document.createElement("div");
-  mainRow.style.display = "flex";
-  mainRow.style.flexDirection = "row";
-  mainRow.style.justifyContent = "space-between";
-  mainRow.style.alignItems = "flex-start";
-
-  // Conteúdo principal (esquerda)
-  const contentCol = document.createElement("div");
-  contentCol.className = "content";
-  contentCol.append(number, name, email, status, tasks);
-
-  // Botões (direita)
-  buttonContainer.style.display = "flex";
-  buttonContainer.style.flexDirection = "column";
-  buttonContainer.style.alignItems = "flex-end";
-  buttonContainer.style.justifyContent = "flex-start";
-  buttonContainer.style.gap = "8px";
-  buttonContainer.style.height = "100%";
-
-  // Ajuste para garantir que actionIcons e cardBtn fiquem em coluna
-  if (buttonContainer.childNodes.length === 2) {
-    buttonContainer.childNodes[0].style.marginBottom = "8px";
-    buttonContainer.childNodes[1].style.marginTop = "0";
-  }
+  buttonContainer.appendChild(detailsBtn);
+  buttonContainer.appendChild(tasksBtn);
+  buttonContainer.appendChild(assignTaskBtn);
+  buttonContainer.appendChild(removeAssignTaskBtn);
+  buttonContainer.appendChild(toggleBtn);
+  buttonContainer.appendChild(deleteBtn);
 
   // Monta a linha principal: conteúdo à esquerda, botões à direita
   mainRow.appendChild(contentCol);
@@ -180,63 +215,121 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   return divUserCard;
 }
 
+async function renderTaskAssignModal(
+  user: UserClass,
+  action: "assign" | "remove",
+): Promise<void> {
+  try {
+    const userId = user.getId();
+    const allTasks = await TaskService.getTasks();
+    const allAssignees = await TaskAssigneeService.getTaskAssignees();
 
+    // Get tasks assigned to this user
+    const userAssignedTaskIds = new Set<number>(
+      allAssignees
+        .filter((a) => a.user_id === userId)
+        .map((a) => a.task_id)
+    );
 
-/* Função para criar os botões do cartão de usuário */
-function userCardBtn(user: UserClass): HTMLElement {
-  const toogleIcon = document.createElement("i") as HTMLElement;
-  toogleIcon.className = user.isActive()
-    ? "fa-solid fa-toggle-on fa-2xl"
-    : "fa-solid fa-toggle-off fa-2xl";
+    const modal = document.createElement("section");
+    modal.className = "modal task-assign-modal";
+    modal.id = `taskAssignModal-${userId}-${action}`;
 
-  const bntToggle = document.createElement("span") as HTMLElement;
-  bntToggle.appendChild(toogleIcon);
-  bntToggle.id = "toogleBtn";
-  bntToggle.title = "Ativar ou desativar utilizador";
-  bntToggle.addEventListener("click", async (event) => {
-    event.stopPropagation();
-    await toggleUserState(user.getId());
-    // TODO: Recarregar lista de utilizadores da API
-    const users = await UserService.getUsers();
-    await renderUsers(users as UserClass[]);
-    await showUsersCounters("utilizadores");
-  });
+    const content = document.createElement("div");
+    content.className = "modal-content";
+    content.style.maxWidth = "1040px";
+    content.style.width = "95%";
+    content.style.padding = "42px";
 
-  const trashIcon = document.createElement("i") as HTMLElement;
-  trashIcon.className = "fa-solid fa-trash fa-lg";
+    const title = document.createElement("h2");
+    title.textContent = "Gerenciar atribuições de tarefas do utilizador";
 
-  const btnRemover = document.createElement("span") as HTMLButtonElement;
-  btnRemover.appendChild(trashIcon);
-  btnRemover.id = "removeBtn";
-  btnRemover.role = "button";
-  btnRemover.style.color = "#ff4c4c";
-  btnRemover.title = "Remover tarefas do utilizador";
-  btnRemover.addEventListener("click", async (event) => {
-    event.stopPropagation();
-    if (1 > 0) {
-      showInfoBanner(
-        "Utilizador com tarefas pendentes não pode ser removido.",
-        "error-banner",
+    const list = document.createElement("div");
+    list.className = "task-assign-list";
+    list.style.display = "grid";
+    list.style.gridTemplateColumns = "repeat(3, minmax(260px, 1fr))";
+    list.style.gap = "1rem";
+    list.style.marginTop = "1rem";
+
+    allTasks.forEach((task) => {
+      const isAssigned = userAssignedTaskIds.has(task.getId());
+      const row = document.createElement("div");
+      row.className = "task-assign-row";
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.alignItems = "center";
+      row.style.padding = "0.8rem 1rem";
+      row.style.background = "#f7f7f7";
+      row.style.border = "1px solid rgba(0,0,0,0.08)";
+      row.style.borderRadius = "8px";
+
+      const label = document.createElement("span");
+      label.textContent = `${task.getId()}: ${task.getTitle()}`;
+      label.style.fontSize = "0.95rem";
+      label.style.color = "#1f2937";
+      label.style.flex = "1";
+
+      const button = document.createElement("button");
+      button.className = "btn primary";
+      button.innerHTML = isAssigned
+        ? `<i class="fas fa-minus"></i>`
+        : `<i class="fas fa-plus"></i>`;
+      button.title = isAssigned ? "Remover atribuição" : "Atribuir tarefa";
+      button.setAttribute(
+        "aria-label",
+        isAssigned ? "Remover atribuição" : "Atribuir tarefa",
       );
-    } else {
-      try {
-        // TODO: Implementar deleção de utilizador via API
-        // const removed = await UserService.deleteUser(user.getId());
-        showInfoBanner("Utilizador removido com sucesso.", "info-banner");
-        //atualiza a lista de utilizadores
-        const users = await UserService.getUsers();
-        await renderUsers(users as UserClass[]);
-        await showUsersCounters("utilizadores");
-      } catch (error) {
-        showInfoBanner("Erro ao remover utilizador.", "error-banner");
+      button.style.marginLeft = "0";
+      button.style.padding = "0";
+      button.style.width = "34px";
+      button.style.height = "34px";
+      button.style.display = "inline-flex";
+      button.style.alignItems = "center";
+      button.style.justifyContent = "center";
+      button.style.fontSize = "1rem";
+      button.style.minWidth = "auto";
+      button.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        try {
+          if (isAssigned) {
+            const assignee = allAssignees.find(
+              (a) => a.task_id === task.getId() && a.user_id === userId,
+            );
+            if (assignee && assignee.id) {
+              await TaskAssigneeService.deleteTaskAssignee(assignee.id);
+              showInfoBanner(`Atribuição da tarefa "${task.getTitle()}" removida.`, "success");
+            }
+          } else {
+            await TaskAssigneeService.createTaskAssignee({
+              task_id: task.getId(),
+              user_id: userId,
+            });
+            showInfoBanner(`Tarefa "${task.getTitle()}" atribuída ao utilizador.`, "success");
+          }
+          modal.remove();
+          window.location.reload();
+        } catch (error) {
+          showInfoBanner("Erro ao atualizar atribuição de tarefa.", "error");
+          console.error("Erro ao atualizar atribuição de tarefa:", error);
+        }
+      });
+
+      row.append(label, button);
+      list.appendChild(row);
+    });
+
+    content.append(title, list);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    modal.style.display = "block";
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.remove();
       }
-    }
-  });
-
-  //para agrupar os botoes
-  const divUserCardBtn = document.createElement("section") as HTMLElement;
-  divUserCardBtn.appendChild(bntToggle);
-  divUserCardBtn.appendChild(btnRemover);
-
-  return divUserCardBtn;
+    });
+  } catch (error) {
+    showInfoBanner("Erro ao abrir o modal de atribuição de tarefas.", "error");
+    console.error("Erro ao renderizar modal de atribuição de tarefas:", error);
+  }
 }

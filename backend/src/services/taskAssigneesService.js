@@ -17,10 +17,20 @@ export const getTaskAssigneeByUserId = async (userId) => {
 };
 
 export const createTaskAssignee = async (data) => {
+  const [existing] = await db.query(
+    "SELECT * FROM task_assignees WHERE task_id = ?",
+    [data.task_id]
+  );
+
+  if (existing.length > 0) {
+    throw new Error("Esta tarefa já está atribuída a outro utilizador.");
+  }
+
   const [result] = await db.query(
     "INSERT INTO task_assignees (task_id, user_id) VALUES (?, ?)",
     [data.task_id, data.user_id]
   );
+
   return mapTaskAssigneeAPIResponse({ id: result.insertId, ...data });
 };
 
