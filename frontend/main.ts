@@ -7,7 +7,7 @@ import {
   loadInitialSprints,
   loadInitialTags,
 } from "./src/ui/gestUserTask/index.js";
-import { activateMenu } from "./src/ui/dom/index.js";
+import { activateMenu, clearContainer } from "./src/ui/dom/index.js";
 
 //inicializar a aplicação
 window.onload = async () => {
@@ -35,69 +35,68 @@ async function setupProjectsSubmenu(): Promise<void> {
 }
 
 //obter o menu task
-const allMenuUsers = document.querySelectorAll(
-  "#menuUsers",
-) as NodeListOf<HTMLAnchorElement>;
-allMenuUsers.forEach((button) => {
-  button.addEventListener("click", async () => {
-    activateMenu("#menuUsers");
-    await loadInitialUsers();
-  });
+const allMenuUsers = document.querySelector("#menuUsers") as HTMLAnchorElement;
+allMenuUsers.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuUsers");
+  await loadInitialUsers();
 });
 
 //obter o menu task
-const allMenuTasks = document.querySelectorAll(
-  "#menuTasks",
-) as NodeListOf<HTMLAnchorElement>;
-allMenuTasks.forEach((button) => {
-  button.addEventListener("click", async () => {
-    activateMenu("#menuTasks");
-    await loadAInitialTasks();
-  });
+const allMenuTasks = document.querySelector("#menuTasks") as HTMLAnchorElement;
+allMenuTasks.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuTasks");
+  await loadAInitialTasks();
 });
 
 // menuTeams
-const allMenuTeams = document.querySelectorAll(
-  "#menuTeams",
-) as NodeListOf<HTMLAnchorElement>;
-allMenuTeams.forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    e.preventDefault();
-    activateMenu("#menuTeams");
-    await loadInitialTeams();
-  });
+const allMenuTeams = document.querySelector("#menuTeams") as HTMLAnchorElement;
+allMenuTeams.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuTeams");
+  await loadInitialTeams();
 });
 
 // menuSprints
-const allMenuSprints = document.querySelectorAll(
+const allMenuSprints = document.querySelector(
   "#menuSprints",
-) as NodeListOf<HTMLAnchorElement>;
-allMenuSprints.forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    e.preventDefault();
-    activateMenu("#menuSprints");
-    await loadInitialSprints();
-  });
+) as HTMLAnchorElement;
+allMenuSprints.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuSprints");
+  await loadInitialSprints();
 });
 
 // menuTags
-const allMenuTags = document.querySelectorAll(
-  "#menuTags",
-) as NodeListOf<HTMLAnchorElement>;
-allMenuTags.forEach((button) => {
-  button.addEventListener("click", async () => {
-    activateMenu("#menuTags");
-    await loadInitialTags();
-  });
+const allMenuTags = document.querySelector("#menuTags") as HTMLAnchorElement;
+allMenuTags.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuTags");
+  await loadInitialTags();
 });
 
 // menuStatistics
-const allMenuStatistics = document.querySelectorAll(
+const allMenuStatistics = document.querySelector(
   "#menuStatistics",
-) as NodeListOf<HTMLAnchorElement>;
-allMenuStatistics.forEach((button) => {
-  button.addEventListener("click", () => {
-    activateMenu("#menuStatistics");
-    loadInitialStatistics();
-  });
+) as HTMLAnchorElement;
+allMenuStatistics.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuStatistics");
+  await loadInitialStatistics();
+});
+
+//voltar para a home
+const homeButton = document.querySelector("#homeButton") as HTMLElement;
+homeButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  activateMenu("#menuProjects");
+  await loadInitialProjects();
 });

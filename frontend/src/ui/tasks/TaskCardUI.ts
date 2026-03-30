@@ -79,38 +79,96 @@ async function buildTaskCard(
   card.className = "task-card";
   card.setAttribute("data-task-id", task.getId().toString());
 
-  const contentWrapper = document.createElement("div");
-  contentWrapper.className = "task-card-content";
-  contentWrapper.innerHTML = `
-    <h3 class="task-title">${task.getTitle()}</h3>
-    <div class="task-meta">
-      <span class="task-user">${assigneeName}</span>
-      <span class="task-status">${task.getStatus()}</span>
-    </div>
-  `;
 
+  // Container principal flexível: conteúdo à esquerda, botões à direita
+  const mainRow = document.createElement("div");
+  mainRow.style.display = "flex";
+  mainRow.style.flexDirection = "row";
+  mainRow.style.justifyContent = "space-between";
+  mainRow.style.alignItems = "flex-start";
+
+
+  // Conteúdo principal (esquerda) - agora com expand/collapse
+  const contentCol = document.createElement("div");
+  contentCol.className = "task-card-content";
+
+  // Número/id
+  const number = document.createElement("span");
+  number.className = "number";
+  number.textContent = task.getId().toString();
+
+  // Título
+  const title = document.createElement("span");
+  title.className = "task-title";
+  title.textContent = task.getTitle();
+
+  // Botão de expandir/recolher
+  const toggleBtn = document.createElement("button");
+  toggleBtn.className = "icon-button";
+  toggleBtn.innerHTML = `<i class='fas fa-chevron-down'></i>`;
+  toggleBtn.title = "Expandir/Recolher detalhes";
+  toggleBtn.style.marginLeft = "8px";
+
+  // Container para detalhes (responsável, status, tags)
+  const detailsDiv = document.createElement("div");
+  detailsDiv.className = "task-details";
+  detailsDiv.style.display = "none";
+
+  // Responsável
+  const user = document.createElement("span");
+  user.className = "task-user";
+  user.textContent = assigneeName;
+
+  // Status
+  const status = document.createElement("span");
+  status.className = "task-status";
+  status.textContent = task.getStatus();
+
+  // Tags
+  let tagsWrapper: HTMLElement | null = null;
   try {
     const tags = await TaskService.getTaskTags(task.getId());
     if (tags.length > 0) {
-      const tagsWrapper = document.createElement("div");
+      tagsWrapper = document.createElement("div");
       tagsWrapper.className = "task-tags";
-
       tags.forEach((tag: any) => {
         const tagPill = document.createElement("span");
         tagPill.className = "task-tag-pill";
         tagPill.textContent = tag.name || "Tag";
-        tagsWrapper.appendChild(tagPill);
+        tagsWrapper!.appendChild(tagPill);
       });
-
-      contentWrapper.appendChild(tagsWrapper);
     }
   } catch (error) {
     console.error("Erro ao carregar tags da tarefa:", error);
   }
 
-  const actions = document.createElement("div");
-  actions.className = "task-card-actions";
+  detailsDiv.append(user, status);
+  if (tagsWrapper) detailsDiv.appendChild(tagsWrapper);
 
+  // Por padrão, só mostra número, título e botão toggle
+  contentCol.append(number, title, toggleBtn);
+  contentCol.appendChild(detailsDiv);
+
+  // Toggle expand/collapse
+  let expanded = false;
+  toggleBtn.onclick = (e) => {
+    e.stopPropagation();
+    expanded = !expanded;
+    detailsDiv.style.display = expanded ? "block" : "none";
+    toggleBtn.innerHTML = expanded
+      ? `<i class='fas fa-chevron-up'></i>`
+      : `<i class='fas fa-chevron-down'></i>`;
+  };
+
+  // Botões (direita)
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-container";
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.flexDirection = "column";
+  buttonContainer.style.alignItems = "flex-end";
+  buttonContainer.style.gap = "8px";
+
+  // Botões de ação
   const editBtn = document.createElement("button");
   editBtn.className = "icon-button";
   editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
@@ -123,7 +181,6 @@ async function buildTaskCard(
       showInfoBanner("Não foi possível obter o projeto da tarefa.", "error");
       return;
     }
-
     await renderTaskModal(projectId, task, undefined, async () => {
       window.location.reload();
     });
@@ -137,12 +194,11 @@ async function buildTaskCard(
   deleteBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     const confirmed = await showConfirmDialog(
-      `Tem certeza que deseja excluir a tarefa "${task.getTitle()}"?`,
+      `Tem certeza que deseja excluir a tarefa \"${task.getTitle()}\"?`,
     );
     if (!confirmed) {
       return;
     }
-
     try {
       await TaskService.deleteTask(task.getId());
       showInfoBanner("Tarefa excluída com sucesso.", "success");
@@ -170,16 +226,14 @@ async function buildTaskCard(
   removeResponsibleBtn.setAttribute("aria-label", "Remover responsável");
   removeResponsibleBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
-    //await handleTaskAssigneeRemove(task);
+   // await handleTaskAssigneeRemove(task);
   });
-
   const currentAssignees = task.getAssignees?.() || [];
   removeResponsibleBtn.style.display = currentAssignees.length > 0 ? "" : "none";
 
   const addTagBtn = document.createElement("button");
   addTagBtn.className = "icon-button";
-  addTagBtn.innerHTML = `<i class="fas fa-tags"></i>
-  <i class="fa-sharp fa-solid fa-plus"></i>`;
+  addTagBtn.innerHTML = `<i class="fas fa-tags"></i><i class="fa-sharp fa-solid fa-plus"></i>`;
   addTagBtn.title = "Adicionar tag";
   addTagBtn.setAttribute("aria-label", "Adicionar tag");
   addTagBtn.addEventListener("click", async (e) => {
@@ -189,8 +243,7 @@ async function buildTaskCard(
 
   const deleteTagBtn = document.createElement("button");
   deleteTagBtn.className = "icon-button";
-  deleteTagBtn.innerHTML = `<i class="fas fa-tags"></i>
-  <i class="fa-sharp fa-solid fa-minus"></i>`;
+  deleteTagBtn.innerHTML = `<i class="fas fa-tags"></i><i class="fa-sharp fa-solid fa-minus"></i>`;
   deleteTagBtn.title = "Remover tag";
   deleteTagBtn.setAttribute("aria-label", "Remover tag");
   deleteTagBtn.addEventListener("click", async (e) => {
@@ -198,8 +251,18 @@ async function buildTaskCard(
     await renderTaskTagModal(task, "remove");
   });
 
-  actions.append(editBtn, deleteBtn, assignResponsibleBtn, removeResponsibleBtn, addTagBtn, deleteTagBtn);
-  card.append(contentWrapper, actions);
+  buttonContainer.appendChild(editBtn);
+  buttonContainer.appendChild(deleteBtn);
+  buttonContainer.appendChild(assignResponsibleBtn);
+  buttonContainer.appendChild(removeResponsibleBtn);
+  buttonContainer.appendChild(addTagBtn);
+  buttonContainer.appendChild(deleteTagBtn);
+
+  // Monta a linha principal: conteúdo à esquerda, botões à direita
+  mainRow.appendChild(contentCol);
+  mainRow.appendChild(buttonContainer);
+
+  card.appendChild(mainRow);
 
   setCardBorderColor(card, getCardBorderColor(task.getStatus()));
   card.addEventListener("click", (event) => {

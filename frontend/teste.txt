@@ -1,150 +1,164 @@
-/**
- * Tipos Auxiliares para IDs e Enums
- */
-type ID = number;
-
-enum TeamRole {
-    ADMIN = 'admin',
-    MEMBER = 'member'
+body{
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    font-family: consolas;
+	align-items: flex-start;
+    padding-top: 50px;
 }
 
-enum DependencyType {
-    BLOCKS = 'blocks',
-    DEPENDS_ON = 'depends_on'
+.usersContainer{
+    width: 1000px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    justify-content: center;
 }
 
-/**
- * Entidades Principais
- */
-
-export class User {
-    id!: ID;
-    name!: string;
-    email!: string;
-    phone!: string;
-    active: boolean = true;
-    gender!: string;
-    createdAt: Date = new Date();
+.usersContainer .card{
+    position: relative;
+    width: 300px;
+    height: 200px;
+    overflow: hidden;
+	perspective: 1000px;
+	transform-style: preserve-3d;
+	box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-export class ProjectStatus {
-    id!: ID;
-    name!: string;
-    flowOrder?: number;
+.usersContainer .card:hover{
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
 }
 
-export class Project {
-    id!: ID;
-    name!: string;
-    description!: string;
-    projectStatusId?: ID;
-    startDate?: Date;
-    endDateExpected?: Date;
+.usersContainer .card .face{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transition: transform 0.6s ease;
+    backface-visibility: hidden; 
+	transform-style: preserve-3d; 
+    border-radius: 10px;
 }
 
-export class TaskStatus {
-    id!: ID;
-    name!: string;
-    flowOrder?: number;
+
+.usersContainer .card .face.face1{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+     background: #333;
+    transform: rotateX(0deg) translateZ(1px);
+    z-index: 2;
+	box-shadow: inset 0 0 20px rgba(255,255,255,0.05);
 }
 
-export class Category {
-    id!: ID;
-    name!: string;
-    flowOrder?: number;
+.usersContainer .card:hover .face.face1{
+     transform: rotateX(-180deg);
 }
 
-export class Priority {
-    id!: ID;
-    name!: string;
-    flowOrder?: number;
+.usersContainer .card .face.face1 .content{
+    opacity: 0.2;
+    transition: 0.5s;
 }
 
-export class Task {
-    id!: ID;
-    title!: string;
-    description!: string;
-    taskStatusId!: ID;
-    priorityId!: ID;
-    categoryId!: ID;
-    projectId!: ID;
-    createdAt: Date = new Date();
-    dueDate?: Date;
-    completedAt?: Date;
-    estimatedHours!: number; // DECIMAL(5,2) mapeia para number
+.usersContainer .card:hover .face.face1 .content{
+    opacity: 1;
 }
 
-export class Comment {
-    id!: ID;
-    content!: string;
-    taskId!: ID;
-    userId!: ID;
-    createdAt: Date = new Date();
-    editedAt?: Date;
-    resolved: boolean = false;
+.usersContainer .card .face.face1 .content img{
+    max-width: 100px;
 }
 
-export class TaskAttachment {
-    id!: ID;
-    taskId!: ID;
-    fileName!: string;
-    fileType!: string;
-    sizeKb?: number;
-    uploadedAt: Date = new Date();
+.usersContainer .card .face.face1 .content h3{
+    margin: 10px 0 0;
+    padding: 0;
+    color: #fff;
+    text-align: center;
+    font-size: 1.5em;
 }
 
-export class Team {
-    id!: ID;
-    name!: string;
-    description!: string;
-    createdAt: Date = new Date();
+.usersContainer .card .face.face2{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+	box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+	background: rgba(255, 255, 255, 0.2);
+    transform: rotateX(180deg) translateZ(1px); 	
+    backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
 }
 
-/**
- * Tabelas de Relacionamento (N:M) e Funcionalidades Extra
- */
 
-export class TeamMember {
-    teamId!: ID;
-    userId!: ID;
-    role: TeamRole = TeamRole.MEMBER;
-    joinedAt: Date = new Date();
+.usersContainer .card:hover .face.face2{
+    transform: rotateX(0deg);
 }
 
-export class TimeLog {
-    id!: ID;
-    taskId!: ID;
-    userId!: ID;
-    hours!: number;
-    description!: string;
-    loggedAt: Date = new Date();
+.usersContainer .card .face.face2 .content p{
+    margin: 0;
+    padding: 0;
 }
 
-export class Sprint {
-    id!: ID;
-    projectId!: ID;
-    name!: string;
-    startDate: Date = new Date();
-    endDate?: Date;
+.usersContainer .card .face.face2 .content a{
+    margin: 15px 0 0;
+    display:  inline-block;
+    text-decoration: none;
+    font-weight: 900;
+    color: #333;
+    padding: 5px;
+    border: 1px solid #333;
 }
 
-export class Notification {
-    id!: ID;
-    userId!: ID;
-    title!: string;
-    message!: string;
-    isRead: boolean = false;
-    sentAt: Date = new Date();
+.usersContainer .card .face.face2 .content a:hover{
+    background: #333;
+    color: #fff;
 }
 
-export class Label {
-    id!: ID;
-    name!: string;
-    color?: string;
+/* profile card details styling */
+.usersContainer .card .face.face2 .content .number{
+    display: block;
+    font-size: 2em;
+    margin-bottom: 5px;
 }
-
-export class TaskDependency {
-    taskId!: ID;
-    dependentTaskId!: ID;
-    type!: DependencyType;
+.usersContainer .card .face.face2 .content .name{
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+.usersContainer .card .face.face2 .content .email{
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 8px;
+}
+.usersContainer .card .face.face2 .content .status{
+    display: block;
+    color: green;
+    margin-bottom: 5px;
+    text-transform: lowercase;
+}
+.usersContainer .card .face.face2 .content .tasks{
+    display: block;
+    margin-bottom: 10px;
+}
+.usersContainer .card .face.face2 .content .actions{
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+.usersContainer .card .face.face2 .content .btn{
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+.usersContainer .card .face.face2 .content .btn.delete{
+    color: red;
+}
+.usersContainer .card .face.face2 .content .btn.view{
+    color: #555;
 }

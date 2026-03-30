@@ -6,35 +6,45 @@ import { toggleUserState } from "../gestUserTask/index.js";
 import { showUserDetails } from "../modal/index.js";
 import { TaskAssigneeAPIResponse } from "../../api/dto/typesDTO.js";
 import { loadUserTasksPage } from "./index.js";
+import { createSection } from "../dom/CreatePage.js";
 
 /* Criar cartão de utilizador */
 export async function createUserCard(user: UserClass): Promise<HTMLElement> {
-  const divUserCard = document.createElement("section") as HTMLElement;
-  divUserCard.className = "cardContainer sectionUserCard";
+  const divUserCard = createSection("sectionUserCard") as HTMLElement;
+  divUserCard.className = "usersContainer";
 
   const card = document.createElement("div") as HTMLElement;
   card.className = "card";
-  card.addEventListener("click", () => showUserDetails(user));
-  divUserCard.appendChild(card);
+  // Apenas flip ao clicar no card, sem abrir modal
+  card.addEventListener("click", (e) => {
+    e.stopPropagation();
+    card.classList.toggle("flipped");
+  });
 
-  const face1 = document.createElement("div") as HTMLElement;
+  // =====================
+  // FACE 1
+  // =====================
+  const face1 = document.createElement("div");
   face1.className = "face face1";
 
-  const content1 = document.createElement("div") as HTMLElement;
+  const content1 = document.createElement("div");
   content1.className = "content";
 
+  const img = document.createElement("img");
   const randomValue = Math.floor(Math.random() * 4) + 1;
-  const img = document.createElement("img") as HTMLImageElement;
+
   img.src = getAvatarPath(user.getId(), user.getGender(), randomValue);
   img.alt = "User Avatar";
 
-  const h3 = document.createElement("h3") as HTMLElement;
+  const h3 = document.createElement("h3");
   h3.textContent = user.getName().split(" ")[0];
 
   content1.append(img, h3);
   face1.appendChild(content1);
-  card.appendChild(face1);
 
+  // =====================
+  // FACE 2
+  // =====================
   const face2 = document.createElement("div");
   face2.className = "face face2";
 
@@ -53,12 +63,11 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   email.className = "email";
   email.textContent = user.getEmail();
 
-  const status = document.createElement("span") as HTMLElement;
-  status.textContent = `${user.isActive() ? "activo" : "Inactivo"}`;
-
-  //Mostra o estado com texto ou cor diferente
+  const status = document.createElement("span");
+  status.className = "status";
+  status.textContent = user.isActive() ? "ativo" : "inativo";
   status.style.color = user.isActive() ? "green" : "red";
-  status.style.fontWeight = "bold";
+  status.style.fontWeight = "10";
 
   const viewTask = document.createElement("div");
   viewTask.className = "view-task";
@@ -66,45 +75,41 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
 
   const tasks = document.createElement("span");
   tasks.className = "tasks";
-  
-  // Contar tarefas atribuídas a este utilizador
+
   try {
     const allTasks = await TaskService.getTasks();
-    const userTaskCount = allTasks.filter((task) => {
-      const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
-      return assignees.some((a: TaskAssigneeAPIResponse) => a.user_id === user.getId());
+
+    const count = allTasks.filter((task) => {
+      const assignees = (task as any).getAssignees?.() || [];
+      return assignees.some((a: any) => a.user_id === user.getId());
     }).length;
-    
-    tasks.textContent = `${userTaskCount} tarefa${userTaskCount !== 1 ? 's' : ''}`;
-  } catch (error) {
-    console.error("Erro ao carregar tarefas para o contador:", error);
+
+    tasks.textContent = `${count} tarefa${count !== 1 ? "s" : ""}`;
+  } catch {
     tasks.textContent = "0 tarefas";
+    console.error("Erro ao carregar tarefas para o contador");
   }
 
+
+  // Ícone de olho para abrir modal de detalhes
   const eyeOpenIcon = document.createElement("i") as HTMLElement;
-  eyeOpenIcon.className = "fa-solid fa-eye fa-lg";
-
-  const eyeCloseIcon = document.createElement("i") as HTMLElement;
-  eyeCloseIcon.className = "fa-solid fa-eye-slash fa-lg";
-
-  const eyeIcon = 1 > 0 ? eyeOpenIcon : eyeCloseIcon;
-  eyeIcon.style.cursor = "pointer";
-  eyeIcon.addEventListener("click", async (event) => {
+  eyeOpenIcon.className = "fas fa-eye fa-lg";
+  eyeOpenIcon.style.cursor = "pointer";
+  eyeOpenIcon.title = "Ver detalhes do utilizador";
+  eyeOpenIcon.addEventListener("click", (event) => {
     event.stopPropagation();
-    
-    // Carregar todas as tarefas e filtrar apenas as atribuídas ao utilizador
-    try {
-      const allTasks = await TaskService.getTasks();
-      
-      // Filtrar tarefas que têm assignees para este utilizador
-      const userAssignedTasks = allTasks.filter((task) => {
-        const assignees = (task as any).getAssignees?.() || [] as TaskAssigneeAPIResponse[];
-        return assignees.some((a: TaskAssigneeAPIResponse) => a.user_id === user.getId());
-      });
-      
-      // Carregar página de tarefas com apenas as tarefas atribuídas ao utilizador
-      await loadUserTasksPage(user.getId());
+    showUserDetails(user);
+  });
 
+  // Ícone de tarefas para abrir página de tarefas do usuário
+  const taskIcon = document.createElement("i") as HTMLElement;
+  taskIcon.className = "fas fa-tasks fa-lg";
+  taskIcon.style.cursor = "pointer";
+  taskIcon.title = "Ver tarefas do utilizador";
+  taskIcon.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    try {
+      await loadUserTasksPage(user.getId());
     } catch (error) {
       console.error("Erro ao carregar tarefas do utilizador:", error);
       showInfoBanner(
@@ -114,23 +119,68 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
     }
   });
 
-  viewTask.append(tasks, eyeIcon);
+  // Container para todos os botões alinhados à direita e em coluna
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-container";
+  // Não precisa de estilos inline, será ajustado no CSS
 
+  // Sub-container para ícones de ação (olho e tarefas)
+  const actionIcons = document.createElement("div");
+  actionIcons.style.display = "flex";
+  actionIcons.style.gap = "8px";
+  actionIcons.appendChild(eyeOpenIcon);
+  actionIcons.appendChild(taskIcon);
+
+  // Botões de ativar/desativar e remover
   const cardBtn = userCardBtn(user);
   cardBtn.className = "btnGroup";
 
-  content2.appendChild(number);
-  content2.appendChild(name);
-  content2.appendChild(email);
-  content2.appendChild(status);
-  content2.appendChild(viewTask);
-  content2.appendChild(cardBtn);
+  // Adiciona os ícones e botões ao container principal
+  buttonContainer.appendChild(actionIcons);
+  buttonContainer.appendChild(cardBtn);
 
-  face2.appendChild(content2);
-  card.appendChild(face2);
+  // Container principal flexível: conteúdo à esquerda, botões à direita
+  const mainRow = document.createElement("div");
+  mainRow.style.display = "flex";
+  mainRow.style.flexDirection = "row";
+  mainRow.style.justifyContent = "space-between";
+  mainRow.style.alignItems = "flex-start";
+
+  // Conteúdo principal (esquerda)
+  const contentCol = document.createElement("div");
+  contentCol.className = "content";
+  contentCol.append(number, name, email, status, tasks);
+
+  // Botões (direita)
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.flexDirection = "column";
+  buttonContainer.style.alignItems = "flex-end";
+  buttonContainer.style.justifyContent = "flex-start";
+  buttonContainer.style.gap = "8px";
+  buttonContainer.style.height = "100%";
+
+  // Ajuste para garantir que actionIcons e cardBtn fiquem em coluna
+  if (buttonContainer.childNodes.length === 2) {
+    buttonContainer.childNodes[0].style.marginBottom = "8px";
+    buttonContainer.childNodes[1].style.marginTop = "0";
+  }
+
+  // Monta a linha principal: conteúdo à esquerda, botões à direita
+  mainRow.appendChild(contentCol);
+  mainRow.appendChild(buttonContainer);
+
+  face2.append(mainRow);
+
+  // montar card
+  card.append(face1, face2);
+
+  //montar a section user card
+  divUserCard.appendChild(card);
 
   return divUserCard;
 }
+
+
 
 /* Função para criar os botões do cartão de usuário */
 function userCardBtn(user: UserClass): HTMLElement {
