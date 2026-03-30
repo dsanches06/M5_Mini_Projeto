@@ -1,4 +1,4 @@
-# Projeto 2 - API Completa com Banco de Dados
+# Projeto 3 - Frontend + API
 
 Uma API RESTful criada com Node.js, Express e MySQL para gerir tarefas, utilizadores, tags, comentários, projetos e sprints.
 
