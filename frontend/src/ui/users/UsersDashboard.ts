@@ -86,44 +86,37 @@ export class UsersDashboard {
     this.statusColumns.forEach(col => {
       const column = document.createElement("div");
       column.className = "dash-column";
-      column
-      column
-      column
-      column
-      column
-      column
-      column
+      column.style.flex = "1";
+      column.style.minWidth = "200px";
+      column.style.maxWidth = "300px";
+      column.style.display = "flex";
+      column.style.flexDirection = "column";
 
       const columnHeader = document.createElement("div");
       columnHeader.className = "column-header";
-      columnHeader
-      columnHeader
-      columnHeader
-      columnHeader
-      columnHeader
-      columnHeader
+      columnHeader.style.display = "flex";
+      columnHeader.style.justifyContent = "space-between";
+      columnHeader.style.alignItems = "center";
+      columnHeader.style.padding = "8px";
+      columnHeader.style.backgroundColor = "#f8f9fa";
+      columnHeader.style.borderBottom = "1px solid #dee2e6";
 
       const title = document.createElement("h2");
       title.textContent = col.label;
-      title
-      title
-      title
-      title
+      title.style.margin = "0";
+      title.style.fontSize = "1.1em";
+      title.style.fontWeight = "bold";
 
       const count = document.createElement("span");
       count.className = "column-count";
       count.setAttribute("data-status", col.id.toString());
       count.textContent = "0";
-      count
-      count
-      count
-      count
-      count
-      count
-      count
-      count
-      count
-      count
+      count.style.backgroundColor = "#007bff";
+      count.style.color = "white";
+      count.style.borderRadius = "50%";
+      count.style.padding = "2px 8px";
+      count.style.fontSize = "0.8em";
+      count.style.fontWeight = "bold";
 
       columnHeader.appendChild(title);
       columnHeader.appendChild(count);
@@ -131,11 +124,12 @@ export class UsersDashboard {
       const tasksContainer = document.createElement("div");
       tasksContainer.className = "tasks-container";
       tasksContainer.setAttribute("data-status", col.id.toString());
-      tasksContainer
-      tasksContainer
-      tasksContainer
-      tasksContainer
-      tasksContainer
+      tasksContainer.style.display = "flex";
+      tasksContainer.style.flexDirection = "column";
+      tasksContainer.style.gap = "8px";
+      tasksContainer.style.padding = "8px";
+      tasksContainer.style.minHeight = "200px";
+      tasksContainer.style.overflowY = "auto";
 
       column.appendChild(columnHeader);
       column.appendChild(tasksContainer);
@@ -183,20 +177,19 @@ export class UsersDashboard {
     const card = document.createElement("div");
     card.className = "task-card";
     card.setAttribute("data-task-id", task.getId().toString());
-    card
-    card
-    card
-    card
-    card
-    card
-    card
+    card.style.border = "1px solid #ddd";
+    card.style.borderRadius = "8px";
+    card.style.padding = "12px";
+    card.style.backgroundColor = "#fff";
+    card.style.cursor = "pointer";
+    card.style.transition = "all 0.2s";
     card.addEventListener("mouseover", () => {
-      card
-      card
+      card.style.transform = "translateY(-2px)";
+      card.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
     });
     card.addEventListener("mouseout", () => {
-      card
-      card
+      card.style.transform = "none";
+      card.style.boxShadow = "none";
     });
 
     const names = this.user.getName().split(" ");
@@ -204,10 +197,8 @@ export class UsersDashboard {
     const title = document.createElement("h3");
     title.className = "task-title";
     title.textContent = task.getTitle();
-    title
-    title
-    title
-    title
+    title.style.margin = "0 0 8px 0";
+    title.style.fontSize = "1.1em";
 
     // Buscar sprint associado
     let sprintName = "Sem Sprint";
@@ -232,41 +223,27 @@ export class UsersDashboard {
 
     const meta = document.createElement("div");
     meta.className = "task-meta";
-    meta
-    meta
-    meta
-    meta
+    meta.style.display = "flex";
+    meta.style.flexDirection = "column";
+    meta.style.gap = "4px";
+    meta.style.fontSize = "0.9em";
+    meta.style.color = "#666";
 
     const sprintSpan = document.createElement("span");
     sprintSpan.className = "task-sprint";
     sprintSpan.textContent = sprintName;
-    sprintSpan
-    sprintSpan
-    sprintSpan
-    sprintSpan
-    sprintSpan
-    sprintSpan
-    sprintSpan
-    sprintSpan
+    sprintSpan.style.fontWeight = "bold";
 
     const userSpan = document.createElement("span");
     userSpan.className = "task-user";
     userSpan.textContent = names[0];
-    userSpan
-    userSpan
-    userSpan
-    userSpan
-    userSpan
+    userSpan.style.fontSize = "0.8em";
 
     const statusSpan = document.createElement("span");
     statusSpan.className = "task-status";
     statusSpan.textContent = task.getStatus();
-    statusSpan
-    statusSpan
-    statusSpan
-    statusSpan
-    statusSpan
-    statusSpan
+    statusSpan.style.fontSize = "0.8em";
+    statusSpan.style.textTransform = "uppercase";
 
     meta.appendChild(sprintSpan);
     meta.appendChild(userSpan);
@@ -295,29 +272,37 @@ export class UsersDashboard {
   private renderStatusModal(task: ITask): void {
     const modal = document.createElement("section");
     modal.className = "modal";
-    modal
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.zIndex = "1000";
     modal.id = `statusModal-${task.getId()}`;
 
     const modalContent = document.createElement("div");
     modalContent.className = "modal-content";
-    modalContent
-    modalContent
-    modalContent
-    modalContent
-    modalContent
-    modalContent
+    modalContent.style.backgroundColor = "#fff";
+    modalContent.style.borderRadius = "8px";
+    modalContent.style.padding = "20px";
+    modalContent.style.maxWidth = "500px";
+    modalContent.style.width = "90%";
+    modalContent.style.maxHeight = "80vh";
+    modalContent.style.overflowY = "auto";
 
     const title = document.createElement("h2");
     title.textContent = `Alterar Estado - ${task.getTitle()}`;
-    title
-    title
-    title
+    title.style.margin = "0 0 20px 0";
 
     const statusList = document.createElement("div");
-    statusList
-    statusList
-    statusList
-    statusList
+    statusList.className = "status-list";
+    statusList.style.display = "flex";
+    statusList.style.flexDirection = "column";
+    statusList.style.gap = "10px";
 
     this.statusColumns.forEach(statusCol => {
       const btn = document.createElement("button");
@@ -325,20 +310,16 @@ export class UsersDashboard {
       
       const isSelected = task.getStatus() === statusCol.id;
       
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
-      btn
+      btn.style.display = "flex";
+      btn.style.alignItems = "center";
+      btn.style.gap = "10px";
+      btn.style.padding = "10px";
+      btn.style.border = "1px solid #ddd";
+      btn.style.borderRadius = "4px";
+      btn.style.backgroundColor = isSelected ? "#007bff" : "#fff";
+      btn.style.color = isSelected ? "#fff" : "#333";
+      btn.style.cursor = "pointer";
+      btn.style.transition = "all 0.2s";
       
       btn.innerHTML = `
         <span>
@@ -350,17 +331,13 @@ export class UsersDashboard {
       
       btn.addEventListener("mouseover", () => {
         if (!isSelected) {
-          btn
-          btn
-          btn
+          btn.style.backgroundColor = "#f0f0f0";
         }
       });
       
       btn.addEventListener("mouseout", () => {
         if (!isSelected) {
-          btn
-          btn
-          btn
+          btn.style.backgroundColor = "#fff";
         }
       });
       
@@ -374,8 +351,7 @@ export class UsersDashboard {
 
     const closeBtn = document.createElement("button");
     closeBtn.className = "btn secondary";
-    closeBtn
-    closeBtn
+    closeBtn.style.marginTop = "20px";
     styleTransparentButton(closeBtn, "#999", "#333");
     closeBtn.innerHTML = `<i class="fas fa-times"></i> Fechar`;
     closeBtn.addEventListener("click", () => modal.remove());
