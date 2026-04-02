@@ -1,5 +1,5 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { MentionAPIRequest } from "./dto/index.js";
+import { MentionDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "mentions";
 
@@ -7,33 +7,34 @@ const ENDPOINT = "mentions";
 export async function getMentions(
   sort?: string,
   search?: string,
-): Promise<MentionAPIRequest[]> {
-  return get<MentionAPIRequest>(ENDPOINT, sort, search);
+): Promise<MentionDTORequest[]> {
+  return get<MentionDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma menção por ID */
 export async function getMentionById(
   id: number,
-): Promise<MentionAPIRequest | null> {
-  return getById<MentionAPIRequest>(ENDPOINT, id);
+): Promise<MentionDTORequest | null> {
+  return getById<MentionDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar uma nova menção */
 export async function createMention(
-  mention: Partial<MentionAPIRequest>,
-): Promise<MentionAPIRequest | null> {
-  return create<MentionAPIRequest>(ENDPOINT, mention);
+  mention: Partial<MentionDTORequest>,
+): Promise<MentionDTORequest | null> {
+  return create<MentionDTORequest>(ENDPOINT, mention);
 }
 
 /* Função para atualizar uma menção */
 export async function updateMention(
   id: number,
-  mention: Partial<MentionAPIRequest>,
-): Promise<MentionAPIRequest | null> {
-  return put<MentionAPIRequest>(ENDPOINT, id, mention);
+  mention: Partial<MentionDTORequest>,
+): Promise<MentionDTORequest | null> {
+  return put<MentionDTORequest>(ENDPOINT, id, mention);
 }
 
 /* Função para deletar uma menção */
 export async function deleteMention(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+

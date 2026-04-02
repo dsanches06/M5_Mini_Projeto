@@ -1,7 +1,8 @@
-import { IUser } from "@/models/index.js";
+import { IUser } from "../../models/index.js";
 import Notifications from "../../notifications/Notifications.js";
 import { UserService } from "../../services/index.js";
 import { addElementInContainer, createSection } from "../dom/index.js";
+import { showInfoBanner } from "../../helpers/index.js";
 
 let isNotificationBoxOpen = false;
 
@@ -20,6 +21,7 @@ function createNotificationItem(data: Notifications): HTMLDivElement {
 
   const sentAt = document.createElement("small");
   sentAt.textContent = new Date(data.getSentAt()).toLocaleString("pt-PT");
+  sentAt.style.fontSize = "12px";
   sentAt.style.color = "#999";
 
   textDiv.appendChild(title);
@@ -73,16 +75,17 @@ async function renderNotifications(user: IUser): Promise<void> {
     } else {
       const emptyMsg = document.createElement("p");
       emptyMsg.textContent = "Sem notificações";
-      emptyMsg.style.padding = "10px";
-      emptyMsg.style.color = "#999";
+      emptyMsg
+      emptyMsg
       box.appendChild(emptyMsg);
     }
   } catch (error) {
+    showInfoBanner("Erro ao carregar notificações", "error-banner");
     console.error("Erro ao carregar notificações:", error);
     const errorMsg = document.createElement("p");
     errorMsg.textContent = "Erro ao carregar notificações";
-    errorMsg.style.padding = "10px";
-    errorMsg.style.color = "red";
+    errorMsg
+    errorMsg
     box.appendChild(errorMsg);
   }
 }

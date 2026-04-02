@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { mapProjectAPIResponse } from "../dto/mapDTO.js";
+import { mapProjectDTOResponse, mapProjectStatsDTOResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todos os projetos */
 export const getAllProjects = async (search, sort) => {
@@ -17,13 +17,13 @@ export const getAllProjects = async (search, sort) => {
   }
 
   const [projects] = await db.query(query, params);
-  return projects.map(mapProjectAPIResponse);
+  return projects.map(mapProjectDTOResponse);
 };
 
 /* Função para buscar um projeto por ID */
 export const getProjectById = async (projectId) => {
   const [projects] = await db.query("SELECT * FROM project WHERE id = ?", [projectId]);
-  return projects.length > 0 ? mapProjectAPIResponse(projects[0]) : null;
+  return projects.length > 0 ? mapProjectDTOResponse(projects[0]) : null;
 };
 
 /* Função para criar novo projeto */
@@ -32,7 +32,7 @@ export const createProject = async (data) => {
     "INSERT INTO project (name, description, start_date, end_date_expected) VALUES (?, ?, ?, ?)",
     [data.name, data.description, data.start_date, data.end_date_expected],
   );
-  return mapProjectAPIResponse({ id: result.insertId, ...data });
+  return mapProjectDTOResponse({ id: result.insertId, ...data });
 };
 
 /* Função para atualizar projeto */
@@ -76,3 +76,51 @@ export const deleteProject = async (projectId) => {
   const [result] = await db.query("DELETE FROM project WHERE id=?", [projectId]);
   return result.affectedRows;
 };
+
+/* Função para obter estatísticas globais de projetos */
+export const getProjectsStats = async () => {
+  const [result] = await db.query(`
+    SELECT 
+      COUNT(*) as totalProjects,
+      COALESCE(SUM(CASE WHEN project_status_id = 1 THEN 1 ELSE 0 END), 0) as activeProjects,
+      COALESCE(SUM(CASE WHEN project_status_id = 3 THEN 1 ELSE 0 END), 0) as finishedProjects,
+      COALESCE(SUM(CASE WHEN project_status_id = 2 THEN 1 ELSE 0 END), 0) as inDevelopmentProjects
+    FROM project
+  `);
+  
+  const stats = result[0];
+  const total = stats.totalProjects || 1;
+  
+  const statsWithPercentage = {
+    ...stats,
+    activePercentage: ((stats.activeProjects / total) * 100).toFixed(2) + '%',
+    finishedPercentage: ((stats.finishedProjects / total) * 100).toFixed(2) + '%'
+  };
+  
+  return mapProjectStatsDTOResponse(statsWithPercentage);
+};
+
+/* Função para obter estatísticas de projetos */
+export const getProjectStats = async (projectId) => {
+  const [result] = await db.query(`
+    SELECT 
+      COUNT(*) as totalTasks,
+      COALESCE(SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END), 0) as completedTasks,
+      COALESCE(SUM(CASE WHEN status_id != 4 THEN 1 ELSE 0 END), 0) as pendingTasks
+    FROM task
+    WHERE project_id = ?
+  `, [projectId]);
+  
+  const stats = result[0];
+  const total = stats.totalTasks || 1;
+  
+  const statsWithPercentage = {
+    ...stats,
+    completedPercentage: ((stats.completedTasks / total) * 100).toFixed(2) + '%',
+    pendingPercentage: ((stats.pendingTasks / total) * 100).toFixed(2) + '%'
+  };
+  
+  return mapProjectStatsDTOResponse(statsWithPercentage);
+};
+
+

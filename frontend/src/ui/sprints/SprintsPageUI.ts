@@ -22,13 +22,16 @@ export async function loadSprintsPage(sprints: any[]): Promise<void> {
   const sprintCounterSection = createSprintCounter("sprintCounters");
   addElementInContainer("#containerSection", sprintCounterSection);
 
-  await showSprintsCounters("sprints");
-
   const searchContainer = showSearchSprintContainer();
   addElementInContainer("#containerSection", searchContainer);
 
+  // Aguardar render do DOM antes de atualizar contadores
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await showSprintsCounters("sprints");
+
   // renderizar sprints em cards
-  renderSprintsCards(sprints);
+  const sprintsContainer = await renderSprintsCards(sprints);
+  addElementInContainer("#containerSection", sprintsContainer);
 
   // Adicionar event listeners aos botões de contador para filtrar
   const allSprintsBtn = sprintCounterSection.querySelector(
@@ -39,7 +42,14 @@ export async function loadSprintsPage(sprints: any[]): Promise<void> {
     allSprintsBtn.title = "Mostrar todos os sprints";
     allSprintsBtn.addEventListener("click", async () => {
       const currentSprints = await SprintService.getSprints();
-      renderSprintsCards(currentSprints);
+      clearContainer("#sprintsGridContainer");
+      const sprintsContainer = await renderSprintsCards(currentSprints);
+      const oldContainer = document.querySelector("#sprintsGridContainer");
+      if (oldContainer) {
+        oldContainer.replaceWith(sprintsContainer);
+      } else {
+        addElementInContainer("#containerSection", sprintsContainer);
+      }
       await showSprintsCounters("sprints");
     });
   }
@@ -55,7 +65,14 @@ export async function loadSprintsPage(sprints: any[]): Promise<void> {
         undefined,
         searchTerm,
       );
-      renderSprintsCards(searchedSprints);
+      clearContainer("#sprintsGridContainer");
+      const sprintsContainer = await renderSprintsCards(searchedSprints);
+      const oldContainer = document.querySelector("#sprintsGridContainer");
+      if (oldContainer) {
+        oldContainer.replaceWith(sprintsContainer);
+      } else {
+        addElementInContainer("#containerSection", sprintsContainer);
+      }
       await showSprintsCounters("filtrados", searchedSprints);
     });
   }
@@ -76,7 +93,15 @@ export async function loadSprintsPage(sprints: any[]): Promise<void> {
           : bName.localeCompare(aName);
       });
       isAscending = !isAscending;
-      renderSprintsCards(sortedSprints);
+      clearContainer("#sprintsGridContainer");
+      const sprintsContainer = await renderSprintsCards(sortedSprints);
+      const oldContainer = document.querySelector("#sprintsGridContainer");
+      if (oldContainer) {
+        oldContainer.replaceWith(sprintsContainer);
+      } else {
+        addElementInContainer("#containerSection", sprintsContainer);
+      }
+      await showSprintsCounters("sprints", sortedSprints);
       sortSprintsBtn.textContent = isAscending ? "Ordenar A-Z" : "Ordenar Z-A";
     });
   }
@@ -87,7 +112,9 @@ function showSearchSprintContainer(): HTMLElement {
   const searchSprintContainer = createSearchContainer(
     "searchSprintContainer",
     { id: "searchSprint", placeholder: "Procurar sprint..." },
-    [{ id: "sortSprintsBtn", text: "Ordenar A-Z" }],
+    [
+      { id: "sortSprintsBtn", text: "Ordenar A-Z" },
+    ],
   );
   searchSprintContainer.classList.add("search-add-container");
   return searchSprintContainer;

@@ -1,5 +1,6 @@
 import { IUser } from "../../models/index.js";
 import { UserService } from "../../services/index.js";
+import { showInfoBanner } from "../../helpers/index.js";
 import { toggleNotifications } from "./notificationBoxUI.js";
 
 export async function createNotificationsUI(user: IUser): Promise<HTMLButtonElement> {
@@ -39,20 +40,21 @@ export async function createNotificationsUI(user: IUser): Promise<HTMLButtonElem
       spanBadge.textContent = notifyCount.toString();
     }
   } catch (error) {
+    showInfoBanner("Erro ao carregar notificações", "error-banner");
     console.error("Erro ao obter notificações da API:", error);
     // Mostrar erro no badge para que o utilizador saiba que há um problema
     spanBadge.textContent = "!";
-    spanBadge.style.backgroundColor = "red";
+    spanBadge.style.backgroundColor = "#dc3545"
   }
 
   icone.className = "fa-solid fa-bell fa-2xl fa-shake";
-  icone.style.animationIterationCount = "1";
+  icone.style.pointerEvents = "none"
 
   icone.addEventListener(
     "animationend",
     () => {
       icone.classList.remove("fa-shake");
-      icone.style.animationIterationCount = ""; // Limpa o estilo inline
+      icone.style.animation = "none" // Limpa o estilo inline
     },
     { once: true },
   );

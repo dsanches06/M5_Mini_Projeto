@@ -9,6 +9,8 @@ import {
 } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
+import { activateMenu } from "../dom/index.js";
+import { loadProjectsPage } from "./index.js";
 import {
   ActivityBar,
   formatDate,
@@ -24,6 +26,16 @@ export async function renderProjectGantt(
   const wrapper = document.createElement("div");
   wrapper.className = "gantt-wrapper";
 
+  const backBtn = document.createElement("button");
+  backBtn.className = "back-btn";
+  backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> Voltar`;
+  backBtn.addEventListener("click", async () => {
+    const projects = await ProjectService.getProjects();
+    activateMenu("#menuProjects");
+    await loadProjectsPage(projects);
+  });
+  wrapper.appendChild(backBtn);
+
   const topContainer = document.createElement("div");
   topContainer.className = "gantt-top";
   topContainer.appendChild(await createHeader(projectId));
@@ -37,12 +49,16 @@ export async function renderProjectGantt(
     const sprintTaskRelations = await SprintTaskService.getSprintTasks();
     const users = await UserService.getUsers();
 
-    let teams = [];
-    let teamMembers = [];
+    let teams: any[] = [];
+    let teamMembers: any[] = [];
 
     try {
       teams = await TeamService.getTeams();
-      teamMembers = await TeamMemberService.getTeamMembers();
+      // Agora os team members são aninhados por team
+      for (const team of teams) {
+        const members = await TeamMemberService.getTeamMembers(team.id);
+        teamMembers.push(...members);
+      }
     } catch (dataError) {
       console.warn(`⚠️ Aviso ao carregar times e membros:`, dataError);
     }
@@ -109,8 +125,8 @@ export async function renderProjectGantt(
   } catch (error) {
     const errorMsg = document.createElement("p");
     errorMsg.textContent = `Erro ao carregar tarefas: ${error instanceof Error ? error.message : String(error)}`;
-    errorMsg.style.color = "#e74c3c";
-    errorMsg.style.padding = "20px";
+    errorMsg
+    errorMsg
     wrapper.appendChild(errorMsg);
   }
 
@@ -216,7 +232,7 @@ async function createHeader(projectId: number): Promise<HTMLElement> {
   } catch (error) {
     console.error("Erro ao carregar o header:", error);
     header.innerHTML = `<h1>Erro ao carregar o projeto</h1>`;
-    showInfoBanner("Erro ao carregar informações do projeto", "error");
+    showInfoBanner("Erro ao carregar informações do projeto", "error-banner");
   }
 
   return header;
@@ -231,7 +247,7 @@ function createLegend(ganttColors: LegendItem[]): HTMLElement {
     row.className = "legend-item";
     row.innerHTML = `
       <span>${item.name}</span>
-      <div style="background-color: ${item.color}; width: 50px; height: 4px;"></div>
+      <div></div>
     `;
     legend.appendChild(row);
   });
@@ -242,7 +258,7 @@ function createLegend(ganttColors: LegendItem[]): HTMLElement {
 function createTimeline(weeks: number): HTMLElement {
   const timeline = document.createElement("div");
   timeline.className = "timeline";
-  timeline.style.gridTemplateColumns = `repeat(${weeks}, 1fr)`;
+  timeline
 
   for (let i = 1; i <= weeks; i++) {
     const week = document.createElement("div");
@@ -293,8 +309,8 @@ function createActivity(act: ActivityBar, weeks: number): HTMLElement {
 
   const bar = document.createElement("div");
   bar.className = "bar";
-  bar.style.gridColumn = `${act.start + 1} / span ${act.duration}`;
-  bar.style.backgroundColor = act.color;
+  bar
+  bar
   bar.textContent = act.name;
 
   barContainer.appendChild(bar);

@@ -1,20 +1,20 @@
 import { db } from "../db.js";
-import { mapTaskVoteAPIResponse } from "../dto/mapDTO.js";
+import { mapTaskVoteDTOResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskVotes = async () => {
   const [votes] = await db.query("SELECT * FROM task_vote");
-  return votes.map(mapTaskVoteAPIResponse);
+  return votes.map(mapTaskVoteDTOResponse);
 };
 export const getTaskVoteById = async (taskVoteId) => {
   const [taskVotes] = await db.query("SELECT * FROM task_vote WHERE id = ?", [taskVoteId]);
-  return taskVotes.length > 0 ? mapTaskVoteAPIResponse(taskVotes[0]) : null;
+  return taskVotes.length > 0 ? mapTaskVoteDTOResponse(taskVotes[0]) : null;
 };
 export const createTaskVote = async (data) => {
   const [result] = await db.query(
     "INSERT INTO task_vote (task_id, user_id, vote_type) VALUES (?, ?, ?)",
     [data.task_id, data.user_id, data.vote_type]
   );
-  return mapTaskVoteAPIResponse({ id: result.insertId, ...data });
+  return mapTaskVoteDTOResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskVote = async (id, data) => {
@@ -26,3 +26,5 @@ export const deleteTaskVote = async (id) => {
   const [result] = await db.query("DELETE FROM task_vote WHERE id = ?", [id]);
   return result.affectedRows;
 };
+
+

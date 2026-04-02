@@ -1,14 +1,14 @@
 import { db } from "../db.js";
-import { mapTagTaskAPIResponse } from "../dto/mapDTO.js";
+import { mapTagTaskDTOResponse } from "../dto/mapDTO.js";
 
 export const getAllTagTasks = async () => {
   const [tagTasks] = await db.query("SELECT * FROM tags_task");
-  return tagTasks.map(mapTagTaskAPIResponse);
+  return tagTasks.map(mapTagTaskDTOResponse);
 };
 
 export const getTagTaskById = async (tagTaskId) => {
   const [tagTasks] = await db.query("SELECT * FROM tags_task WHERE task_id = ?", [tagTaskId]);
-  return tagTasks.length > 0 ? mapTagTaskAPIResponse(tagTasks[0]) : null;
+  return tagTasks.length > 0 ? mapTagTaskDTOResponse(tagTasks[0]) : null;
 };
 
 export const createTagTask = async (data) => {
@@ -16,7 +16,7 @@ export const createTagTask = async (data) => {
     "INSERT INTO tags_task (task_id, tag_id) VALUES (?, ?)",
     [data.task_id, data.tag_id]
   );
-  return mapTagTaskAPIResponse({ id: result.insertId, ...data });
+  return mapTagTaskDTOResponse({ id: result.insertId, ...data });
 };
 
 export const updateTagTask = async (id, data) => {
@@ -28,3 +28,5 @@ export const deleteTagTask = async (id) => {
   const [result] = await db.query("DELETE FROM tags_task WHERE task_id = ?", [id]);
   return result.affectedRows;
 };
+
+

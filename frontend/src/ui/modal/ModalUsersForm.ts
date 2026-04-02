@@ -11,8 +11,8 @@ import { IUser, UserClass } from "../../models/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
 import { renderUsers, showUsersCounters } from "../users/index.js";
 import { GlobalValidators } from "../../utils/index.js";
+import { UserDTORequest } from "../../api/dto/index.js";
 // import { IdGenerator } from "../../utils/index.js"; // TODO: IDs são gerados pelo backend via API
-import { UserRole } from "../../security/UserRole.js";
 
 /**
  * Gere a submissão e validação com Regex para Email
@@ -22,14 +22,14 @@ function setupFormLogic(
   fields: {
     name: HTMLInputElement;
     email: HTMLInputElement;
+    phone: HTMLInputElement;
     gender: HTMLSelectElement;
-    role: HTMLSelectElement;
   },
   errors: {
     nameErr: HTMLElement;
     emailErr: HTMLElement;
+    phoneErr: HTMLElement;
     genderErr: HTMLElement;
-    roleErr: HTMLElement;
   },
   modal: HTMLElement,
   userToEdit?: any,
@@ -40,14 +40,14 @@ function setupFormLogic(
     //obter os resultados
     const name = fields.name.value.trim();
     const email = fields.email.value.trim();
+    const phone = fields.phone.value.trim();
     const gender = fields.gender.value.trim();
-    const role = fields.role.value.trim();
 
     // Reset de estados
     errors.nameErr.textContent = "";
     errors.emailErr.textContent = "";
+    errors.phoneErr.textContent = "";
     errors.genderErr.textContent = "";
-    errors.roleErr.textContent = "";
 
     let isValid = true;
 
@@ -76,8 +76,12 @@ function setupFormLogic(
       isValid = false;
     }
 
-    if (!GlobalValidators.isNonEmpty(role)) {
-      errors.roleErr.textContent = "O role não pode estar vazio.";
+    // Validação do Telemóvel
+    if (!GlobalValidators.isNonEmpty(phone)) {
+      errors.phoneErr.textContent = "O telemóvel não pode estar vazio.";
+      isValid = false;
+    } else if (!/^\d{9}$/.test(phone)) {
+      errors.phoneErr.textContent = "O telemóvel deve conter 9 dígitos.";
       isValid = false;
     }
 
@@ -88,75 +92,59 @@ function setupFormLogic(
       isValid = false;
     }
 
-    let roleUser: UserRole | undefined;
-
     // Verificação Final
-    if (isValid && roleUser === undefined) {
-      // TODO: IDs são gerados pelo backend via API, não gerar no frontend
-      let newId: number = 0; // IdGenerator.generateUserId();
-      //cria um novo user com os dados inseridos no formulario
+    if (isValid) {
+      // Criar DTO do utilizador conforme esperado pela API
+      const userData: Partial<UserDTORequest> = {
+        name,
+        email,
+        phone: parseInt(phone, 10),
+        gender,
+        active: 1, // 1 = ativo, 0 = inativo (número, não boolean)
+      };
 
-      if (role === "ADMIN") {
-        roleUser = UserRole.ADMIN;
-      } else if (role === "MANAGER") {
-        roleUser = UserRole.MANAGER;
-      } else if (role === "MEMBER") {
-        roleUser = UserRole.MEMBER;
-      } else if (role === "VIEWER") {
-        roleUser = UserRole.VIEWER;
-      }
-
-      const phone = 111111111;
-
-      if (roleUser) {
-        const userData = {
-          name,
-          email,
-          phone,
-          gender,
-          active: true,
-          role: roleUser,
-        };
-        
-        try {
-          // Criar ou atualizar utilizador via API
-          let newUser;
-          if (userToEdit) {
-            await UserService.updateUser(userToEdit.id, userData);
-            newUser = await UserService.getUserById(userToEdit.id);
-            showInfoBanner(
-              `${newUser!.getName()} foi atualizado com sucesso.`,
-              "success-banner",
-            );
-          } else {
-            newUser = await UserService.createUser(userData);
-            showInfoBanner(
-              `${newUser!.getName()} foi adicionado com sucesso.`,
-              "success-banner",
-            );
-          }
-          
-          if (newUser) {
-            // Recarregar lista de utilizadores da API
-            const users = await UserService.getUsers();
-            await renderUsers(users as UserClass[]);
-            // Atualizar contadores
-            await showUsersCounters("utilizadores");
-          } else {
-            showInfoBanner(
-              `ERRO: ${name} não foi adicionado.`,
-              "error-banner",
-            );
-          }
-        } catch (error) {
-          console.error("Erro ao criar/atualizar utilizador:", error);
+      try {
+        // Criar ou atualizar utilizador via API
+        let newUser;
+        if (userToEdit) {
+          await UserService.updateUser(userToEdit.id, userData);
+          newUser = await UserService.getUserById(userToEdit.id);
           showInfoBanner(
-            `ERRO: Não foi possível processar o utilizador. Por favor, tente novamente.`,
+            `${newUser!.getName()} foi atualizado com sucesso.`,
+            "success-banner",
+          );
+        } else {
+          newUser = await UserService.createUser(userData);
+          showInfoBanner(
+            `${newUser!.getName()} foi adicionado com sucesso.`,
+            "success-banner",
+          );
+        }
+
+        if (newUser) {
+          // Recarregar lista de utilizadores da API
+          const users = await UserService.getUsers();
+          
+          // Aguardar um pouco para garantir que o backend processou a mudança
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          await renderUsers(users as UserClass[]);
+          // Atualizar contadores
+          await showUsersCounters("utilizadores");
+        } else {
+          showInfoBanner(
+            `ERRO: ${name} não foi adicionado.`,
             "error-banner",
           );
         }
-        modal.remove();
+      } catch (error) {
+        console.error("Erro ao criar/atualizar utilizador:", error);
+        showInfoBanner(
+          `ERRO: Não foi possível processar o utilizador. Por favor, tente novamente.`,
+          "error-banner",
+        );
       }
+      modal.remove();
     } else {
       showInfoBanner(
         `O utilizador não foi adicionado. Verifique os erros no formulário.`,
@@ -208,6 +196,15 @@ export function renderUserModal(userToEdit?: any): void {
   if (userToEdit) {
     (emailData.input as HTMLInputElement).value = userToEdit.email;
   }
+  const phoneData = createInputGroup(
+    "Telemóvel",
+    "phoneInput",
+    "tel",
+    "inserir o telemóvel",
+  );
+  if (userToEdit) {
+    (phoneData.input as HTMLInputElement).value = userToEdit.phone;
+  }
   const selectGenderData = createSelectGroup("Gender", "selectGender", [
     "Masculino",
     "Feminino",
@@ -215,21 +212,6 @@ export function renderUserModal(userToEdit?: any): void {
   if (userToEdit) {
     selectGenderData.select.value = userToEdit.gender;
   }
-  const selectRoleData = createSelectGroup("Role", "selectRole", [
-    "ADMIN",
-    "MANAGER",
-    "MEMBER",
-    "VIEWER",
-  ]);
-  if (userToEdit) {
-    selectRoleData.select.value = userToEdit.role;
-  }
-
-  // Container para colocar lado a lado
-  const selectsContainer = document.createElement("div");
-  selectsContainer.style.display = "flex";
-  selectsContainer.style.gap = "6rem";
-  selectsContainer.append(selectGenderData.section, selectRoleData.section);
 
   const submitBtn = createButton(
     "button",
@@ -237,7 +219,7 @@ export function renderUserModal(userToEdit?: any): void {
     "submit",
   ) as HTMLButtonElement;
 
-  form.append(nameData.section, emailData.section, selectsContainer, submitBtn);
+  form.append(nameData.section, emailData.section, phoneData.section, selectGenderData.section, submitBtn);
   content.append(closeBtn, title, form);
   modal.append(content);
   document.body.appendChild(modal);
@@ -248,14 +230,14 @@ export function renderUserModal(userToEdit?: any): void {
     {
       name: nameData.input,
       email: emailData.input,
+      phone: phoneData.input,
       gender: selectGenderData.select,
-      role: selectRoleData.select,
     },
     {
       nameErr: nameData.errorSection,
       emailErr: emailData.errorSection,
+      phoneErr: phoneData.errorSection,
       genderErr: selectGenderData.errorSection,
-      roleErr: selectRoleData.errorSection,
     },
     modal,
     userToEdit,
@@ -266,5 +248,7 @@ export function renderUserModal(userToEdit?: any): void {
     if (e.target === modal) modal.remove();
   };
 
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 }

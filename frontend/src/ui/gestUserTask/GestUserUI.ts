@@ -25,13 +25,12 @@ export async function loadInitialUsers(): Promise<void> {
     await loadUsersPage(users);
   } catch (error) {
     console.error("Erro ao carregar utilizadores:", error);
-    showInfoBanner(`Erro ao carregar utilizadores: ${error}`, "error-banner");
+    showInfoBanner("Erro ao carregar utilizadores", "error-banner");
   }
 }
 
 /* Remover utilizador */
 export async function removeUserByID(id: number): Promise<void> {
-  // TODO: Implementar deleção com API
   await UserService.deleteUser(id);
 }
 

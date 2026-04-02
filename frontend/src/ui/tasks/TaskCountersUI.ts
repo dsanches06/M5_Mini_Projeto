@@ -1,5 +1,6 @@
 import { ITask } from "../../tasks/index.js";
 import { TaskService } from "../../services/index.js";
+import { TaskStatsDTORequest } from "../../api/dto/index.js";
 
 export async function showTasksCounters(
   type?: string,
@@ -9,27 +10,21 @@ export async function showTasksCounters(
     (type === "tarefas" || type === "pendentes" || type === "concluídas" || type === "filtradas") &&
     tasks
   ) {
-    
+    // Contar tarefas pendentes e concluídas no array fornecido
+    const pendingCount = tasks.filter((t) => !t.getCompleted()).length;
+    const completedCount = tasks.filter((t) => t.getCompleted()).length;
+
+    // Sempre mostrar o total de tarefas do array
     await countAllTasks("#allTasksCounter", tasks.length);
+    await countPendingTasks("#pendingTasksCounter", pendingCount);
+    await countCompletedTasks("#completedTaskCounter", completedCount);
 
-    if (type === "tarefas") {
-      // Para "tarefas" de um utilizador, contar pending vs completed correctamente
-      const pendingCount = tasks.filter((t) => !t.getCompleted()).length;
-      const completedCount = tasks.filter((t) => t.getCompleted()).length;
-      await countPendingTasks("#pendingTasksCounter", pendingCount);
-      await countCompletedTasks("#completedTaskCounter", completedCount);
-    } else if (type === "pendentes") {
-      await countPendingTasks("#pendingTasksCounter", tasks.length);
-      await countCompletedTasks("#completedTaskCounter", 0);
-    } else if (type === "concluídas") {
-      await countCompletedTasks("#completedTaskCounter", tasks.length);
-      await countPendingTasks("#pendingTasksCounter", 0);
+    // Mostrar o filtro se não for "tarefas" (que é o estado padrão)
+    if (type !== "tarefas") {
+      countFilterTasks("#filterTasksCounter", type!, tasks.length);
     } else {
-      await countPendingTasks("#pendingTasksCounter", tasks.length);
-      await countCompletedTasks("#completedTaskCounter", tasks.length);
+      countFilterTasks("#filterTasksCounter", "");
     }
-
-    countFilterTasks("#filterTasksCounter", type!, tasks.length);
   } else {
     await countAllTasks("#allTasksCounter");
     await countPendingTasks("#pendingTasksCounter");
@@ -50,9 +45,9 @@ async function countPendingTasks(
     }
     return;
   }
-  const tasks = await TaskService.getTasks();
+  const stats: TaskStatsDTORequest = (await TaskService.getTaskStats())!;
   if (section) {
-    section.textContent = `${tasks.filter((task) => !task.getCompleted()).length}`;
+    section.textContent = `${stats.pendingTasks}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
@@ -70,9 +65,9 @@ async function countCompletedTasks(
     }
     return;
   }
-  const tasks = await TaskService.getTasks();
+  const stats: TaskStatsDTORequest = (await TaskService.getTaskStats())!;
   if (section) {
-    section.textContent = `${tasks.filter((task) => task.getCompleted()).length}`;
+    section.textContent = `${stats.completedTasks}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
@@ -110,9 +105,9 @@ async function countAllTasks(
     }
     return;
   }
-  const tasks = await TaskService.getTasks();
+  const stats: TaskStatsDTORequest = (await TaskService.getTaskStats())!;
   if (section) {
-    section.textContent = `${tasks.length}`;
+    section.textContent = `${stats.totalTasks}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }

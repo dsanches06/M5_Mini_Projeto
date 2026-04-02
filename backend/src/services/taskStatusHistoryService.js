@@ -1,14 +1,14 @@
 import { db } from "../db.js";
-import { mapTaskStatusHistoryAPIResponse } from "../dto/mapDTO.js";
+import { mapTaskStatusHistoryDTOResponse } from "../dto/mapDTO.js";
 
 export const getAllTaskStatusHistories = async () => {
   const [histories] = await db.query("SELECT * FROM task_status_history");
-  return histories.map(mapTaskStatusHistoryAPIResponse);
+  return histories.map(mapTaskStatusHistoryDTOResponse);
 };
 
 export const getTaskStatusHistoryById = async (taskStatusHistoryId) => {
   const [taskStatusHistories] = await db.query("SELECT * FROM task_status_history WHERE id = ?", [taskStatusHistoryId]);
-  return taskStatusHistories.length > 0 ? mapTaskStatusHistoryAPIResponse(taskStatusHistories[0]) : null;
+  return taskStatusHistories.length > 0 ? mapTaskStatusHistoryDTOResponse(taskStatusHistories[0]) : null;
 };
 
 export const createTaskStatusHistory = async (data) => {
@@ -16,7 +16,7 @@ export const createTaskStatusHistory = async (data) => {
     "INSERT INTO task_status_history (task_id, status_id, changed_at) VALUES (?, ?, ?)",
     [data.task_id, data.status_id, new Date()]
   );
-  return mapTaskStatusHistoryAPIResponse({ id: result.insertId, ...data });
+  return mapTaskStatusHistoryDTOResponse({ id: result.insertId, ...data });
 };
 
 export const updateTaskStatusHistory = async (id, data) => {
@@ -28,3 +28,5 @@ export const deleteTaskStatusHistory = async (id) => {
   const [result] = await db.query("DELETE FROM task_status_history WHERE id = ?", [id]);
   return result.affectedRows;
 };
+
+

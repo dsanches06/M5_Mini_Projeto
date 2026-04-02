@@ -7,7 +7,7 @@ import { TaskStatus } from "../tasks/TaskStatus.js";
 }
 
 export function setCardBorderColor(card: HTMLElement, color: string): void {
-  card.style.borderLeft = `4px solid ${color}`;
+  card
 }
 
 export function getCardBorderColor(status: TaskStatus): string {

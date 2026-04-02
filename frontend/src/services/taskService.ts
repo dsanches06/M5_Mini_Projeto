@@ -4,10 +4,11 @@ import { ITask } from "../tasks/index.js";
 import { TaskStatus } from "../tasks/TaskStatus.js";
 import { TaskAssigneeService } from "./taskAssigneeService.js";
 import {
-  TagAPIRequest,
-  TaskAPIRequest,
-  TaskCommentAPIRequest,
-  TaskStatsAPIRequest,
+  TagDTORequest,
+  TagTaskDTORequest,
+  TaskDTORequest,
+  TaskCommentDTORequest,
+  TaskStatsDTORequest,
 } from "../api/dto/index.js";
 
 /* Serviço para gerir tarefas */
@@ -76,29 +77,32 @@ export class TaskService {
   }
 
   /* Obtém estatísticas de tarefas da API */
-  static async getTaskStats(): Promise<TaskStatsAPIRequest | null> {
+  static async getTaskStats(): Promise<TaskStatsDTORequest | null> {
     return await fetchTasks.getTaskStats();
   }
 
   /* Obtém tags de uma tarefa da API */
-  static async getTaskTags(taskId: number): Promise<TagAPIRequest[]> {
+  static async getTaskTags(taskId: number): Promise<TagDTORequest[]> {
     return await fetchTasks.getTaskTags(taskId);
   }
 
   /* Obtém comentários de uma tarefa da API */
   static async getTaskComments(
     taskId: number,
-  ): Promise<TaskCommentAPIRequest[]> {
+  ): Promise<TaskCommentDTORequest[]> {
     return await fetchTasks.getTaskComments(taskId);
   }
 
   /* Cria um nova tarefa na API */
-  static async createTask(taskData: any): Promise<ITask | null> {
-    return await fetchTasks.createTask(taskData);
+  static async createTask(
+    taskData: Partial<TaskDTORequest>,
+  ): Promise<ITask | null> {
+    const data = await fetchTasks.createTask(taskData);
+    return data ? mapToTask(data) : null;
   }
 
   /* Adiciona uma tag a uma tarefa na API */
-  static async addTagToTask(taskId: number, tagData: any): Promise<any> {
+  static async addTagToTask(taskId: number, tagData: Partial<TagTaskDTORequest>): Promise<TagTaskDTORequest | null> {
     return await fetchTasks.addTagToTask(taskId, tagData);
   }
 
@@ -118,9 +122,18 @@ export class TaskService {
   /* Atualiza uma tarefa na API */
   static async updateTask(
     taskId: number,
-    taskData: any,
+    taskData: Partial<TaskDTORequest>,
   ): Promise<ITask | null> {
-    return await fetchTasks.updateTask(taskId, taskData);
+    const data = await fetchTasks.updateTask(taskId, taskData);
+    return data ? mapToTask(data) : null;
+  }
+
+  /* Função para atualizar parcialmente uma tarefa (datas, descrição, etc) */
+  static async partialUpdateTask(
+    taskId: number,
+    updates: Partial<TaskDTORequest>,
+  ): Promise<boolean> {
+    return await fetchTasks.partialUpdateTask(taskId, updates);
   }
 
   /* Atualiza um comentário na API */
@@ -128,7 +141,7 @@ export class TaskService {
     taskId: number,
     commentId: number,
     commentData: any,
-  ): Promise<TaskCommentAPIRequest | null> {
+  ): Promise<TaskCommentDTORequest | null> {
     return await fetchTasks.updateTaskComment(taskId, commentId, commentData);
   }
 
@@ -136,7 +149,7 @@ export class TaskService {
   static async updateTaskStatus(
     taskId: number,
     statusId: number,
-  ): Promise<TaskAPIRequest | null> {
+  ): Promise<TaskDTORequest | null> {
     return await fetchTasks.changeTaskStatus(taskId, statusId);
   }
 
@@ -145,3 +158,4 @@ export class TaskService {
     return await fetchTasks.deleteTask(taskId);
   }
 }
+

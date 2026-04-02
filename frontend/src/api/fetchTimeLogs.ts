@@ -1,5 +1,5 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { TimeLogAPIRequest } from "./dto/index.js";
+import { TimeLogDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "time_logs";
 
@@ -7,33 +7,34 @@ const ENDPOINT = "time_logs";
 export async function getTimeLogs(
   sort?: string,
   search?: string,
-): Promise<TimeLogAPIRequest[]> {
-  return get<TimeLogAPIRequest>(ENDPOINT, sort, search);
+): Promise<TimeLogDTORequest[]> {
+  return get<TimeLogDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter um registro de tempo por ID */
 export async function getTimeLogById(
   id: number,
-): Promise<TimeLogAPIRequest | null> {
-  return getById<TimeLogAPIRequest>(ENDPOINT, id);
+): Promise<TimeLogDTORequest | null> {
+  return getById<TimeLogDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar um novo registro de tempo */
 export async function createTimeLog(
-  timeLog: Partial<TimeLogAPIRequest>,
-): Promise<TimeLogAPIRequest | null> {
-  return create<TimeLogAPIRequest>(ENDPOINT, timeLog);
+  timeLog: Partial<TimeLogDTORequest>,
+): Promise<TimeLogDTORequest | null> {
+  return create<TimeLogDTORequest>(ENDPOINT, timeLog);
 }
 
 /* Função para atualizar um registro de tempo */
 export async function updateTimeLog(
   id: number,
-  timeLog: Partial<TimeLogAPIRequest>,
-): Promise<TimeLogAPIRequest | null> {
-  return put<TimeLogAPIRequest>(ENDPOINT, id, timeLog);
+  timeLog: Partial<TimeLogDTORequest>,
+): Promise<TimeLogDTORequest | null> {
+  return put<TimeLogDTORequest>(ENDPOINT, id, timeLog);
 }
 
 /* Função para deletar um registro de tempo */
 export async function deleteTimeLog(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+

@@ -18,7 +18,11 @@ export const getTasksByProject = async (req, res) => {
   try {
     const { projectId } = req.params;
     const { sort, search } = req.query;
-    const tasks = await taskService.getTasksByProjectId(Number(projectId), search, sort);
+    const tasks = await taskService.getTasksByProjectId(
+      Number(projectId),
+      search,
+      sort,
+    );
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar tarefas do projeto" });
@@ -41,35 +45,6 @@ export const getTaskById = async (req, res) => {
 /* Função para criar tarefa */
 export const createTask = async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      task_status_id,
-      priority_id,
-      category_id,
-      project_id,
-      estimated_hours,
-    } = req.body;
-
-    // Validações apenas dos campos NOT NULL
-    if (!title || title.toString().trim().length === 0) {
-      return res.status(400).json({ error: "Título é obrigatório" });
-    }
-
-    if (!description || description.toString().trim().length === 0) {
-      return res.status(400).json({ error: "Descrição é obrigatória" });
-    }
-
-    if (!task_status_id) {
-      return res
-        .status(400)
-        .json({ error: "ID do status da tarefa é obrigatório" });
-    }
-
-    if (!priority_id) {
-      return res.status(400).json({ error: "ID da prioridade é obrigatório" });
-    }
-
     const task = await taskService.createTask(req.body);
     res.status(201).json(task);
   } catch (error) {
@@ -91,16 +66,33 @@ export const updateTask = async (req, res) => {
     }
     res.json(result);
   } catch (error) {
-    res
-      .status(400)
-      .json({ error: "Erro ao atualizar tarefa" });
+    res.status(400).json({ error: "Erro ao atualizar tarefa" });
+  }
+};
+
+/* Função para atualizar parcialmente tarefa (PATCH) - para datas, descrição, etc */
+export const partialUpdateTask = async (req, res) => {
+  try {
+    const result = await taskService.updateTask(
+      Number(req.params.id),
+      req.body,
+    );
+    if (result === 0) {
+      return res.status(404).json({ error: "Tarefa não encontrada" });
+    }
+    res.json({ message: "Tarefa atualizada com sucesso" });
+  } catch (error) {
+    res.status(400).json({ error: "Erro ao atualizar tarefa" });
   }
 };
 
 /* Função para marcar tarefa como concluída */
 export const updateStatus = async (req, res) => {
   try {
-    const task = await taskService.updateStatus(Number(req.params.id), req.body);
+    const task = await taskService.updateStatus(
+      Number(req.params.id),
+      req.body,
+    );
     res.json({ message: "Status da tarefa atualizado com sucesso", task });
   } catch (error) {
     res.status(400).json({

@@ -1,20 +1,20 @@
 import { db } from "../db.js";
-import { mapProjectStatusAPIResponse } from "../dto/mapDTO.js";
+import { mapProjectStatusDTOResponse } from "../dto/mapDTO.js";
 
 export const getAllProjectStatuses = async () => {
   const [statuses] = await db.query("SELECT * FROM project_status");
-  return statuses.map(mapProjectStatusAPIResponse);
+  return statuses.map(mapProjectStatusDTOResponse);
 };
 export const getProjectStatusById = async (projectStatusId) => {
   const [projectStatuses] = await db.query("SELECT * FROM project_status WHERE id = ?", [projectStatusId]);
-  return projectStatuses.length > 0 ? mapProjectStatusAPIResponse(projectStatuses[0]) : null;
+  return projectStatuses.length > 0 ? mapProjectStatusDTOResponse(projectStatuses[0]) : null;
 };
 export const createProjectStatus = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO project_status (name, description) VALUES (?, ?)",
-    [data.name, data.description]
+    "INSERT INTO project_status (name, flow_order) VALUES (?, ?)",
+    [data.name, data.flow_order]
   );
-  return mapProjectStatusAPIResponse({ id: result.insertId, ...data });
+  return mapProjectStatusDTOResponse({ id: result.insertId, ...data });
 };
 
 export const updateProjectStatus = async (id, data) => {
@@ -26,3 +26,5 @@ export const deleteProjectStatus = async (id) => {
   const [result] = await db.query("DELETE FROM project_status WHERE id = ?", [id]);
   return result.affectedRows;
 };
+
+

@@ -9,12 +9,11 @@ import {
   createSection,
   clearContainer,
 } from "../dom/index.js";
-import {
-  renderTeamsCards,
-} from "./index.js";
+import { renderTeamsCards } from "./index.js";
+import { TeamDTORequest } from "../../api/dto/typesDTO.js";
 
 /* Lista de equipes */
-export async function loadTeamsPage(teams: any[]): Promise<void> {
+export async function loadTeamsPage(teams?: TeamDTORequest[]): Promise<void> {
   clearContainer("#containerSection");
 
   addElementInContainer(
@@ -25,24 +24,39 @@ export async function loadTeamsPage(teams: any[]): Promise<void> {
   const teamCounterSection = createTeamCounter("teamCounters");
   addElementInContainer("#containerSection", teamCounterSection);
 
-  await showTeamsCounters("equipes");
-
   const searchContainer = showSearchTeamContainer();
   addElementInContainer("#containerSection", searchContainer);
 
+  // Aguardar render do DOM antes de atualizar contadores
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await showTeamsCounters("equipes");
+
   // renderizar equipes em cards
-  renderTeamsCards(teams);
+  if (teams) {
+    const teamsContainer = await renderTeamsCards(teams);
+    addElementInContainer("#containerSection", teamsContainer);
+  } else {
+    const allTeams = await TeamService.getTeams();
+    const teamsContainer = await renderTeamsCards(allTeams);
+    addElementInContainer("#containerSection", teamsContainer);
+  }
 
   // Adicionar event listeners aos botões de contador para filtrar
   const allTeamsBtn = teamCounterSection.querySelector(
     "#allTeamsBtn",
-  ) as HTMLElement | null;
-
+  ) as HTMLButtonElement;
   if (allTeamsBtn) {
     allTeamsBtn.title = "Mostrar todas as equipes";
     allTeamsBtn.addEventListener("click", async () => {
       const currentTeams = await TeamService.getTeams();
-      renderTeamsCards(currentTeams);
+      clearContainer("#teamsGridContainer");
+      const teamsContainer = await renderTeamsCards(currentTeams);
+      const oldContainer = document.querySelector("#teamsGridContainer");
+      if (oldContainer) {
+        oldContainer.replaceWith(teamsContainer);
+      } else {
+        addElementInContainer("#containerSection", teamsContainer);
+      }
       await showTeamsCounters("equipes");
     });
   }
@@ -56,14 +70,24 @@ export async function loadTeamsPage(teams: any[]): Promise<void> {
       const searchTerm = searchTeamInput.value;
       const searchedTeams = await TeamService.getTeams();
       const filteredTeams = searchedTeams.filter((t) =>
-        (t.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+        (t.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()),
       );
-      renderTeamsCards(filteredTeams);
+      clearContainer("#teamsGridContainer");
+      const teamsContainer = await renderTeamsCards(filteredTeams);
+      const oldContainer = document.querySelector("#teamsGridContainer");
+      if (oldContainer) {
+        oldContainer.replaceWith(teamsContainer);
+      } else {
+        addElementInContainer("#containerSection", teamsContainer);
+      }
+      await showTeamsCounters("filtrados", filteredTeams);
     });
   }
 
   // Event listener para adicionar equipe
-  const addTeamBtn = document.querySelector("#addTeamBtn") as HTMLElement;
+  const addTeamBtn = document.querySelector(
+    "#addTeamBtn",
+  ) as HTMLButtonElement;
   if (addTeamBtn) {
     addTeamBtn.addEventListener("click", async () => {
       await renderTeamModal();
@@ -73,7 +97,7 @@ export async function loadTeamsPage(teams: any[]): Promise<void> {
   // Event listener para ordenar equipes
   const sortTeamsBtn = document.querySelector(
     "#sortTeamsBtn",
-  ) as HTMLElement;
+  ) as HTMLButtonElement;
   if (sortTeamsBtn) {
     let isAscending = true;
     sortTeamsBtn.addEventListener("click", async () => {
@@ -86,7 +110,15 @@ export async function loadTeamsPage(teams: any[]): Promise<void> {
           : bName.localeCompare(aName);
       });
       isAscending = !isAscending;
-      renderTeamsCards(sortedTeams);
+      clearContainer("#teamsGridContainer");
+      const teamsContainer = await renderTeamsCards(sortedTeams);
+      const oldContainer = document.querySelector("#teamsGridContainer");
+      if (oldContainer) {
+        oldContainer.replaceWith(teamsContainer);
+      } else {
+        addElementInContainer("#containerSection", teamsContainer);
+      }
+      await showTeamsCounters("equipes", sortedTeams);
       sortTeamsBtn.textContent = isAscending ? "Ordenar A-Z" : "Ordenar Z-A";
     });
   }
@@ -114,21 +146,16 @@ function createTeamCounter(id: string): HTMLElement {
     "./src/assets/teams.png",
     "equipes",
     "allTeamsCounter",
-  ) as HTMLElement;
-
+  );
   const filterTeamsBtn = createStatisticsCounter(
     "filterTeamsSection",
     "filterTeamsBtn",
     "./src/assets/filter.png",
     "filtradas",
     "filterTeamsCounter",
-  ) as HTMLElement;
-
-  const sectionTeamsCounter = createSection(`${id}`) as HTMLElement;
-  sectionTeamsCounter.classList.add("teams-counters");
-  sectionTeamsCounter.append(
-    allTeamsBtn,
-    filterTeamsBtn,
   );
+  const sectionTeamsCounter = createSection(`${id}`);
+  sectionTeamsCounter.classList.add("teams-counters");
+  sectionTeamsCounter.append(allTeamsBtn, filterTeamsBtn);
   return sectionTeamsCounter;
 }

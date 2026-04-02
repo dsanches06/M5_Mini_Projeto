@@ -10,9 +10,7 @@ import {
   createSection,
   clearContainer,
 } from "../dom/index.js";
-import {
-  renderProjectsCards,
-} from "./index.js";
+import { renderProjectsCards } from "./index.js";
 
 /* Lista de projetos */
 export async function loadProjectsPage(projects: IProject[]): Promise<void> {
@@ -26,10 +24,12 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
   const projectCounterSection = createProjectCounter("projectCounters");
   addElementInContainer("#containerSection", projectCounterSection);
 
-  await showProjectsCounters("projetos");
-
   const searchContainer = showSearchProjectContainer();
   addElementInContainer("#containerSection", searchContainer);
+
+  // Aguardar render do DOM antes de atualizar contadores
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  await showProjectsCounters("projetos");
 
   // renderizar projetos em cards
   renderProjectsCards(projects);
@@ -47,7 +47,6 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
   const inDevelopmentProjectsBtn = projectCounterSection.querySelector(
     "#inDevelopmentProjectsBtn",
   ) as HTMLElement | null;
-  
 
   if (allProjectsBtn) {
     allProjectsBtn.title = "Mostrar todos os projetos";
@@ -61,7 +60,9 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
   if (activeProjectsBtn) {
     activeProjectsBtn.addEventListener("click", async () => {
       const allProjects = await ProjectService.getProjects();
-      const activeProjects = allProjects.filter((p) => p.getStatus() === "Ativo");
+      const activeProjects = allProjects.filter(
+        (p) => p.getStatus() === "Ativo",
+      );
       renderProjectsCards(activeProjects);
       await showProjectsCounters("ativos", activeProjects);
     });
@@ -71,7 +72,7 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
     finishedProjectsBtn.addEventListener("click", async () => {
       const allProjects = await ProjectService.getProjects();
       const finishedProjects = allProjects.filter(
-        (p) => p.getStatus() === "Terminado",
+        (p) => p.getStatus() === "Concluido",
       );
       renderProjectsCards(finishedProjects);
       await showProjectsCounters("concluidos", finishedProjects);
@@ -89,8 +90,8 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
     });
   }
 
-  // Event listener para busca
-  const searchProjectInput = document.querySelector(
+  // Event listener para busca - usar searchContainer.querySelector
+  const searchProjectInput = searchContainer.querySelector(
     "#searchProject",
   ) as HTMLInputElement;
   if (searchProjectInput) {
@@ -101,19 +102,21 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
         searchTerm,
       );
       renderProjectsCards(searchedProjects);
+      await showProjectsCounters("filtrados", searchedProjects);
     });
   }
 
-  // Event listener para adicionar projeto
-  const addProjectBtn = document.querySelector("#addProjectBtn") as HTMLElement;
+  // Event listener para adicionar projeto - usar searchContainer.querySelector
+  const addProjectBtn = searchContainer.querySelector("#addProjectBtn") as HTMLElement;
   if (addProjectBtn) {
-    addProjectBtn.addEventListener("click", async () => {
+    addProjectBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       await renderProjectModal();
     });
   }
 
-  // Event listener para ordenar projetos
-  const sortProjectsBtn = document.querySelector(
+  // Event listener para ordenar projetos - usar searchContainer.querySelector
+  const sortProjectsBtn = searchContainer.querySelector(
     "#sortProjectsBtn",
   ) as HTMLElement;
   if (sortProjectsBtn) {
@@ -123,6 +126,7 @@ export async function loadProjectsPage(projects: IProject[]): Promise<void> {
       const sortedProjects = await ProjectService.getProjects(sortValue);
       isAscending = !isAscending;
       renderProjectsCards(sortedProjects);
+      await showProjectsCounters("projetos", sortedProjects);
       sortProjectsBtn.textContent = isAscending ? "Ordenar A-Z" : "Ordenar Z-A";
     });
   }
@@ -205,4 +209,3 @@ function createProjectCounter(id: string): HTMLElement {
   );
   return sectionProjectsCounter;
 }
-

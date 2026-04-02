@@ -29,9 +29,9 @@ export const getTaskAttachmentById = async (req, res) => {
 /* Função para criar anexo de tarefa */
 export const createTaskAttachment = async (req, res) => {
   try {
-    const { task_id, file_name } = req.body;
-    if (!task_id || !file_name) {
-      return res.status(400).json({ error: "task_id e file_name são obrigatórios" });
+    const { task_id, file_name, file_path } = req.body;
+    if (!task_id || !file_name || !file_path) {
+      return res.status(400).json({ error: "task_id, file_name e file_path são obrigatórios" });
     }
     const taskAttachment = await taskAttachmentService.createTaskAttachment(req.body);
     res.status(201).json(taskAttachment);

@@ -28,7 +28,6 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
 
   const userCounterSection = createUserCounter("userCounters");
   addElementInContainer("#containerSection", userCounterSection);
-
   await showUsersCounters("utilizadores");
 
   const searchContainer = showSearchContainer();
@@ -77,14 +76,18 @@ export async function loadUsersPage(users: IUser[]): Promise<void> {
     await showUsersCounters("inativos", inactiveUsers as UserClass[]);
   });
 
+  // Aguardar um pouco para garantir que o DOM foi renderizado
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   // Adicionar event listeners aos botões de busca
   const addUserBtn = document.querySelector("#addUserBtn") as HTMLElement;
-  addUserBtn.addEventListener("click", () => {
-    renderUserModal();
-  });
+  if (addUserBtn) {
+    addUserBtn.addEventListener("click", async () => {
+      await renderUserModal();
+    });
+  }
 
   const sortUsersBtn = document.querySelector("#sortUsersBtn") as HTMLElement;
-
   if (sortUsersBtn) {
     let isAscending = true;
     sortUsersBtn.addEventListener("click", async () => {

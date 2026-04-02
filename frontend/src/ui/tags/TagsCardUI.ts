@@ -1,50 +1,45 @@
 import { TagService } from "../../services/index.js";
 import { showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
+import { activateMenu } from "../dom/index.js";
+import { loadTagsPage } from "./TagsPageUI.js";
 
 export async function createTagCard(tag: any): Promise<HTMLElement> {
   return await buildTagCard(tag);
 }
 
-export async function renderTagsList(
-  container: HTMLElement,
-  tags: any[],
-): Promise<void> {
-  container.innerHTML = "";
-  container.style.display = "grid";
-  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(190px, 1fr))";
-  container.style.gridAutoRows = "minmax(min-content, auto)";
-  container.style.justifyItems = "start";
-  container.style.gap = "1rem";
+export async function renderTagsList(tags: any[]): Promise<HTMLElement> {
+  const container = document.createElement("div");
+  container.id = "tagsListContainer";
+  container.classList.add("grid-card-container");
 
   if (tags.length === 0) {
     const emptyMessage = document.createElement("p");
     emptyMessage.textContent = "Nenhuma tag encontrada.";
-    emptyMessage.style.color = "#666";
     container.appendChild(emptyMessage);
-    return;
+    return container;
   }
 
   for (const tag of tags) {
     const tagCard = await createTagCard(tag);
     container.appendChild(tagCard);
   }
+  return container;
 }
 
 async function buildTagCard(tag: any): Promise<HTMLElement> {
   const card = document.createElement("div");
   card.className = "task-card tag-card";
   card.setAttribute("data-tag-id", tag.id.toString());
+  card.style.display = "flex";
+  card.style.gap = "1rem";
+  card.style.alignItems = "flex-start";
 
   // Container principal flexível: conteúdo à esquerda, botões à direita
-  const mainRow = document.createElement("div");
-  mainRow.style.display = "flex";
-  mainRow.style.flexDirection = "row";
-  mainRow.style.justifyContent = "space-between";
-  mainRow.style.alignItems = "flex-start";
-
-  // Conteúdo principal (esquerda)
-  const contentCol = document.createElement("div");
-  contentCol.className = "task-card-content";
+  const contentWrapper = document.createElement("div");
+  contentWrapper.className = "tag-card-row";
+  contentWrapper.style.display = "flex";
+  contentWrapper.style.flexDirection = "column";
+  contentWrapper.style.gap = "1rem";
 
   // ID
   const idSpan = document.createElement("span");
@@ -56,15 +51,16 @@ async function buildTagCard(tag: any): Promise<HTMLElement> {
   nameSpan.className = "task-title";
   nameSpan.textContent = tag.name || "Tag sem nome";
 
-  contentCol.append(idSpan, nameSpan);
+  contentWrapper.append(idSpan, nameSpan);
 
   // Botões (direita)
   const buttonContainer = document.createElement("div");
   buttonContainer.className = "button-container";
   buttonContainer.style.display = "flex";
   buttonContainer.style.flexDirection = "column";
+  buttonContainer.style.gap = "0.35rem";
   buttonContainer.style.alignItems = "flex-end";
-  buttonContainer.style.gap = "8px";
+  buttonContainer.style.flexShrink = "0";
 
   card.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
@@ -103,7 +99,9 @@ async function buildTagCard(tag: any): Promise<HTMLElement> {
     try {
       await TagService.deleteTag(tag.id);
       showInfoBanner(`Tag "${tag.name}" removida.`, "success-banner");
-      window.location.reload();
+      const allTags = await TagService.getTags();
+      activateMenu("#menuTags");
+      await loadTagsPage(allTags);
     } catch (error) {
       showInfoBanner("Erro ao excluir tag.", "error-banner");
       console.error(error);
@@ -114,10 +112,7 @@ async function buildTagCard(tag: any): Promise<HTMLElement> {
   buttonContainer.appendChild(deleteBtn);
 
   // Monta a linha principal: conteúdo à esquerda, botões à direita
-  mainRow.appendChild(contentCol);
-  mainRow.appendChild(buttonContainer);
-
-  card.appendChild(mainRow);
+  card.append(contentWrapper, buttonContainer);
 
   return card;
 }
@@ -139,8 +134,8 @@ async function renderTagEditModal(tag: any): Promise<void> {
 
   const description = document.createElement("p");
   description.textContent = "Atualize o nome da tag abaixo.";
-  description.style.color = "#4b5563";
-  description.style.margin = "0.5rem 0 1rem";
+  description.style.margin = "0.5rem 0";
+  description.style.color = "#666";
 
   const input = document.createElement("input") as HTMLInputElement;
   input.type = "text";
@@ -171,7 +166,9 @@ async function renderTagEditModal(tag: any): Promise<void> {
     try {
       await TagService.updateTag(tag.id, { name: newName });
       showInfoBanner(`Tag atualizada para "${newName}".`, "success-banner");
-      window.location.reload();
+      const allTags = await TagService.getTags();
+      activateMenu("#menuTags");
+      await loadTagsPage(allTags);
       modal.remove();
     } catch (error) {
       showInfoBanner("Erro ao atualizar tag.", "error-banner");

@@ -6,8 +6,11 @@ import {
   showConfirmDialog,
   showInfoBanner,
 } from "../../helpers/index.js";
-import { loadTaskDetailPage } from "./TaskDetailPageUI.js";
+import { loadTaskDetailPage } from "./index.js";
+import { loadTasksPage } from "./index.js";
 import { renderTaskModal } from "../modal/index.js";
+import { renderProjectDashboard } from "../projects/ProjectDashboardUI.js";
+import { activateMenu, createSection } from "../dom/index.js";
 import {
   TaskService,
   TaskAssigneeService,
@@ -24,18 +27,17 @@ export async function createTaskCard(
 }
 
 export async function renderTaskCards(
-  container: HTMLElement,
   tasks: ITask[],
-): Promise<void> {
-  container.innerHTML = "";
-  container.style.display = "grid";
-  container.style.gridTemplateColumns = "1fr";
-  container.style.gap = "1rem";
+): Promise<HTMLElement> {
+
+  const container = createSection("taskCardsContainer") as HTMLElement;
+  container.classList.add("grid-card-container");
 
   for (const task of tasks) {
     const taskCard = await createTaskCardElement(task);
     container.appendChild(taskCard);
   }
+  return container;
 }
 
 async function createTaskCardElement(task: ITask): Promise<HTMLElement> {
@@ -71,7 +73,10 @@ async function getAssigneeNameRemote(task: ITask): Promise<string> {
     );
     return user ? user.getName().split(" ")[0] : "Sem atribuição";
   } catch (error) {
-    showInfoBanner("Erro ao carregar informações do utilizador.", "error");
+    showInfoBanner(
+      "Erro ao carregar informações do utilizador.",
+      "error-banner",
+    );
     return "Sem atribuição";
   }
 }
@@ -83,17 +88,13 @@ async function buildTaskCard(
   const card = document.createElement("div");
   card.className = "task-card";
   card.setAttribute("data-task-id", task.getId().toString());
+  card.style.display = "flex";
+  card.style.gap = "1rem";
+  card.style.alignItems = "flex-start";
 
-  // Container principal flexível: conteúdo à esquerda, botões à direita
-  const mainRow = document.createElement("div");
-  mainRow.style.display = "flex";
-  mainRow.style.flexDirection = "row";
-  mainRow.style.justifyContent = "space-between";
-  mainRow.style.alignItems = "flex-start";
-
-  // Conteúdo principal (esquerda) - agora com expand/collapse
-  const contentCol = document.createElement("div");
-  contentCol.className = "task-card-content";
+  const contentWrapper = document.createElement("div");
+  contentWrapper.className = "task-card-content";
+  contentWrapper.style.flex = "1";
 
   // Número/id
   const number = document.createElement("span");
@@ -134,10 +135,10 @@ async function buildTaskCard(
   }
 
   // Por padrão, só mostra número, título e botão toggle
-  contentCol.append(number, title, user, status);
+  contentWrapper.append(number, title, user, status);
 
   if (tagsWrapper) {
-    contentCol.appendChild(tagsWrapper);
+    contentWrapper.appendChild(tagsWrapper);
   }
 
   // Botões (direita)
@@ -145,8 +146,9 @@ async function buildTaskCard(
   buttonContainer.className = "button-container";
   buttonContainer.style.display = "flex";
   buttonContainer.style.flexDirection = "column";
+  buttonContainer.style.gap = "0.35rem";
   buttonContainer.style.alignItems = "flex-end";
-  buttonContainer.style.gap = "8px";
+  buttonContainer.style.flexShrink = "0";
 
   // Botões de ação
   const editBtn = document.createElement("button");
@@ -157,13 +159,14 @@ async function buildTaskCard(
   editBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     const projectId = getTaskProjectId(task);
-    if (!projectId) {
-      showInfoBanner("Não foi possível obter o projeto da tarefa.", "error");
-      return;
+    if (projectId) {
+      await renderTaskModal(projectId, task, undefined, async () => {
+        activateMenu("#menuTasks");
+        await loadTasksPage();
+      });
+    } else {
+      showInfoBanner("Não foi possível obter o ID do projeto.", "error-banner");
     }
-    await renderTaskModal(projectId, task, undefined, async () => {
-      window.location.reload();
-    });
   });
 
   const deleteBtn = document.createElement("button");
@@ -181,10 +184,26 @@ async function buildTaskCard(
     }
     try {
       await TaskService.deleteTask(task.getId());
-      showInfoBanner("Tarefa excluída com sucesso.", "success");
-      window.location.reload();
+      showInfoBanner("Tarefa excluída com sucesso.", "success-banner");
+      
+      // Verificar se está no dashboard do projeto
+      const dashboardElement = document.querySelector("#dashboardProject");
+      if (dashboardElement) {
+        // Se está no dashboard, recarregar o dashboard
+        const projectId = getTaskProjectId(task);
+        if (projectId) {
+
+          const projectDashboard = await renderProjectDashboard(projectId);
+          dashboardElement.replaceWith(projectDashboard);
+        }
+      } else {
+        // Caso contrário, carregar página de tarefas
+        activateMenu("#menuTasks");
+        await loadTasksPage();
+      }
     } catch (error) {
-      showInfoBanner("Erro ao excluir a tarefa.", "error");
+      showInfoBanner("Erro ao excluir tarefa", "error-banner");
+      showInfoBanner("Erro ao excluir a tarefa.", "error-banner");
       console.error(error);
     }
   });
@@ -215,10 +234,7 @@ async function buildTaskCard(
   buttonContainer.appendChild(deleteTagBtn);
 
   // Monta a linha principal: conteúdo à esquerda, botões à direita
-  mainRow.appendChild(contentCol);
-  mainRow.appendChild(buttonContainer);
-
-  card.appendChild(mainRow);
+  card.append(contentWrapper, buttonContainer);
 
   setCardBorderColor(card, getCardBorderColor(task.getStatus()));
   card.addEventListener("click", (event) => {
@@ -252,37 +268,37 @@ async function renderTaskTagModal(
 
     const content = document.createElement("div");
     content.className = "modal-content";
-    content.style.maxWidth = "1040px";
-    content.style.width = "95%";
-    content.style.padding = "42px";
+    content.style.maxWidth = "600px";
+    content.style.width = "100%";
+    content.style.padding = "1rem";
 
     const title = document.createElement("h2");
     title.textContent =
-      action === "add" ? "Selecionar tag para adicionar à tarefa" : "Selecionar tag para remover da tarefa";
+      action === "add"
+        ? "Selecionar tag para adicionar à tarefa"
+        : "Selecionar tag para remover da tarefa";
 
     const list = document.createElement("div");
     list.className = "task-tag-selection-list";
-    list.style.display = "grid";
-    list.style.gridTemplateColumns = "repeat(3, minmax(260px, 1fr))";
-    list.style.gap = "1rem";
-    list.style.marginTop = "1rem";
+    list.style.display = "flex";
+    list.style.flexDirection = "column";
+    list.style.gap = "0.5rem";
+    list.style.maxHeight = "400px";
+    list.style.overflowY = "auto";
 
     availableTags.forEach((tag: any) => {
       const row = document.createElement("div");
       row.className = "task-tag-selection-row";
       row.style.display = "flex";
-      row.style.justifyContent = "space-between";
+      row.style.gap = "0.5rem";
       row.style.alignItems = "center";
-      row.style.padding = "0.8rem 1rem";
-      row.style.background = "#f7f7f7";
-      row.style.border = "1px solid rgba(0,0,0,0.08)";
-      row.style.borderRadius = "8px";
+      row.style.padding = "0.5rem";
+      row.style.borderBottom = "1px solid #e0e0e0";
 
       const label = document.createElement("span");
       label.textContent = tag.name;
-      label.style.fontSize = "0.95rem";
-      label.style.color = "#1f2937";
       label.style.flex = "1";
+      label.style.fontSize = "0.95rem";
 
       const button = document.createElement("button");
       button.className = "btn primary";
@@ -295,29 +311,35 @@ async function renderTaskTagModal(
         "aria-label",
         action === "add" ? "Adicionar tag" : "Remover tag",
       );
-      button.style.marginLeft = "0";
-      button.style.padding = "0";
-      button.style.width = "34px";
-      button.style.height = "34px";
-      button.style.display = "inline-flex";
-      button.style.alignItems = "center";
-      button.style.justifyContent = "center";
-      button.style.fontSize = "1rem";
-      button.style.minWidth = "auto";
+      button.style.whiteSpace = "nowrap";
       button.addEventListener("click", async (e) => {
         e.stopPropagation();
         try {
           if (action === "add") {
-            await TaskService.addTagToTask(taskId, { tagId: tag.id });
-            showInfoBanner(`Tag "${tag.name}" adicionada à tarefa.`, "success");
+            await TaskService.addTagToTask(taskId, {
+              task_id: taskId,
+              tag_id: tag.id,
+            });
+            showInfoBanner(
+              `Tag "${tag.name}" adicionada à tarefa.`,
+              "success-banner",
+            );
           } else {
             await TaskService.removeTagFromTask(taskId, tag.id);
-            showInfoBanner(`Tag "${tag.name}" removida da tarefa.`, "success");
+            showInfoBanner(
+              `Tag "${tag.name}" removida da tarefa.`,
+              "success-banner",
+            );
           }
           modal.remove();
-          window.location.reload();
+          
+          // Aguardar um pouco para garantir que o backend processou a mudança
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          activateMenu("#menuTasks");
+          await loadTasksPage();
         } catch (error) {
-          showInfoBanner("Erro ao atualizar tag da tarefa.", "error");
+          showInfoBanner("Erro ao atualizar tag da tarefa.", "error-banner");
           console.error("Erro ao atualizar tag da tarefa:", error);
         }
       });
@@ -329,7 +351,9 @@ async function renderTaskTagModal(
     content.append(title, list);
     modal.appendChild(content);
     document.body.appendChild(modal);
-    modal.style.display = "block";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
 
     modal.addEventListener("click", (event) => {
       if (event.target === modal) {
@@ -337,7 +361,7 @@ async function renderTaskTagModal(
       }
     });
   } catch (error) {
-    showInfoBanner("Erro ao abrir o modal de tags.", "error");
+    showInfoBanner("Erro ao abrir o modal de tags.", "error-banner");
     console.error("Erro ao renderizar modal de tags:", error);
   }
 }

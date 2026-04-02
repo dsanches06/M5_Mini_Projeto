@@ -1,23 +1,19 @@
 import { Project } from "../../projects/index.js";
+import { Task } from "../../tasks/index.js";
+import { TaskCategory } from "../../tasks/TaskCategory.js";
+import { TaskStatus } from "../../tasks/TaskStatus.js";
 import { UserClass } from "../../models/index.js";
 import Notifications from "../../notifications/Notifications.js";
+import { getStatus, parseDate } from "../../api/utils/index.js";
 import {
-  getStatus,
-  getTaskStatusFromId,
-  parseDate,
-} from "../../api/utils/index.js";
-import {
-  NotificationAPIRequest,
-  ProjectAPIRequest,
-  UserAPIRequest,
-  TaskAPIRequest,
+  NotificationDTORequest,
+  ProjectDTORequest,
+  TaskDTORequest,
+  UserDTORequest,
 } from "./index.js";
-import { ITask } from "../../tasks/index.js";
-import { Task } from "../../tasks/Task.js";
-import { TaskCategory } from "../../tasks/TaskCategory.js";
 
 /** Converter objeto plano para instância de UserClass */
-export function mapToUserClass(data: UserAPIRequest): UserClass {
+export function mapToUserClass(data: UserDTORequest): UserClass {
   return new UserClass(
     data.id,
     data.name,
@@ -25,13 +21,12 @@ export function mapToUserClass(data: UserAPIRequest): UserClass {
     data.phone,
     data.gender,
     getStatus(data.active),
-    data.role,
   );
 }
 
 /** Converter objeto plano para instância de Notifications */
 export function mapToNotifications(
-  data: NotificationAPIRequest,
+  data: NotificationDTORequest,
 ): Notifications {
   return new Notifications(
     data.id,
@@ -43,7 +38,7 @@ export function mapToNotifications(
 }
 
 /* Função auxiliar para mapear dados da API para instâncias de Project */
-export function mapToProject(data: ProjectAPIRequest): Project {
+export function mapToProject(data: ProjectDTORequest): Project {
   return new Project(
     data.id,
     data.name,
@@ -54,52 +49,60 @@ export function mapToProject(data: ProjectAPIRequest): Project {
   );
 }
 
-/** Converter instância de Project para objeto plano da API */
-export function mapFromProject(project: Project): ProjectAPIRequest {
-  return {
-    id: project.getId(),
-    name: project.getName(),
-    description: project.getDescription(),
-    project_status_id: project.getProjectStatusId(),
-    start_date: project.getStartDate().toISOString().split('T')[0],
-    end_date_expected: project.getEndDateExpected().toISOString().split('T')[0],
-  };
+function mapTaskCategory(categoryId?: number): TaskCategory {
+  switch (categoryId) {
+    case 1:
+      return TaskCategory.WORKED;
+    case 2:
+      return TaskCategory.PERSONAL;
+    case 3:
+      return TaskCategory.STUDY;
+    default:
+      return TaskCategory.WORKED;
+  }
 }
 
-/** Converter objeto plano para instância de ITask (Task) */
-export function mapToTask(data: TaskAPIRequest): ITask {
-  // Criar um projeto dummy com dados mínimos
+function mapTaskStatus(statusId?: number): TaskStatus {
+  switch (statusId) {
+    case 2:
+      return TaskStatus.ASSIGNED;
+    case 3:
+      return TaskStatus.IN_PROGRESS;
+    case 4:
+      return TaskStatus.BLOCKED;
+    case 5:
+      return TaskStatus.COMPLETED;
+    case 6:
+      return TaskStatus.ARCHIVED;
+    default:
+      return TaskStatus.CREATED;
+  }
+}
+
+export function mapToTask(data: TaskDTORequest): Task {
   const project = new Project(
-    data.project_id || 0,
-    `Project ${data.project_id}`,
-    "Project from API",
-    0,
-    new Date(),
-    new Date(),
+    data.project_id,
+    `Projeto ${data.project_id}`,
+    "",
+    data.status_id ?? 0,
+    parseDate(data.due_date),
+    parseDate(data.due_date),
   );
 
-  // Criar uma categoria dummy com dados mínimos
-  const category = {
-    getId: () => data.category_id || 0,
-    getName: () => `Category ${data.category_id}`,
-  } as unknown as TaskCategory;
-
-  // Criar tarefa usando a classe Task real
   const task = new Task(
     data.id,
     data.title,
-    data.description || "",
-    category,
+    data.description,
+    mapTaskCategory(data.category_id),
     project,
   );
 
-  // Definir o status da tarefa
-  task.setStatus(getTaskStatusFromId(data.status_id!));
+  task.setStatus(mapTaskStatus(data.status_id));
 
-  // Se a tarefa foi marcada como concluída, definir isso
   if (data.completed_at) {
     task.markCompleted();
+    task.setCompletedDate(parseDate(data.completed_at));
   }
 
-  return task as ITask;
+  return task;
 }

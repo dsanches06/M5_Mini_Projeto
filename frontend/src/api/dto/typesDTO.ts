@@ -1,274 +1,293 @@
 import { UserRole } from "../../security/UserRole.js";
 
-/* Type para representar utilizador vindo da API */
-export type UserAPIRequest = {
+/* Interface para representar utilizador vindo da API */
+export interface UserDTORequest {
   id: number;
   name: string;
   email: string;
   phone: number;
   gender: string;
   active: number;
-  role?: UserRole;
-};
+  created_at: string;
+}
 
-/* Type para representar estatísticas de utlizador vindo da API */
-export type UserStatsAPIRequest = {
+/* Interface para representar estatísticas de utilizador vindo da API */
+export interface UserStatsDTORequest {
   totalUsers: number;
   activeUsers: number;
   inactiveUsers: number;
   activePercentage: string;
   inactivePercentage: string;
-};
+}
 
-/* Type para representar notificação vindo da API */
-export type NotificationAPIRequest = {
+/* Interface para representar notificação vindo da API */
+export interface NotificationDTORequest {
   id: number;
+  user_id: number;
   title: string;
   message: string;
   is_read: number;
   sent_at: string;
-};
+}
 
-/* Type para representar tarefa vindo da API */
-export type TaskAPIRequest = {
+/* Interface para representar tarefa vindo da API */
+export interface TaskDTORequest {
   id: number;
   title: string;
   description?: string;
+  types_id?: number;
   status_id?: number;
   priority_id?: number;
   category_id?: number;
   assigned_to?: number;
   project_id: number;
-  sprint_id?: number;
-  start_date?: string;
   due_date?: string;
   completed_at?: string;
   created_at?: string;
-  updated_at?: string;
-};
+  estimated_hours?: number;
+}
 
-/* Type para representar estatísticas de tarefas vindo da API */
-export type TaskStatsAPIRequest = {
+/* Interface para representar estatísticas de tarefas vindo da API */
+export interface TaskStatsDTORequest {
   totalTasks: number;
   completedTasks: number;
   pendingTasks: number;
   completedPercentage: string;
-};
+}
 
-/** Type para representar comentário de tarefa vindo da API */
-export type TaskCommentAPIRequest = {
+/** Interface para representar comentário de tarefa vindo da API */
+export interface TaskCommentDTORequest {
   id: number;
-  task_id: number;
-  user_id: number;
   content: string;
-  created_at?: string;
-  updated_at?: string;
-};
+  task_id: number;
+  userId: number;
+  created_at: string;
+  edited_at?: string;
+  resolved?: number;
+}
 
-/** Type para representar tag vindo da API */
-export type TagAPIRequest = {
+/** Interface para representar tag vindo da API */
+export interface TagDTORequest {
   id: number;
   name: string;
   color?: string;
-  description?: string;
-};
+}
 
-/** Type para representar projeto vindo da API */
-export type ProjectAPIRequest = {
+/** Interface para representar projeto vindo da API */
+export interface ProjectDTORequest {
   id: number;
   name: string;
   description?: string;
   project_status_id?: number;
   start_date?: string;
   end_date_expected?: string;
-  created_at?: string;
-  updated_at?: string;
-};
+}
 
-/** Type para representar status de projeto vindo da API */
-export type ProjectStatusAPIRequest = {
+/** Interface para representar status de projeto vindo da API */
+export interface ProjectStatusDTORequest {
   id: number;
   name: string;
-  description?: string;
-};
+  flow_order: number;
+}
 
-/** Type para representar permissão de projeto vindo da API */
-export type ProjectPermissionAPIRequest = {
+/** Interface para representar permissão de projeto vindo da API */
+export interface ProjectPermissionDTORequest {
   id: number;
   project_id: number;
   user_id: number;
-  role: string;
-};
+  permission: string;
+  created_at: string;
+}
 
-/** Type para representar equipe vindo da API */
-export type TeamAPIRequest = {
+/** Interface para representar equipe vindo da API */
+export interface TeamDTORequest {
   id: number;
   name: string;
   description?: string;
-  created_at?: string;
-  updated_at?: string;
-};
+  created_at: string;
+}
 
-/** Type para representar membro de equipe vindo da API */
-export type TeamMemberAPIRequest = {
+/** Interface para representar tipo de tarefa vindo da API */
+export interface TeamMemberRolesDTORequest {
   id: number;
+  name: string;
+  flow_order: number;
+}
+
+/** Interface para representar membro de equipe vindo da API */
+export interface TeamMemberDTORequest {
   team_id: number;
   user_id: number;
-  role?: string;
-};
+  role_id: number;
+  joined_at?: string;
+}
 
-/** Type para representar sprint vindo da API */
-export type SprintAPIRequest = {
+/** Interface para representar sprint vindo da API */
+export interface SprintDTORequest {
   id: number;
   project_id: number;
   name: string;
   description?: string;
+  status_id?: number;
   start_date?: string;
   end_date?: string;
-  status?: string;
-  created_at?: string;
-  updated_at?: string;
-};
+}
 
-/** Type para representar tarefa de sprint vindo da API */
-export type SprintTaskAPIRequest = {
-  id: number;
+/** Interface para representar tarefa de sprint vindo da API */
+export interface SprintTaskDTORequest {
   sprint_id: number;
   task_id: number;
-};
+}
 
-/** Type para representar prioridade vindo da API */
-export type PriorityAPIRequest = {
+/** Interface para representar prioridade vindo da API */
+export interface PriorityDTORequest {
   id: number;
   name: string;
-  level?: number;
-  color?: string;
-};
+  flow_order: number;
+}
 
-/** Type para representar status de tarefa vindo da API */
-export type TaskStatusAPIRequest = {
+/** Interface para representar status de tarefa vindo da API */
+export interface TaskStatusDTORequest {
   id: number;
   name: string;
-  color?: string;
-  description?: string;
-};
+  flow_order: number;
+}
 
-/** Type para representar histórico de status vindo da API */
-export type TaskStatusHistoryAPIRequest = {
+/** Interface para representar tipo de tarefa vindo da API */
+export interface TaskTypeDTORequest {
+  id: number;
+  name: string;
+  flow_order: number;
+}
+
+/** Interface para representar histórico de status vindo da API */
+export interface TaskStatusHistoryDTORequest {
   id: number;
   task_id: number;
   status_id: number;
-  changed_by: number;
   changed_at: string;
-  previous_status_id?: number;
-};
+  changed_by?: number;
+}
 
-/** Type para representar anexo de tarefa vindo da API */
-export type TaskAttachmentAPIRequest = {
+/** Interface para representar anexo de tarefa vindo da API */
+export interface TaskAttachmentDTORequest {
   id: number;
   task_id: number;
-  file_path: string;
   file_name: string;
-  uploaded_by: number;
-  uploaded_at?: string;
-};
+  file_path: string;
+  uploaded_at: string;
+}
 
-/** Type para representar dependência de tarefa vindo da API */
-export type TaskDependencyAPIRequest = {
+/** Interface para representar dependência de tarefa vindo da API */
+export interface TaskDependencyDTORequest {
   id: number;
   task_id: number;
   depends_on_task_id: number;
-  dependency_type?: string;
-};
+  created_at: string;
+}
 
-/** Type para representar votação de tarefa vindo da API */
-export type TaskVoteAPIRequest = {
+/** Interface para representar votação de tarefa vindo da API */
+export interface TaskVoteDTORequest {
   id: number;
   task_id: number;
   user_id: number;
   vote_type: string;
-};
+  created_at: string;
+}
 
-/** Type para representar menção vindo da API */
-export type MentionAPIRequest = {
+/** Interface para representar menção vindo da API */
+export interface MentionDTORequest {
   id: number;
-  user_id: number;
-  task_id?: number;
-  comment_id?: number;
-  mentioned_by: number;
-  created_at?: string;
-};
+  comment_id: number;
+  mentioned_user_id: number;
+}
 
-/** Type para representar lembrete vindo da API */
-export type ReminderAPIRequest = {
+/** Interface para representar lembrete vindo da API */
+export interface ReminderDTORequest {
   id: number;
   task_id: number;
   user_id: number;
-  reminder_date: string;
-  message?: string;
-  is_sent: number;
-};
+  remind_at: string;
+  created_at: string;
+}
 
-/** Type para representar log de tempo vindo da API */
-export type TimeLogAPIRequest = {
+/** Interface para representar log de tempo vindo da API */
+export interface TimeLogDTORequest {
   id: number;
   task_id: number;
   user_id: number;
   hours: number;
   description?: string;
-  log_date: string;
-};
+  logged_at: string;
+}
 
-/** Type para representar tarefa e tag vindo da API */
-export type TagTaskAPIRequest = {
-  id: number;
+/** Interface para representar tarefa e tag vindo da API */
+export interface TagTaskDTORequest {
   task_id: number;
   tag_id: number;
-};
+}
 
-/** Type para representar tarefa favorita vindo da API */
-export type FavoriteTaskAPIRequest = {
-  id: number;
+/** Interface para representar tarefa favorita vindo da API */
+export interface FavoriteTaskDTORequest {
+  user_id: number;
+  task_id: number;
+  marked_at: string;
+}
+
+/** Interface para representar atribuição de tarefa vindo da API */
+export interface TaskAssigneeDTORequest {
   task_id: number;
   user_id: number;
-};
-
-/** Type para representar atribuição de tarefa vindo da API */
-export type TaskAssigneeAPIRequest = {
-  id: number;
-  task_id: number;
-  user_id: number;
-  assigned_by: number;
   assigned_at?: string;
-};
+}
 
-/** Type para representar categoria vindo da API */
-export type CategoryAPIRequest = {
+/** Interface para representar categoria vindo da API */
+export interface CategoryDTORequest {
   id: number;
   name: string;
-  description?: string;
-};
+  flow_order: number;
+}
 
-/* Type para representar ranking de horas mais reais vindo da API */
-export type RankingMoreHoursAPIRequest = {
+/* Interface para representar ranking de horas mais reais vindo da API */
+export interface RankingMoreHoursDTORequest {
   projeto: string;
   utilizador: string;
   total_horas_reais: number;
   ranking: number;
-};
+}
 
-/* Mapeia a resposta da API para ranking de horas de aumento */
-export type RankingIncreaseHoursAPIRequest = {
+/* Interface para representar ranking de horas de aumento vindo da API */
+export interface RankingIncreaseHoursDTORequest {
   utilizador: string;
   data_dia: string;
   horas_dia: number;
   horas_dia_anterior: number;
   ranking_do_dia: number;
-};
+}
 
-/* Type para representar ranking de horas acima da média vindo da API */
-export type RankingAboveAverageAPIRequest = {
+/* Interface para representar ranking de horas acima da média vindo da API */
+export interface RankingAboveAverageDTORequest {
   projeto: string;
   total_horas_projeto: number;
   media_geral_sistema: number;
-};
+}
+
+/* Interface para representar estatísticas de teams vindo da API */
+export interface TeamStatsDTORequest {
+  totalTeams: number;
+}
+
+/* Interface para representar estatísticas de sprints vindo da API */
+export interface SprintStatsDTORequest {
+  totalSprints: number;
+}
+
+/* Interface para representar estatísticas de projetos vindo da API */
+export interface ProjectStatsDTORequest {
+  totalProjects: number;
+  activeProjects: number;
+  finishedProjects: number;
+  inDevelopmentProjects: number;
+  activePercentage: string;
+  finishedPercentage: string;
+}

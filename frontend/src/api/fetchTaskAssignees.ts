@@ -1,6 +1,5 @@
-import { get, getById, create, put, remove } from "./index.js";
-import { TaskAssigneeAPIRequest } from "./dto/index.js";
-import { BASE_URL } from "./utils/index.js";
+import { get, getById, create, put, remove, request } from "./index.js";
+import { TaskAssigneeDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "task_assignees";
 
@@ -8,52 +7,42 @@ const ENDPOINT = "task_assignees";
 export async function getTaskAssignees(
   sort?: string,
   search?: string,
-): Promise<TaskAssigneeAPIRequest[]> {
-  return get<TaskAssigneeAPIRequest>(ENDPOINT, sort, search);
+): Promise<TaskAssigneeDTORequest[]> {
+  return get<TaskAssigneeDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma atribuição de tarefa por ID */
 export async function getTaskAssigneeById(
   id: number,
-): Promise<TaskAssigneeAPIRequest | null> {
-  return getById<TaskAssigneeAPIRequest>(ENDPOINT, id);
+): Promise<TaskAssigneeDTORequest | null> {
+  return getById<TaskAssigneeDTORequest>(ENDPOINT, id);
 }
 
 /* Função para obter atribuições de tarefas de um utilizador */
 export async function getTaskAssigneesByUserId(
   userId: number,
-): Promise<TaskAssigneeAPIRequest[]> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${userId}`);
-    if (!res.ok) {
-      throw new Error(
-        `ERRO: Não foi possível obter atribuições para o utilizador ${userId} - ${res.status}`,
-      );
-    }
-    const data: TaskAssigneeAPIRequest[] = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error(`Erro ao obter atribuições do utilizador ${userId}:`, error);
-    return [];
-  }
+): Promise<TaskAssigneeDTORequest[]> {
+  const data = await request<TaskAssigneeDTORequest[]>(`${ENDPOINT}/${userId}`);
+  return Array.isArray(data) ? data : [];
 }
 
 /* Função para criar uma nova atribuição de tarefa */
 export async function createTaskAssignee(
-  assignee: Partial<TaskAssigneeAPIRequest>,
-): Promise<TaskAssigneeAPIRequest | null> {
-  return create<TaskAssigneeAPIRequest>(ENDPOINT, assignee);
+  assignee: Partial<TaskAssigneeDTORequest>,
+): Promise<TaskAssigneeDTORequest | null> {
+  return create<TaskAssigneeDTORequest>(ENDPOINT, assignee);
 }
 
 /* Função para atualizar uma atribuição de tarefa */
 export async function updateTaskAssignee(
   id: number,
-  assignee: Partial<TaskAssigneeAPIRequest>,
-): Promise<TaskAssigneeAPIRequest | null> {
-  return put<TaskAssigneeAPIRequest>(ENDPOINT, id, assignee);
+  assignee: Partial<TaskAssigneeDTORequest>,
+): Promise<TaskAssigneeDTORequest | null> {
+  return put<TaskAssigneeDTORequest>(ENDPOINT, id, assignee);
 }
 
 /* Função para deletar uma atribuição de tarefa */
 export async function deleteTaskAssignee(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+

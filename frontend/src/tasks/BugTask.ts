@@ -3,7 +3,7 @@ import { IUser, BaseEntity } from "../models/index.js";
 import { ITask } from "./index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
-import { IProject } from "../projects/IProject.js";
+import { IProject } from "../projects/index.js";
 
 /* Implementação da tarefa de bug */
 export class BugTask extends BaseEntity implements ITask {

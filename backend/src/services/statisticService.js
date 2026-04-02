@@ -1,5 +1,6 @@
 import { db } from "../db.js";
 
+/* Função para obter o ranking dos 3 usuários com mais horas reais registradas */
 export const getRankingMoreHours = async () => {
   const query = `SELECT 
         u.name AS utilizador,
@@ -18,6 +19,7 @@ export const getRankingMoreHours = async () => {
   }));
 };
 
+/* Função para obter o ranking dos 3 usuários com mais horas reais registradas em um projeto específico */
 export const getRankingIncreasedHours = async () => {
   const query = `SELECT 
         utilizador,
@@ -47,6 +49,7 @@ export const getRankingIncreasedHours = async () => {
   return ranking;
 };
 
+/* Função para obter o ranking dos projetos com mais horas reais registradas */
 export const getRankingAboveAverage = async () => {
   const query = `SELECT *
     FROM (

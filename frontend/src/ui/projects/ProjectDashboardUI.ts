@@ -4,9 +4,11 @@ import {
   SprintService,
 } from "../../services/index.js";
 import { renderSprintModal, renderTaskModal } from "../modal/index.js";
-import { createHeadingTitle } from "../dom/index.js";
+import { createHeadingTitle, activateMenu } from "../dom/index.js";
 import { renderSprintsCards } from "../sprints/index.js";
 import { renderTaskCards } from "../tasks/index.js";
+import { loadProjectsPage } from "./index.js";
+import { showInfoBanner } from "../../helpers/index.js";
 
 // =======================
 // INIT
@@ -19,24 +21,29 @@ export async function renderProjectDashboard(id: number): Promise<HTMLElement> {
   const project = await ProjectService.getProjectById(id);
   const projectName = project?.getName() || "Projeto";
 
+  const backBtn = document.createElement("button");
+  backBtn.className = "back-btn";
+  backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> Voltar`;
+  backBtn.addEventListener("click", async () => {
+    const projects = await ProjectService.getProjects();
+    activateMenu("#menuProjects");
+    await loadProjectsPage(projects);
+  });
+  root.appendChild(backBtn);
+
   // Criar container principal com abas/seções
   const container = document.createElement("div");
-  container.style.display = "flex";
-  container.style.flexDirection = "column";
-  container.style.gap = "2rem";
-  container.style.padding = "1rem";
+  container.className = "dashboard-container";
 
   // Cabeçalho do dashboard
-  container.appendChild(
-    createHeadingTitle("h2", `DASHBOARD DO PROJETO: ${projectName}`),
-  );
+  const heading = createHeadingTitle("h2", `DASHBOARD DO PROJETO: ${projectName}`);
+  container.appendChild(heading);
 
   // Conteúdo principal em coluna: sprints em cima, tarefas embaixo
   const dashboardContent = document.createElement("div");
   dashboardContent.className = "project-dashboard-content";
   dashboardContent.style.display = "flex";
   dashboardContent.style.flexDirection = "column";
-  dashboardContent.style.gap = "2rem";
   dashboardContent.appendChild(await createSprintsSection(id));
   dashboardContent.appendChild(await createTasksSection(id));
   container.appendChild(dashboardContent);
@@ -68,12 +75,17 @@ async function createSprintsSection(projectId: number): Promise<HTMLElement> {
 
     const title = document.createElement("h3");
     title.textContent = `Sprints (${projectSprints.length})`;
-
     titleWrapper.appendChild(title);
 
     const addBtn = document.createElement("button");
     addBtn.className = "btn primary";
     addBtn.textContent = "+ Novo Sprint";
+    addBtn.addEventListener("mouseover", () => {
+      addBtn.style.opacity = "0.9";
+    });
+    addBtn.addEventListener("mouseout", () => {
+      addBtn.style.opacity = "1";
+    });
     addBtn.addEventListener("click", async () => {
       await renderSprintModal(projectId);
     });
@@ -86,11 +98,6 @@ async function createSprintsSection(projectId: number): Promise<HTMLElement> {
     const cardsContainer = document.createElement("div");
     cardsContainer.id = "projectSprintsContainer";
     cardsContainer.className = "project-section-cards";
-    // Layout horizontal com wrap para os cards de sprint
-    cardsContainer.style.display = "flex";
-    cardsContainer.style.flexWrap = "wrap";
-    cardsContainer.style.gap = "1.5rem";
-
 
     section.appendChild(cardsContainer);
 
@@ -102,10 +109,12 @@ async function createSprintsSection(projectId: number): Promise<HTMLElement> {
         "Nenhum sprint criado ainda. Clique em '+ Novo Sprint' para começar.";
       section.appendChild(emptyMsg);
     } else {
-      await renderSprintsCards(projectSprints, cardsContainer);
+      const sprintsContainer = await renderSprintsCards(projectSprints);
+      cardsContainer.appendChild(sprintsContainer);
     }
   } catch (error) {
     console.error("Erro ao carregar sprints:", error);
+    showInfoBanner("Erro ao carregar sprints do projeto", "error-banner");
     const errorMsg = document.createElement("p");
     errorMsg.className = "error-message";
     errorMsg.textContent = "Erro ao carregar sprints do projeto";
@@ -133,12 +142,17 @@ async function createTasksSection(projectId: number): Promise<HTMLElement> {
 
     const title = document.createElement("h3");
     title.textContent = `Tarefas (${tasks.length})`;
-
     titleWrapper.appendChild(title);
 
     const addBtn = document.createElement("button");
     addBtn.className = "btn primary";
     addBtn.textContent = "+ Nova Tarefa";
+    addBtn.addEventListener("mouseover", () => {
+      addBtn.style.opacity = "0.9";
+    });
+    addBtn.addEventListener("mouseout", () => {
+      addBtn.style.opacity = "1";
+    });
     addBtn.addEventListener("click", async () => {
       await renderTaskModal(projectId, undefined, undefined, async () => {
         const dashboardElement = document.querySelector("#dashboardProject");
@@ -156,7 +170,6 @@ async function createTasksSection(projectId: number): Promise<HTMLElement> {
     const tasksContent = document.createElement("div");
     tasksContent.className = "project-section-cards";
 
-
     if (tasks.length === 0) {
       const emptyMsg = document.createElement("p");
       emptyMsg.className = "empty-message";
@@ -166,13 +179,16 @@ async function createTasksSection(projectId: number): Promise<HTMLElement> {
     } else {
       const tasksList = document.createElement("div");
       tasksList.className = "project-tasks-grid";
-      await renderTaskCards(tasksList, tasks);
+
+      const renderedTasksContainer = await renderTaskCards(tasks);
+      tasksList.appendChild(renderedTasksContainer);
       tasksContent.appendChild(tasksList);
     }
 
     section.appendChild(tasksContent);
   } catch (error) {
     console.error("Erro ao carregar tarefas:", error);
+    showInfoBanner("Erro ao carregar tarefas do projeto", "error-banner");
     const errorMsg = document.createElement("p");
     errorMsg.className = "error-message";
     errorMsg.textContent = "Erro ao carregar tarefas do projeto";
@@ -181,3 +197,6 @@ async function createTasksSection(projectId: number): Promise<HTMLElement> {
 
   return section;
 }
+
+// Exportar função para uso em outros módulos (evitar dependências circulares)
+export { createSprintsSection };

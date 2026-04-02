@@ -1,7 +1,7 @@
 import { BASE_URL } from "./utils/index.js";
 
 /* Função base de request */
-async function request<T>(
+export async function request<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T | null> {
@@ -106,4 +106,15 @@ export async function remove(
   });
 
   return res !== null;
+}
+
+
+interface RequestInit {
+  method?: string;
+  headers?: HeadersInit;
+  body?: BodyInit | null;
+  mode?: RequestMode;
+  credentials?: RequestCredentials;
+  cache?: RequestCache;
+  signal?: AbortSignal;
 }

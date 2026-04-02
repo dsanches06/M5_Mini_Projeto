@@ -19,4 +19,7 @@ export async function renderDashboard(
     // Usa a tua função auxiliar para inserir no DOM
     addElementInContainer("#containerSection", renderedElement);
   }
+
+  // 4. Inicializa o dashboard (popula as colunas com cards)
+  await dashboard.initializeDashboard();
 }

@@ -16,9 +16,9 @@ export const checkUserExists = async (req, res, next) => {
     }
 
     req.user = user;
+    next();
   } catch (error) {
     console.error(`Erro ao verificar usuário com ID ${req.params.id}:`, error);
+    return res.status(500).json({ error: "Erro ao verificar utilizador" });
   }
-  
-  next();
 };

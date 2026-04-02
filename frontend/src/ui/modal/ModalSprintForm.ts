@@ -1,6 +1,7 @@
 import { SprintService, ProjectStatusService, ProjectService } from "../../services/index.js";
 import { GlobalValidators } from "../../utils/index.js";
-import { loadSprintsPage } from "../sprints/SprintsPageUI.js";
+import { loadSprintsPage } from "../sprints/index.js";
+import { SprintDTORequest } from "../../api/dto/index.js";
 
 import {
   createButton,
@@ -59,16 +60,8 @@ function setupSprintFormLogic(
       isValid = false;
     }
 
-    if (!GlobalValidators.isNonEmpty(startDate)) {
-      errors.startDateErr.textContent = "A data de início é obrigatória.";
-      isValid = false;
-    }
-
-    if (!GlobalValidators.isNonEmpty(endDate)) {
-      errors.endDateErr.textContent = "A data de fim é obrigatória.";
-      isValid = false;
-    }
-
+    // Datas são opcionais para criação
+    // Apenas validar se ambas forem fornecidas
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -81,26 +74,36 @@ function setupSprintFormLogic(
 
     // Verificação Final
     if (isValid) {
-      // Criar objeto do sprint (ID 0 será gerado pela base de dados)
-      const sprintData = {
-        id: sprintToEdit?.id || 0, // ID existente ou placeholder para novo
-        project_id: projectId, // Projeto obtido via argumento
-        name: name.trim(),
-        description: description || "",
-        status_id: parseInt(fields.statusId.value), // Status selecionado no dropdown
-        start_date: startDate,
-        end_date: endDate,
-      };
-
       try {
-        // Criar ou atualizar sprint via serviço (envia para a API)
+        // Criar DTO do sprint conforme esperado pela API
+        let sprintData: any;
+        
         if (sprintToEdit) {
+          // Para update, incluir o id
+          sprintData = {
+            id: sprintToEdit.id,
+            project_id: projectId,
+            name: name.trim(),
+            description: description || undefined,
+            status_id: parseInt(fields.statusId.value),
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+          };
           await SprintService.updateSprint(sprintData.id, sprintData);
           showInfoBanner(
             `INFO: O sprint ${name} foi atualizado com sucesso.`,
             "info-banner",
           );
         } else {
+          // Para criação, não enviar o id
+          sprintData = {
+            project_id: projectId,
+            name: name.trim(),
+            description: description || undefined,
+            status_id: parseInt(fields.statusId.value),
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+          } as Partial<SprintDTORequest>;
           await SprintService.createSprint(sprintData);
           showInfoBanner(
             `INFO: O sprint ${name} foi criado com sucesso.`,
@@ -108,9 +111,22 @@ function setupSprintFormLogic(
           );
         }
 
-        // Obter todos os sprints e renderizar
-        const sprints = await SprintService.getSprints();
-        await loadSprintsPage(sprints);
+        // Verificar se estamos no dashboard do projeto
+        const dashboardElement = document.querySelector("#dashboardProject");
+        if (dashboardElement) {
+          // Estamos no dashboard do projeto, recarregar apenas a seção de sprints
+          const sprintsSection = dashboardElement.querySelector(".sprints-section");
+          if (sprintsSection) {
+            // Importar dinamicamente para evitar dependências circulares
+            const { createSprintsSection } = await import("../projects/index.js");
+            const newSprintsSection = await createSprintsSection(projectId);
+            sprintsSection.replaceWith(newSprintsSection);
+          }
+        } else {
+          // Caso contrário, recarregar a página geral de sprints
+          const sprints = await SprintService.getSprints();
+          await loadSprintsPage(sprints);
+        }
 
         modal.remove();
       } catch (error) {
@@ -239,6 +255,7 @@ export async function renderSprintModal(projectId: number, sprintToEdit?: any): 
       statusSelect.appendChild(option);
     });
   } catch (error) {
+    showInfoBanner("Erro ao carregar estados de projeto", "error-banner");
     console.error("Erro ao carregar estados de projeto:", error);
   }
 
@@ -262,6 +279,9 @@ export async function renderSprintModal(projectId: number, sprintToEdit?: any): 
   content.append(closeBtn, titleHeading, form);
   modal.append(content);
   document.body.appendChild(modal);
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 
   // Ligar a lógica ao formulário
   setupSprintFormLogic(
@@ -289,5 +309,7 @@ export async function renderSprintModal(projectId: number, sprintToEdit?: any): 
     if (e.target === modal) modal.remove();
   };
 
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 }

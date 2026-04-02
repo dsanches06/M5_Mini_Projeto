@@ -1,30 +1,32 @@
 import { db } from "../db.js";
-import { mapPriorityAPIResponse } from "../dto/mapDTO.js";
+import { mapPriorityDTOResponse } from "../dto/mapDTO.js";
 
 export const getAllPriorities = async () => {
-  const [priorities] = await db.query("SELECT * FROM priority");
-  return priorities.map(mapPriorityAPIResponse);
+  const [priorities] = await db.query("SELECT * FROM priorities");
+  return priorities.map(mapPriorityDTOResponse);
 };
 
 export const getPriorityById = async (priorityId) => {
-  const [priorities] = await db.query("SELECT * FROM priority WHERE id = ?", [priorityId]);
-  return priorities.length > 0 ? mapPriorityAPIResponse(priorities[0]) : null;
+  const [priorities] = await db.query("SELECT * FROM priorities WHERE id = ?", [priorityId]);
+  return priorities.length > 0 ? mapPriorityDTOResponse(priorities[0]) : null;
 };
 
 export const createPriority = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO priority (name, priority_level) VALUES (?, ?)",
-    [data.name, data.priority_level]
+    "INSERT INTO priorities (name, flow_order) VALUES (?, ?)",
+    [data.name, data.flow_order ?? 0]
   );
-  return mapPriorityAPIResponse({ id: result.insertId, ...data });
+  return mapPriorityDTOResponse({ id: result.insertId, ...data });
 };
 
 export const updatePriority = async (id, data) => {
-  const [result] = await db.query("UPDATE priority SET ? WHERE id = ?", [data, id]);
+  const [result] = await db.query("UPDATE priorities SET ? WHERE id = ?", [data, id]);
   return result.affectedRows;
 };
 
 export const deletePriority = async (id) => {
-  const [result] = await db.query("DELETE FROM priority WHERE id = ?", [id]);
+  const [result] = await db.query("DELETE FROM priorities WHERE id = ?", [id]);
   return result.affectedRows;
 };
+
+

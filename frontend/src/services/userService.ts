@@ -1,4 +1,4 @@
-import { UserStatsAPIRequest } from "../api/dto/index.js";
+import { UserStatsDTORequest } from "../api/dto/index.js";
 import { IUser, UserClass } from "../models/index.js";
 import Notifications from "../notifications/Notifications.js";
 import {
@@ -27,7 +27,7 @@ export class UserService {
   }
 
   /* Função para obter estatísticas de usuário */
-  static async getUserStats(): Promise<UserStatsAPIRequest | null> {
+  static async getUserStats(): Promise<UserStatsDTORequest | null> {
     return await apiGetUserStats();
   }
 
@@ -79,3 +79,4 @@ export class UserService {
     return await apiDeleteUser(userId);
   }
 }
+

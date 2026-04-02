@@ -4,6 +4,7 @@ import {
   createSection,
   createHeadingTitle,
   clearContainer,
+  activateMenu,
 } from "../dom/index.js";
 import { getAvatarPath } from "../../helpers/index.js";
 import { loadTasksPage } from "./TaskPageUI.js";
@@ -51,6 +52,7 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
     backButton.className = "task-detail-back-button";
     backButton.textContent = "← Voltar";
     backButton.addEventListener("click", async () => {
+      activateMenu("#menuTasks");
       await loadTasksPage();
     });
 
@@ -119,11 +121,11 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
 
     if (comments.length > 0) {
       comments.forEach((comment) => {
-        const author = users.find((user) => user.getId() === comment.user_id);
+        const author = users.find((user) => user.getId() === comment.userId);
         const commentCard = document.createElement("div");
         commentCard.className = "comment";
         commentCard.innerHTML = `
-          <img class="avatar" src="${getAvatarPath(comment.user_id, author?.getGender() ?? "Male")}" alt="${author?.getName() || "Usuário"}" />
+          <img class="avatar" src="${getAvatarPath(comment.userId, author?.getGender() ?? "Male")}" alt="${author?.getName() || "Usuário"}" />
           <div class="bubble">
             <div class="comment-header">
               <strong>${author ? author.getName() : "Usuário desconhecido"}</strong>
@@ -177,13 +179,18 @@ async function createTaskDetailSection(taskId: number): Promise<HTMLElement> {
       }
 
       const createdComment = await CommentService.createTaskComment(taskId, {
+        id: 0,
         task_id: taskId,
-        user_id: selectedUserId,
+        userId: selectedUserId,
         content,
+        created_at: new Date().toISOString(),
       });
 
       if (createdComment) {
+        contentInput.value = "";
         await loadTaskDetailPage(taskId);
+      } else {
+        alert("Erro ao criar comentário. Tente novamente.");
       }
     });
 

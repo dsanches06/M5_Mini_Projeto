@@ -1,5 +1,5 @@
 {
-  "name": "m3_mini_projeto",
+  "name": "m5_mini_projeto",
   "version": "1.0.0",
   "description": "Gestão de utilizadores e tarefas",
   "license": "ISC",
@@ -8,7 +8,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc && npm run copy:assets",
-    "copy:assets": "copyfiles -u 0 \"src/assets/**/*\" \"src/styles/**/*\" dist",
+    "copy:assets": "shx cp -r src/assets dist/ && shx cp -r src/styles dist/",
     "watch": "tsc -w",
     "start": "npm run build",
     "test": "vitest",

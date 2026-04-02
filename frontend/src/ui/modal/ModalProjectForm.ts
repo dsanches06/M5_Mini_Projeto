@@ -1,7 +1,8 @@
 import { Project } from "../../projects/index.js";
 import { GlobalValidators } from "../../utils/index.js";
 import { ProjectService } from "../../services/index.js";
-import { loadProjectsPage } from "../projects/ProjectPageUI.js";
+import { loadProjectsPage } from "../projects/index.js";
+import { ProjectDTORequest } from "../../api/dto/index.js";
 
 import {
   createButton,
@@ -11,7 +12,6 @@ import {
   createSection,
 } from "../dom/index.js";
 import { showInfoBanner } from "../../helpers/index.js";
-import { mapFromProject } from "../../api/dto/index.js";
 
 function setupProjectFormLogic(
   form: HTMLFormElement,
@@ -59,16 +59,8 @@ function setupProjectFormLogic(
       isValid = false;
     }
 
-    if (!GlobalValidators.isNonEmpty(startDate)) {
-      errors.startDateErr.textContent = "A data de início é obrigatória.";
-      isValid = false;
-    }
-
-    if (!GlobalValidators.isNonEmpty(endDate)) {
-      errors.endDateErr.textContent = "A data de fim esperada é obrigatória.";
-      isValid = false;
-    }
-
+    // Datas são opcionais para criação
+    // Apenas validar se ambas forem fornecidas
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -94,16 +86,26 @@ function setupProjectFormLogic(
         new Date(endDate),
       );
 
+      // Converter para DTO
+      const projectDTO: ProjectDTORequest = {
+        id: projectData.getId(),
+        name: projectData.getName(),
+        description: projectData.getDescription(),
+        project_status_id: projectData.getProjectStatusId(),
+        start_date: startDate ? new Date(startDate).toISOString().split("T")[0] : undefined,
+        end_date_expected: endDate ? new Date(endDate).toISOString().split("T")[0] : undefined,
+      };
+
       try {
         // Criar ou atualizar projeto via serviço (envia para a API)
         if (projectToEdit) {
-          await ProjectService.updateProject(mapFromProject(projectData));
+          await ProjectService.updateProject(projectDTO);
           showInfoBanner(
             `INFO: O projeto ${name} foi atualizado com sucesso.`,
             "info-banner",
           );
         } else {
-          await ProjectService.createProject(mapFromProject(projectData));
+          await ProjectService.createProject(projectDTO);
           showInfoBanner(
             `INFO: O projeto ${name} foi criado com sucesso.`,
             "info-banner",
@@ -112,6 +114,10 @@ function setupProjectFormLogic(
 
         // Obter todos os projetos e renderizar
         const projects = await ProjectService.getProjects();
+        
+        // Aguardar um pouco para garantir que o backend processou a mudança
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         loadProjectsPage(projects);
 
         modal.remove();
@@ -232,6 +238,9 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
   content.append(closeBtn, titleHeading, form);
   modal.append(content);
   document.body.appendChild(modal);
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 
   // Ligar a lógica ao formulário
   setupProjectFormLogic(
@@ -257,5 +266,7 @@ export async function renderProjectModal(projectToEdit?: any): Promise<void> {
     if (e.target === modal) modal.remove();
   };
 
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 }

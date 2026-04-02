@@ -64,3 +64,22 @@ export const deleteTeam = async (req, res) => {
     res.status(400).json({ error: `Error deleting team` });
   }
 };
+/* Função para obter estatísticas globais de times */
+export const getTeamsStats = async (req, res) => {
+  try {
+    const stats = await teamService.getTeamsStats();
+    res.json([stats]);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar estatísticas de times" });
+  }
+};
+/* Função para obter estatísticas de teams */
+export const getTeamStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stats = await teamService.getTeamStats(Number(id));
+    res.json([stats]);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar estatísticas de teams" });
+  }
+};

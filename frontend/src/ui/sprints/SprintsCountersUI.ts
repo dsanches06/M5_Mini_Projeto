@@ -1,4 +1,5 @@
 import { SprintService } from "../../services/index.js";
+import { SprintStatsDTORequest } from "../../api/dto/index.js";
 
 export interface SprintStatsResponse {
   totalSprints: number;
@@ -9,7 +10,7 @@ export async function showSprintsCounters(
   sprints?: any[],
 ): Promise<void> {
   if (type === "filtrados" && sprints) {
-    countAllSprints("#allSprintsCounter", sprints.length);
+    await countAllSprints("#allSprintsCounter", sprints.length);
     countFilterSprints("#filterSprintsCounter", type!, sprints.length);
   } else {
     await countAllSprints("#allSprintsCounter");
@@ -43,9 +44,9 @@ async function countAllSprints(
     }
     return;
   }
-  const sprints = await SprintService.getSprints();
+  const stats: SprintStatsDTORequest = (await SprintService.getSprintsStats())!;
   if (section) {
-    section.textContent = `${sprints.length}`;
+    section.textContent = `${stats.totalSprints}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }

@@ -5,6 +5,8 @@ import {generateRandomColor} from "../../helpers/index.js";
 
 /* Container de utilizadores */
 const usersContainer = createSection("usersContainer") as HTMLElement;
+usersContainer.classList.add("grid-card-container");
+usersContainer.style.gap = "1.5rem";
 
 /* Função de renderização */
 export async function renderUsers(users: IUser[]): Promise<HTMLElement> {
@@ -32,7 +34,7 @@ function applyCardColors(usersContainer: HTMLElement): void {
     const randomColor = generateRandomColor();
     const title = card.querySelector(".face1") as HTMLElement;
     if (title) {
-      title.style.background = randomColor;
+      title.style.backgroundColor = randomColor;
     }
     // Corrigir seletor para o ícone dentro do botão toggle
     const toggleBtn = card.querySelector("button.icon-button[aria-label='Ativar ou desativar utilizador']") as HTMLElement;

@@ -3,7 +3,7 @@ import { BaseEntity } from "../models/index.js";
 import { ITask } from "./index.js";
 import { TaskCategory } from "./TaskCategory.js";
 import { TaskStatus } from "./TaskStatus.js";
-import { IProject } from "../projects/IProject.js";
+import { IProject } from "../projects/index.js";
 
 /* Implementação da tarefa genérica */
 export class Task extends BaseEntity implements ITask {

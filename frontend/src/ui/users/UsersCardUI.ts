@@ -1,12 +1,26 @@
 import { UserService, TaskService, TaskAssigneeService } from "../../services/index.js";
 import { UserClass } from "../../models/index.js";
 import { getAvatarPath, showInfoBanner } from "../../helpers/index.js";
-import { renderUsers, showUsersCounters } from "./index.js";
+import { renderUsers, showUsersCounters, loadUserTasksPage } from "./index.js";
 import { toggleUserState } from "../gestUserTask/index.js";
-import { showUserDetails } from "../modal/index.js";
-import { TaskAssigneeAPIRequest } from "../../api/dto/typesDTO.js";
-import { loadUserTasksPage } from "./index.js";
+import { showUserDetails, renderUserModal } from "../modal/index.js";
 import { createSection } from "../dom/CreatePage.js";
+import { activateMenu } from "../dom/index.js";
+
+async function handleUserEdit(user: UserClass): Promise<void> {
+  try {
+    await renderUserModal({
+      id: user.getId(),
+      name: user.getName(),
+      email: user.getEmail(),
+      phone: user.getPhone(),
+      gender: user.getGender(),
+    });
+  } catch (error) {
+    showInfoBanner("Erro ao abrir formulário de edição.", "error-banner");
+    console.error(error);
+  }
+}
 
 /* Criar cartão de utilizador */
 export async function createUserCard(user: UserClass): Promise<HTMLElement> {
@@ -64,7 +78,6 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   status.className = "status";
   status.textContent = user.isActive() ? "ativo" : "inativo";
   status.style.color = user.isActive() ? "green" : "red";
-  status.style.fontWeight = "10";
 
   const tasks = document.createElement("span");
   tasks.className = "tasks";
@@ -78,26 +91,44 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
     }).length;
 
     tasks.textContent = `${count} tarefa${count !== 1 ? "s" : ""}`;
-  } catch {
+  } catch (error) {
     tasks.textContent = "0 tarefas";
-    console.error("Erro ao carregar tarefas para o contador");
+    console.error("Erro ao carregar tarefas para o contador", error);
+    showInfoBanner("Erro ao carregar tarefas", "error-banner");
   }
 
   // Container principal flexível: conteúdo à esquerda, botões à direita
   const mainRow = document.createElement("div") as HTMLElement;
+  mainRow.className = "user-card-row";
   mainRow.style.display = "flex";
-  mainRow.style.flexDirection = "row";
-  mainRow.style.justifyContent = "space-between";
+  mainRow.style.gap = "1rem";
   mainRow.style.alignItems = "flex-start";
 
   // Conteúdo principal (esquerda)
   const contentCol = document.createElement("div") as HTMLElement;
   contentCol.className = "content";
+  contentCol.style.flex = "1";
   contentCol.append(number, name, email, status, tasks);
 
   // Botões (direita)
   const buttonContainer = document.createElement("div");
   buttonContainer.className = "button-container";
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.flexDirection = "column";
+  buttonContainer.style.gap = "0.35rem";
+  buttonContainer.style.alignItems = "flex-end";
+  buttonContainer.style.flexShrink = "0";
+
+  // Botão para ver detalhes
+  const editBtn = document.createElement("button");
+  editBtn.className = "icon-button";
+  editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
+  editBtn.title = "Editar utilizador";
+  editBtn.setAttribute("aria-label", "Editar utilizador");
+  editBtn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await handleUserEdit(user);
+  });
 
   // Botão para ver detalhes
   const detailsBtn = document.createElement("button");
@@ -107,7 +138,11 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   detailsBtn.setAttribute("aria-label", "Ver detalhes do utilizador");
   detailsBtn.addEventListener("click", (event) => {
     event.stopPropagation();
-    showUserDetails(user);
+    if (user && user.getId()) {
+      showUserDetails(user);
+    } else {
+      showInfoBanner("Erro: Utilizador não encontrado.", "error-banner");
+    }
   });
 
   // Botão para ver tarefas
@@ -122,6 +157,7 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
       await loadUserTasksPage(user.getId());
     } catch (error) {
       console.error("Erro ao carregar tarefas do utilizador:", error);
+      showInfoBanner("Erro ao carregar tarefas do utilizador", "error-banner");
       showInfoBanner(
         "Erro ao carregar tarefas do utilizador. Por favor, tente novamente.",
         "error-banner",
@@ -173,7 +209,6 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
   deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
   deleteBtn.title = "Remover utilizador";
   deleteBtn.setAttribute("aria-label", "Remover utilizador");
-  deleteBtn.style.color = "#ff4c4c";
   deleteBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     if (1 > 0) {
@@ -193,6 +228,7 @@ export async function createUserCard(user: UserClass): Promise<HTMLElement> {
     }
   });
 
+  buttonContainer.appendChild(editBtn);
   buttonContainer.appendChild(detailsBtn);
   buttonContainer.appendChild(tasksBtn);
   buttonContainer.appendChild(assignTaskBtn);
@@ -237,19 +273,20 @@ async function renderTaskAssignModal(
 
     const content = document.createElement("div");
     content.className = "modal-content";
-    content.style.maxWidth = "1040px";
-    content.style.width = "95%";
-    content.style.padding = "42px";
+    content.style.maxWidth = "600px";
+    content.style.width = "100%";
+    content.style.padding = "1rem";
 
     const title = document.createElement("h2");
     title.textContent = "Gerenciar atribuições de tarefas do utilizador";
 
     const list = document.createElement("div");
     list.className = "task-assign-list";
-    list.style.display = "grid";
-    list.style.gridTemplateColumns = "repeat(3, minmax(260px, 1fr))";
-    list.style.gap = "1rem";
-    list.style.marginTop = "1rem";
+    list.style.display = "flex";
+    list.style.flexDirection = "column";
+    list.style.gap = "0.5rem";
+    list.style.maxHeight = "400px";
+    list.style.overflowY = "auto";
 
     // Filtrar tarefas conforme a ação
     let filteredTasks: any[] = [];
@@ -263,10 +300,10 @@ async function renderTaskAssignModal(
 
     if (filteredTasks.length === 0) {
       const emptyMsg = document.createElement("div");
+      emptyMsg.style.padding = "1rem";
       emptyMsg.style.textAlign = "center";
-      emptyMsg.style.color = "#888";
-      emptyMsg.style.fontSize = "1.1rem";
-      emptyMsg.style.margin = "2rem 0";
+      emptyMsg.style.color = "#999";
+      emptyMsg.style.fontSize = "0.9rem";
       emptyMsg.textContent =
         action === "assign"
           ? "Não há tarefas disponíveis para atribuir a este utilizador."
@@ -278,18 +315,15 @@ async function renderTaskAssignModal(
         const row = document.createElement("div");
         row.className = "task-assign-row";
         row.style.display = "flex";
-        row.style.justifyContent = "space-between";
+        row.style.gap = "0.5rem";
         row.style.alignItems = "center";
-        row.style.padding = "0.8rem 1rem";
-        row.style.background = "#f7f7f7";
-        row.style.border = "1px solid rgba(0,0,0,0.08)";
-        row.style.borderRadius = "8px";
+        row.style.padding = "0.5rem";
+        row.style.borderBottom = "1px solid #e0e0e0";
 
         const label = document.createElement("span");
         label.textContent = `${task.getId()}: ${task.getTitle()}`;
-        label.style.fontSize = "0.95rem";
-        label.style.color = "#1f2937";
         label.style.flex = "1";
+        label.style.fontSize = "0.95rem";
 
         const button = document.createElement("button");
         button.className = "btn primary";
@@ -302,15 +336,7 @@ async function renderTaskAssignModal(
           button.title = "Remover atribuição";
           button.setAttribute("aria-label", "Remover atribuição");
         }
-        button.style.marginLeft = "0";
-        button.style.padding = "0";
-        button.style.width = "34px";
-        button.style.height = "34px";
-        button.style.display = "inline-flex";
-        button.style.alignItems = "center";
-        button.style.justifyContent = "center";
-        button.style.fontSize = "1rem";
-        button.style.minWidth = "auto";
+        button.style.whiteSpace = "nowrap";
         button.addEventListener("click", async (e) => {
           e.stopPropagation();
           try {
@@ -318,22 +344,26 @@ async function renderTaskAssignModal(
               const assignee = allAssignees.find(
                 (a) => a.task_id === task.getId() && a.user_id === userId,
               );
-              if (assignee && assignee.id) {
-                await TaskAssigneeService.deleteTaskAssignee(assignee.id);
-                showInfoBanner(`Atribuição da tarefa "${task.getTitle()}" removida.`, "success");
+              if (assignee) {
+                // Use task_id and user_id for deletion if id is not available
+                const assigneeId = (assignee as any).id || assignee.task_id;
+                await TaskAssigneeService.deleteTaskAssignee(assigneeId);
+                showInfoBanner(`Atribuição da tarefa "${task.getTitle()}" removida.`, "success-banner");
               }
             } else if (action === "assign") {
               await TaskAssigneeService.createTaskAssignee({
                 task_id: task.getId(),
                 user_id: userId,
               });
-              showInfoBanner(`Tarefa "${task.getTitle()}" atribuída ao utilizador.`, "success");
+              showInfoBanner(`Tarefa "${task.getTitle()}" atribuída ao utilizador.`, "success-banner");
             }
             modal.remove();
-            window.location.reload();
+            activateMenu("#menuUsers");
+            await loadUserTasksPage(userId);
           } catch (error) {
-            showInfoBanner("Erro ao atualizar atribuição de tarefa.", "error");
+            showInfoBanner("Erro ao atualizar atribuição de tarefa", "error-banner");
             console.error("Erro ao atualizar atribuição de tarefa:", error);
+            showInfoBanner("Erro ao atualizar atribuição de tarefa", "error-banner");
           }
         });
 
@@ -345,7 +375,9 @@ async function renderTaskAssignModal(
     content.append(title, list);
     modal.appendChild(content);
     document.body.appendChild(modal);
-    modal.style.display = "block";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
 
     modal.addEventListener("click", (event) => {
       if (event.target === modal) {
@@ -353,7 +385,8 @@ async function renderTaskAssignModal(
       }
     });
   } catch (error) {
-    showInfoBanner("Erro ao abrir o modal de atribuição de tarefas.", "error");
+    showInfoBanner("Erro ao abrir seleção de tarefas", "error-banner");
     console.error("Erro ao renderizar modal de atribuição de tarefas:", error);
+    showInfoBanner("Erro ao abrir seleção de tarefas", "error-banner");
   }
 }

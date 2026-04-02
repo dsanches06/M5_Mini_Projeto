@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { mapUserAPIResponse } from "../dto/mapDTO.js";
+import { mapUserDTOResponse, mapUserStatsDTOResponse } from "../dto/mapDTO.js";
 
 /* Função para buscar todos os utilizadores */
 export const getAllUsers = async (search, sort) => {
@@ -17,13 +17,13 @@ export const getAllUsers = async (search, sort) => {
   }
 
   const [users] = await db.query(query, params);
-  return users.map(mapUserAPIResponse);
+  return users.map(mapUserDTOResponse);
 };
 
 /* Função para buscar utilizador por ID */
 export const getUserById = async (userId) => {
   const [users] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
-  return users[0] ? mapUserAPIResponse(users[0]) : null;
+  return users[0] ? mapUserDTOResponse(users[0]) : null;
 };
 
 /* Função para criar utilizador */
@@ -32,7 +32,7 @@ export const createUser = async (data) => {
     "INSERT INTO users (name, email, phone, gender) VALUES (?, ?, ?, ?)",
     [data.name, data.email, data.phone || null, data.gender || "Male"],
   );
-  return mapUserAPIResponse({ id: result.insertId, ...data });
+  return mapUserDTOResponse({ id: result.insertId, ...data });
 };
 
 /* Função para atualizar utilizador */
@@ -109,12 +109,12 @@ export const getUserStats = async () => {
     totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(2) : "0.00";
   const inactivePercentage =
     totalUsers > 0 ? ((inactiveUsers / totalUsers) * 100).toFixed(2) : "0.00";
-
-  return {
+  
+    return mapUserStatsDTOResponse({
     totalUsers,
     activeUsers,
     inactiveUsers,
     activePercentage: activePercentage + "%",
     inactivePercentage: inactivePercentage + "%",
-  };
+  });
 };

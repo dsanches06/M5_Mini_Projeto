@@ -1,10 +1,6 @@
-
-/* Database */
 DROP DATABASE IF EXISTS clickup_db;
-CREATE DATABASE IF NOT EXISTS clickup_db;
-
+CREATE DATABASE clickup_db;
 USE clickup_db;
-
 /* Users */
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -15,14 +11,12 @@ CREATE TABLE users (
     gender VARCHAR(20) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
 /* Project Status */
 CREATE TABLE project_status (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     flow_order INT
 );
-
 /* Project */
 CREATE TABLE project (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -35,45 +29,45 @@ CREATE TABLE project (
         REFERENCES project_status (id)
         ON DELETE CASCADE
 );
-
-/* Task Status */
+/* Task Meta-data */
 CREATE TABLE task_status (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     flow_order INT
 );
-
-/* Categories */
+CREATE TABLE task_types (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    flow_order INT
+);
 CREATE TABLE categories (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     flow_order INT
 );
-
-/* Priorities */
 CREATE TABLE priorities (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     flow_order INT
 );
-
 /* Task */
 CREATE TABLE task (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
-    task_status_id INT NOT NULL,
+    types_id INT NOT NULL,
+    status_id INT NOT NULL,
     priority_id INT NOT NULL,
     category_id INT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     project_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     due_date DATETIME,
     completed_at DATETIME,
     estimated_hours DECIMAL(5 , 2 ) NOT NULL,
     FOREIGN KEY (project_id)
         REFERENCES project (id)
         ON DELETE CASCADE,
-    FOREIGN KEY (task_status_id)
+    FOREIGN KEY (status_id)
         REFERENCES task_status (id)
         ON DELETE CASCADE,
     FOREIGN KEY (priority_id)
@@ -81,10 +75,12 @@ CREATE TABLE task (
         ON DELETE CASCADE,
     FOREIGN KEY (category_id)
         REFERENCES categories (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (types_id)
+        REFERENCES task_types (id)
         ON DELETE CASCADE
 );
-
-/* Task Assignees (1:N with max 1 user por task) */
+/* Task Assignees (1:N com Unique Key para simular regra de 1 dev por task) */
 CREATE TABLE task_assignees (
     task_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -98,15 +94,12 @@ CREATE TABLE task_assignees (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
-
-/* Labels */
+/* Tags & NM */
 CREATE TABLE tags (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE,
     color VARCHAR(20)
 );
-
-/* tags_Task (N:M) */
 CREATE TABLE tags_task (
     task_id INT NOT NULL,
     tag_id INT NOT NULL,
@@ -118,8 +111,21 @@ CREATE TABLE tags_task (
         REFERENCES tags (id)
         ON DELETE CASCADE
 );
-
-/* Comments */
+/* Favorite Tasks */
+CREATE TABLE favorite_task (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    task_id INT NOT NULL,
+    user_id INT NOT NULL,
+    marked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_favorite_task (task_id, user_id),
+    FOREIGN KEY (task_id)
+        REFERENCES task (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (user_id)
+        REFERENCES users (id)
+        ON DELETE CASCADE
+);
+/* Comments & Mentions */
 CREATE TABLE comment (
     id INT PRIMARY KEY AUTO_INCREMENT,
     content TEXT NOT NULL,
@@ -135,20 +141,17 @@ CREATE TABLE comment (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
-
-/* Task Attachments */
-CREATE TABLE task_attachments (
+CREATE TABLE mentions (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    task_id INT NOT NULL,
-    file_name VARCHAR(200) NOT NULL,
-    file_type VARCHAR(50) NOT NULL,
-    size_kb INT,
-    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id)
-        REFERENCES task (id)
+    comment_id INT,
+    mentioned_user_id INT,
+    FOREIGN KEY (comment_id)
+        REFERENCES comment (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (mentioned_user_id)
+        REFERENCES users (id)
         ON DELETE CASCADE
 );
-
 /* Notifications */
 CREATE TABLE notification (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -161,20 +164,22 @@ CREATE TABLE notification (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
-
-/* Teams */
+/* Teams & Roles */
 CREATE TABLE teams (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-/* Team Members */
+CREATE TABLE team_members_roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    flow_order INT
+);
 CREATE TABLE team_members (
     team_id INT NOT NULL,
     user_id INT NOT NULL,
-    role ENUM('admin', 'member') DEFAULT 'member',
+    role_id INT,
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (team_id , user_id),
     FOREIGN KEY (team_id)
@@ -182,15 +187,33 @@ CREATE TABLE team_members (
         ON DELETE CASCADE,
     FOREIGN KEY (user_id)
         REFERENCES users (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (role_id)
+        REFERENCES team_members_roles (id)
         ON DELETE CASCADE
 );
-
-/* Task Votes */
-CREATE TABLE task_votes (
+/* Time Logs */
+CREATE TABLE time_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    task_id INT,
+    user_id INT,
+    hours DECIMAL(5 , 2 ) NOT NULL,
+    description TEXT NOT NULL,
+    logged_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES users (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (task_id)
+        REFERENCES task (id)
+        ON DELETE CASCADE
+);
+/* Reminders */
+CREATE TABLE reminder (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     task_id INT NOT NULL,
-    user_id INT NOT NULL,
-    voted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (task_id , user_id),
+    user_id INT,
+    remind_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (task_id)
         REFERENCES task (id)
         ON DELETE CASCADE,
@@ -198,32 +221,13 @@ CREATE TABLE task_votes (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
-
-/* Task Status History */
-CREATE TABLE task_status_history (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    task_id INT NOT NULL,
-    previous_status_id INT NOT NULL,
-    new_status_id INT NOT NULL,
-    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id)
-        REFERENCES task (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (previous_status_id)
-        REFERENCES task_status (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (new_status_id)
-        REFERENCES task_status (id)
-        ON DELETE CASCADE
-);
-
 /* Project Permissions */
-CREATE TABLE project_permissions (
+CREATE TABLE project_permission (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     project_id INT NOT NULL,
     user_id INT NOT NULL,
-    can_edit TINYINT(1) DEFAULT 0,
-    can_delete TINYINT(1) DEFAULT 0,
-    PRIMARY KEY (project_id , user_id),
+    permission VARCHAR(50) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id)
         REFERENCES project (id)
         ON DELETE CASCADE,
@@ -231,51 +235,61 @@ CREATE TABLE project_permissions (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
-
-/* Dependencies */
-CREATE TABLE task_dependencies (
-    task_id INT,
-    dependent_task_id INT,
-    type ENUM('blocks', 'depends_on'),
-    PRIMARY KEY (task_id , dependent_task_id),
-    FOREIGN KEY (task_id)
-        REFERENCES task (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (dependent_task_id)
-        REFERENCES task (id)
-        ON DELETE CASCADE
-);
-
-/* Favorites */
-CREATE TABLE favorite_tasks (
-    user_id INT,
-    task_id INT,
-    marked_at DATETIME,
-    PRIMARY KEY (user_id , task_id),
-    FOREIGN KEY (user_id)
-        REFERENCES users (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (task_id)
-        REFERENCES task (id)
-        ON DELETE CASCADE
-);
-
-/* Reminders */
-CREATE TABLE reminders (
+/* Task Votes */
+CREATE TABLE task_vote (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    task_id INT,
-    message VARCHAR(200),
-    reminder_date DATETIME,
-    sent TINYINT(1),
+    task_id INT NOT NULL,
+    user_id INT NOT NULL,
+    vote_type VARCHAR(50) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (task_id)
+        REFERENCES task (id)
+        ON DELETE CASCADE,
     FOREIGN KEY (user_id)
         REFERENCES users (id)
+        ON DELETE CASCADE
+);
+/* Task Dependencies */
+CREATE TABLE task_dependency (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    task_id INT NOT NULL,
+    depends_on_task_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (task_id)
+        REFERENCES task (id)
         ON DELETE CASCADE,
+    FOREIGN KEY (depends_on_task_id)
+        REFERENCES task (id)
+        ON DELETE CASCADE
+);
+/* Task Attachments */
+CREATE TABLE task_attachment (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    task_id INT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (task_id)
         REFERENCES task (id)
         ON DELETE CASCADE
 );
-
+/* Task Status History */
+CREATE TABLE task_status_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    task_id INT NOT NULL,
+    status_id INT NOT NULL,
+    changed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    changed_by INT,
+    FOREIGN KEY (task_id)
+        REFERENCES task (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (status_id)
+        REFERENCES task_status (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (changed_by)
+        REFERENCES users (id)
+        ON DELETE SET NULL
+);
 /* Sprints */
 CREATE TABLE sprints (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -292,7 +306,6 @@ CREATE TABLE sprints (
         REFERENCES project_status (id)
         ON DELETE CASCADE
 );
-
 CREATE TABLE sprint_tasks (
     sprint_id INT,
     task_id INT,
@@ -304,380 +317,127 @@ CREATE TABLE sprint_tasks (
         REFERENCES task (id)
         ON DELETE CASCADE
 );
-
-/* Mentions */
-CREATE TABLE mentions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    comment_id INT,
-    mentioned_user_id INT,
-    FOREIGN KEY (comment_id)
-        REFERENCES comment (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (mentioned_user_id)
-        REFERENCES users (id)
-        ON DELETE CASCADE
-);
-
-/* Time Logs */
-CREATE TABLE time_logs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    task_id INT,
-    user_id INT,
-    hours DECIMAL(5 , 2 ) NOT NULL,
-    description TEXT NOT NULL,
-    logged_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id)
-        REFERENCES users (id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (task_id)
-        REFERENCES task (id)
-        ON DELETE CASCADE
-);
 -- =====================================================
--- DADOS DE TESTE
+-- 2. INSERÇÃO DE DADOS SINCRONIZADOS
 -- =====================================================
-use clickup_db;
+/* 10 Users */
+INSERT INTO users (id, name, email, phone, gender) VALUES
+(1, 'Ana Silva', 'ana@dev.com', '555-0101', 'Female'), 
+(2, 'Bruno Costa', 'bruno@dev.com', '555-0102', 'Male'),
+(3, 'Carla Dias', 'carla@dev.com', '555-0103', 'Female'),
+ (4, 'David Reas', 'david@dev.com', '555-0104', 'Male'),
+(5, 'Elena Vaz', 'elena@dev.com', '555-0105', 'Female'), 
+(6, 'Filipe Gil', 'filipe@dev.com', '555-0106', 'Male'),
+(7, 'Gina Rosa', 'gina@dev.com', '555-0107', 'Female'),
+ (8, 'Hugo Neto', 'hugo@dev.com', '555-0108', 'Male'),
+(9, 'Igor Lima', 'igor@dev.com', '555-0109', 'Male'),
+ (10, 'Joana Luz', 'joana@dev.com', '555-0110', 'Female');
 
-/* 1. Users */
-INSERT INTO users (id, name, email, phone, gender, active, created_at) VALUES 
-(1, 'Ana Martins','ana@email.com','910000001', 'Female', 1, '2026-01-10 09:00:00'),
-(2, 'Bruno Alves','bruno@email.com','910000002', 'Male', 1, '2026-01-11 09:00:00'),
-(3, 'Catarina Dias','catarina@email.com','910000003', 'Female', 1, '2026-01-12 09:00:00'),
-(4, 'Diogo Rocha','diogo@email.com','910000004', 'Male', 1, '2026-01-13 09:00:00'),
-(5, 'Eduarda Gomes','eduarda@email.com','910000005', 'Female', 1, '2026-01-14 09:00:00'),
-(6, 'Fabio Lopes','fabio@email.com','910000006', 'Male', 1, '2026-01-15 09:00:00'),
-(7, 'Gabriela Vaz','gabriela.vaz@email.pt','910000007', 'Female', 1, NOW()),
-(8, 'Hugo Neves','hugo.neves@email.com','910000008', 'Male', 1, NOW()),
-(9, 'Inês Duarte','ines.duarte@email.com','910000009', 'Female', 1, NOW()),
-(10, 'Jorge Mota','jorge.mota@email.pt','910000010', 'Male', 1, NOW()),
-(11, 'Laura Pinto','laura@email.com','910000011', 'Female', 1, NOW()),
-(12, 'Marco Silva','marco@email.com','910000012', 'Male', 1, NOW());
+/* Status e Metadados */
+INSERT INTO project_status (id, name, flow_order) VALUES (1, 'Ativo', 1), (2, 'Em Desenvolvimento', 2), (3, 'Concluido', 3);
+INSERT INTO task_status (id, name, flow_order) VALUES (1,'CREATED',1), (2,'ASSIGNED',2), (3,'IN_PROGRESS',3), (4,'BLOCKED',4), (5,'COMPLETED',5), (6,'ARCHIVED',6);
+INSERT INTO task_types (id, name,flow_order) VALUES (1,'Feature',1), (2,'Bug',2), (3,'Task',3);
+INSERT INTO priorities (id, name, flow_order) VALUES (1,'Baixa',1), (2,'Média',2), (3,'Alta',3);
+INSERT INTO categories (id, name, flow_order) VALUES (1,'WORKED',1), (2,'PERSONAL',2), (3,'STUDY',3);
 
+/* 3 Teams e Roles */
+INSERT INTO teams (id, name, description) VALUES 
+(1,'Squad Frontend', 'UI/UX'), 
+(2,'Squad Backend', 'API'), (3,'Squad DevOps', 'Infra');
 
-/* 2. Project Status & Projects (Todos os 9) */
-INSERT INTO project_status (name, flow_order) VALUES 
-('Ativo', 1), 
-('Em Desenvolvimento', 2), 
-('Terminado', 3);
+INSERT INTO team_members_roles (id, name) VALUES (1,'Lead'), (2,'Dev');
 
-INSERT INTO project (name, description, project_status_id, start_date, end_date_expected) VALUES 
-('Sistema Gestão Escolar', 'Plataforma para gestão escolar', 1, '2026-01-15', '2026-09-01'), 
-('App Delivery', 'Aplicação para entregas locais', 2, '2026-02-01', '2026-07-01'), 
-('E-commerce de Artesanato', 'Plataforma para venda de produtos.', 1, DATE_ADD(NOW(), INTERVAL 5 DAY), '2026-12-15 23:59:59'), 
-('Portal de Voluntariado', 'Website para conectar ONGs.', 1, DATE_ADD(NOW(), INTERVAL 12 DAY), '2026-08-10 19:00:00'), 
-('Monitor de Gastos Energéticos', 'Sistema IoT.', 3, DATE_ADD(NOW(), INTERVAL 20 DAY), '2027-01-30 14:00:00');
+INSERT INTO team_members (team_id, user_id, role_id) VALUES
+(1,1,1), (1,2,2), (1,3,2), (2,4,1), (2,5,2), (2,6,2), (3,7,1), (3,8,2), (3,9,2), (3,10,2);
+/* 3 Projetos */
 
-/* 3. Task Meta-data */
-INSERT INTO task_status (name, flow_order) VALUES 
-('Backlog',1), 
-('Pendente',2), 
-('Em Progresso',3), 
-('Revisão',4), 
-('Concluida',5),
-('Arquivado',6);
+INSERT INTO project (id, name, description, project_status_id, start_date) VALUES
+(1, 'Portal E-learning', 'Escola online', 1, '2026-01-01'),
+(2, 'App Logística', 'Frotas e GPS', 1, '2026-01-15'),
+(3, 'Data Lake Cloud', 'Infraestrutura AWS', 1, '2026-02-01');
 
-INSERT INTO priorities (name, flow_order) VALUES 
-('Baixa', 1), 
-('Médio', 2), 
-('Alta', 3), 
-('Critica', 4);
+/* 20 Tarefas Sincronizadas */
+INSERT INTO task (id, title, description, types_id, status_id, priority_id, category_id, project_id, estimated_hours, due_date) VALUES
+(1,'Login UI','Ecrã login',1,3,3,1,1,8,'2026-02-01'),
+(2,'API Auth','JWT Auth',1,3,3,2,1,12,'2026-02-01'),
+(3,'Sidebar','Menu',1,2,2,1,1,5,'2026-02-15'), 
+(4,'DB Schema','Tabelas SQL',1,3,2,3,1,6,'2026-01-20'),
+(5,'Bug Botão','Fix click',2,1,1,1,1,2,'2026-03-01'),
+(6,'Profile Page','Dados user',1,1,2,1,1,10,'2026-03-05'),
+(7,'Notificações','Push',1,1,2,2,1,15,'2026-03-10'),
+(8,'GPS Maps','Integração',1,2,3,1,2,20,'2026-02-28'),
+(9,'Driver API','Endpoints',1,3,3,2,2,10,'2026-02-10'), 
+(10,'Query Optm','Frotas',1,2,2,3,2,8,'2026-03-01'),
+(11,'Icons Pack','Design',1,3,1,1,2,4,'2026-01-30'), 
+(12,'Fuel Log','Combustível',1,1,2,2,2,12,'2026-03-15'),
+(13,'Reports','PDF mensal',1,1,2,2,2,10,'2026-03-20'),
+(14,'Fix Crash','Boot fix',3,3,3,2,2,4,'2026-02-01'),
+(15,'S3 Config','AWS Storage',1,3,3,3,3,10,'2026-02-10'),
+(16,'ETL Job','Data sync',1,2,3,3,3,20,'2026-03-15'),
+(17,'Backup DB','Crontab',1,3,2,3,3,5,'2026-02-15'), 
+(18,'Dashboard','Charts',1,1,2,1,3,15,'2026-04-01'),
+(19,'IAM Roles','Permissões',1,2,3,3,3,6,'2026-03-20'), 
+(20,'Index Fix','Slow query',2,2,3,3,3,4,'2026-03-25');
 
-INSERT INTO categories (name, flow_order) VALUES 
-('Backend',1), 
-('Frontend',2), 
-('Infraestrutura',3);
+/* Atribuições (Respeitando Squads) */
+INSERT INTO task_assignees (task_id, user_id) VALUES
+(1,1), (2,4), (3,2), (4,7), (5,3), (6,1), (7,5), (8,1), 
+(9,5), (10,8), (11,2), (12,4), (13,6), (14,5), (15,7), 
+(16,8), (17,9), (18,2), (19,10), (20,8);
 
-/* 4. Tasks (Expandido para 30 tarefas) */
-INSERT INTO task (title, description, task_status_id, priority_id, category_id, project_id, due_date, completed_at, estimated_hours, created_at) VALUES
-('Módulo de Notas', 'Boletim escolar', 2, 4, 1, 1, '2026-03-20', NULL, 15.0, '2026-02-01'),
-('Implementação de CSS', 'Estilização mockups', 5, 2, 2, 1, '2026-02-15', '2026-02-14', 20.0, '2026-01-15'),
-('Integração de Mapas', 'API Google Maps', 2, 4, 2, 2, '2026-04-10', NULL, 20.0, '2026-02-01'),
-('Checkout Transacional', 'Pagamento e frete', 1, 4, 1, 3, DATE_ADD(NOW(), INTERVAL 15 DAY), NULL, 12.0, NOW()),
-('Catálogo de Produtos', 'Upload de imagens', 1, 3, 2, 3, '2026-05-10', NULL, 8.0, NOW()),
-('Filtro de ONGs', 'Busca por categoria', 1, 2, 1, 4, '2026-06-15', NULL, 10.0, NOW()),
-('Mapeamento de Tabelas', 'Organização de campos', 5, 4, 1, 1, '2026-11-01', '2026-10-28', 10.0, '2026-10-01'),
-('Limpeza de Dados', 'Remover duplicados', 5, 3, 1, 1, '2026-11-15', '2026-11-10', 12.0, '2026-10-10'),
-('Perfil do Voluntário', 'Dashboard de usuário', 1, 3, 2, 4, '2026-06-30', NULL, 14.0, NOW()),
-('Configuração de Hub IoT', 'Setup hardware', 2, 4, 3, 5, '2026-12-20', NULL, 25.0, NOW()),
-('Gráficos de Consumo', 'Dados em tempo real', 1, 3, 1, 5, '2027-01-15', NULL, 18.0, NOW()),
-('Auditoria de Logs', 'Verificação acessos', 5, 4, 3, 5, '2026-06-05', '2026-06-04', 5.0, '2026-05-25'),
-('Update SSL', 'Certificados', 5, 3, 3, 3, '2026-06-08', '2026-06-07', 2.0, '2026-06-01'),
-('Bloqueio de IPs Externos', 'Regras deny-all', 5, 4, 3, 5, '2026-02-25', '2026-02-24', 4.0, '2026-02-15'),
-('Testes de Intrusão', 'Validar regras', 5, 4, 3, 5, '2026-02-28', '2026-02-28', 8.0, '2026-02-20'),
-('Menu Responsivo', 'Adaptação para tablets', 1, 2, 2, 1, DATE_ADD(NOW(), INTERVAL 10 DAY), NULL, 6.0, NOW()),
-('Otimização de SVGs', 'Reduzir peso das imagens', 2, 1, 2, 1, '2026-04-01', NULL, 4.0, NOW()),
-('Fix: Erro de Login', 'Corrigir timeout no mobile', 1, 4, 2, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), NULL, 3.0, NOW()),
-('Nova Rota de API', 'Endpoint para histórico', 1, 3, 1, 2, '2026-04-15', NULL, 8.0, NOW()),
-('Indexação de Banco', 'Melhorar busca de produtos', 2, 4, 1, 3, '2026-05-05', NULL, 10.0, NOW()),
-('Migração v2', 'Upgrade da lib de Stripe', 1, 3, 1, 3, '2026-05-25', NULL, 12.0, NOW()),
-('Documentação PDF', 'Gerar manual do usuário', 1, 2, 1, 4, '2026-07-10', NULL, 20.0, NOW()),
-('Análise de Custos', 'Levantamento financeiro', 1, 4, 1, 1, '2026-08-01', NULL, 15.0, NOW()),
-('Ata de Sprint', 'Revisão da sprint 4', 5, 1, 1, 4, '2026-02-20', '2026-02-20', 2.0, '2026-02-19'),
-('Redesign Logo', 'Nova versão vetorial', 1, 2, 2, 4, '2026-07-15', NULL, 10.0, NOW()),
-('Dark Mode Specs', 'Definição de cores dark', 2, 3, 2, 4, '2026-07-20', NULL, 8.0, NOW()),
-('Stress Test', 'Teste de carga no Hub', 1, 4, 3, 5, '2026-12-30', NULL, 16.0, NOW()),
-('Patch de Kernel', 'Atualização segurança OS', 5, 4, 3, 5, '2026-07-01', '2026-06-30', 4.0, '2026-06-25'),
-('Firewall Policy', 'Review de portas abertas', 1, 3, 3, 5, '2026-04-10', NULL, 6.0, NOW()),
-('Simulação de Invasão', 'Phishing interno teste', 2, 4, 3, 5, '2026-05-01', NULL, 20.0, NOW());
+/* Sprints */
+INSERT INTO sprints (id, project_id, name, status_id, start_date, end_date) VALUES
+(1, 1, 'Sprint Jan - MVP', 1, '2026-01-01', '2026-01-31'),
+(2, 2, 'Sprint Fev - Logística', 1, '2026-02-01', '2026-02-28');
 
+INSERT INTO sprint_tasks (sprint_id, task_id) VALUES (1,1), (1,2), (1,4), (2,8), (2,9), (2,14);
 
-/* 5. Assignees (Ajustados para as Equipas) */
-INSERT INTO task_assignees (task_id, user_id, assigned_at) VALUES
-(1,1,'2026-02-01'),
-(2,4,'2026-02-01'),
-(3,5,'2026-02-02'),
-(4,6,'2026-02-05'),
-(5,9,'2026-04-01'),
-(6,3,'2026-06-01'),
-(7,7,'2026-11-20'),
-(8,8,'2026-12-01'),
-(9,10,'2023-10-01'),
-(10,1,'2023-10-01'),
-(11,2,'2024-01-15'),
-(12,7,'2023-05-25'),
-(13,8,'2023-06-01'),
-(14,7,'2024-02-15'),
-(15,8,'2024-02-20'),
-(16,11,'2026-03-01'),
-(17,12,'2026-03-15'),
-(18,3,'2026-02-25'),
-(19,5,'2026-04-01'),
-(20,6,'2026-04-15'),
-(21,5,'2026-05-01'),
-(22,10,'2026-06-15'),
-(23,9,'2026-07-20'),
-(24,2,'2026-02-18'),
-(25,11,'2026-07-01'),
-(26,12,'2026-07-05'),
-(27,7,'2026-12-15'),
-(28,8,'2023-06-20'),
-(29,7,'2026-03-20'),
-(30,8,'2026-04-10');
+-- 3. COMENTÁRIOS, MENÇÕES E NOTIFICAÇÕES (Conforme solicitado)
+INSERT INTO comment (id, content, task_id, user_id) VALUES 
+(1, 'Ana, terminei a API. Podes testar?', 1, 4),
+(2, 'David, o JWT está configurado.', 2, 4),
+(3, 'Gina, o S3 já aceita uploads.', 11, 7);
 
-INSERT INTO tags (id, name, color) VALUES
-(1, 'Urgente', 'Vermelho'),
-(2, 'Frontend', 'Azul'),
-(3, 'Backend', 'Verde'), 
-(4, 'Bug', 'Laranja'), 
-(5, 'Melhoria', 'Roxo');
+INSERT INTO mentions (comment_id, mentioned_user_id) VALUES 
+(1, 1), -- David menciona Ana
+(3, 7); -- Alguém menciona Gina
 
-INSERT INTO tags_task (task_id, tag_id) VALUES
--- Tarefas de Desenvolvimento (Frontend/Backend)
-(1, 2), (1, 1), -- Tarefa 1: Frontend + Urgente
-(2, 3), (2, 4), -- Tarefa 2: Backend + Bug
-(3, 2),         -- Tarefa 3: Frontend
-(4, 2),         -- Tarefa 4: Frontend
-(5, 3), (5, 4), -- Tarefa 5: Backend + Bug
--- Tarefas de Manutenção e Bugs
-(6, 4),         -- Tarefa 6: Bug
-(7, 5),         -- Tarefa 7: Melhoria
-(8, 3),         -- Tarefa 8: Backend
-(9, 5),         -- Tarefa 9: Melhoria
-(10, 1),        -- Tarefa 10: Urgente
--- Tarefas Finais/Passadas
-(11, 2),        -- Tarefa 11: Frontend
-(12, 4),        -- Tarefa 12: Bug
-(13, 3),        -- Tarefa 13: Backend
-(14, 1),        -- Tarefa 14: Urgente
-(15, 5),        -- Tarefa 15: Melhoria
-(16, 2), (17, 2), (18, 4), -- Frontend e Bug
-(19, 3), (20, 3), (21, 3), -- Backend
-(22, 5), (23, 1),          -- Melhoria e Urgente
-(25, 2), (26, 2),          -- Design/Frontend
-(27, 4), (28, 1), (30, 1); -- Bugs e Urgente
+INSERT INTO notification (user_id, title, message) VALUES 
+(1, 'Menção', 'Foste mencionada pelo David na tarefa Login UI'),
+(7, 'Menção', 'Configuração S3 concluída');
 
-/* 6. Task Attachments (Os 22 anexos) */
-INSERT INTO task_attachments (task_id, file_name, file_type, size_kb) VALUES 
-(1, 'config_mysql.conf', 'text', 15), 
-(1, 'log_instalacao.txt', 'txt', 45), 
-(2, 'layout_final.fig', 'fig', 12400), 
-(2, 'paleta_cores.pdf', 'pdf', 2100), 
-(3, 'auth_flow.png', 'png', 850), 
-(3, 'jwt_specs.pdf', 'pdf', 120),
-(4, 'relatorio_performance.pdf', 'pdf', 3400),
-(4, 'grafico_latencia.png', 'png', 620), 
-(5, 'swagger_export.json', 'json', 95),
-(5, 'exemplo_request.txt', 'txt', 10),
-(6, 'print_erro_duplicado.png', 'png', 450),
-(6, 'fix_logs.txt', 'txt', 12),
-(7, 'stripe_docs.pdf', 'pdf', 5600),
-(7, 'webhook_test.json', 'json', 5), 
-(8, 'explain_plan.txt', 'txt', 25), 
-(8, 'benchmarks.xlsx', 'xlsx', 110),
-(9, 'wireframe_mobile.png', 'png', 1100),
-(9, 'copywriting_v1.docx', 'docx', 45), 
-(10, 'ata_reuniao.pdf', 'pdf', 320), 
-(10, 'backlog_priorizado.xlsx', 'xlsx', 85),
-(11, 'codigo_antigo.bak', 'bak', 50), 
-(11, 'teste_unitario.py', 'py', 8);
+-- 4. TIME LOGS (Registo de horas reais)
+INSERT INTO time_logs (task_id, user_id, hours, description) VALUES 
+(1, 1, 4.5, 'Coding UI'), 
+(2, 4, 8.0, 'Setup JWT'), 
+(11, 7, 5.0, 'Config S3'),
+(7, 5, 10.0, 'Desenvolvimento Endpoints'),
+(12, 8, 7.5, 'Processamento de dados');
 
-/* 5. Comments (Ajustados para os membros das equipas certas) */
-INSERT INTO comment (content, task_id, user_id, created_at, resolved) VALUES
-('Análise inicial do módulo concluída.',1,1,'2026-02-02 10:00:00',0),
-('API de mapas configurada com sucesso.',2,4,'2026-02-03 11:30:00',0),
-('Iniciando integração com a gateway de pagamento.',3,5,'2026-02-04 09:15:00',0),
-('Aguardando imagens finais do cliente.',4,6,'2026-02-05 14:00:00',0),
-('Filtros testados em ambiente de staging.',5,9,'2026-02-06 16:45:00',0),
-('Mockups do dashboard aprovados.',6,3,'2026-02-07 10:20:00',0),
-('Hardware IoT calibrado e pronto.',7,7,'2026-02-08 11:00:00',0),
-('Gráficos a renderizar em < 100ms.',8,8,'2026-02-09 17:30:00',0),
-('Mapeamento enviado para validação do DBA.',9,10,'2023-10-10 13:00:00',0),
-('Duplicados removidos. Base limpa.',10,1,'2023-11-12 18:00:00',1),
-('CSS atualizado conforme novas fontes.',11,2,'2024-02-12 10:00:00',0),
-('Logs de acesso sem anomalias detetadas.',12,7,'2023-06-01 09:00:00',0),
-('Certificado SSL renovado por 1 ano.',13,8,'2023-06-05 15:20:00',1),
-('Regras de IP aplicadas no router principal.',14,7,'2024-02-20 11:45:00',0),
-('Relatório de vulnerabilidades gerado.',15,8,'2024-02-27 14:10:00',1),
-('Menu corrigido para iPhone SE.',16,11,NOW(),0),
-('SVGs minificados (ganho de 40% no bundle).',17,12,NOW(),0),
-('Crash no login era devido ao token expirado.',18,3,NOW(),1),
-('Rota /history a devolver JSON correto.',19,5,NOW(),0),
-('Índice criado na coluna user_email.',20,6,NOW(),0),
-('Webhook do Stripe v2 validado.',21,5,NOW(),0),
-('Capítulo 1 do manual finalizado.',22,10,NOW(),0),
-('Budget excedeu em 5% a previsão inicial.',23,9,NOW(),0),
-('Reunião de sprint gravada e ata anexada.',24,2,NOW(),1),
-('Versão dark da logo finalizada.',25,11,NOW(),0),
-('Contraste de cores validado pela acessibilidade.',26,12,NOW(),0),
-('Servidor aguentou 5000 requests/segundo.',27,7,NOW(),0),
-('Kernel atualizado para a versão 6.1 LTS.',28,8,'2023-06-29 11:00:00',1),
-('Porta 8080 fechada por segurança.',29,7,NOW(),0),
-('Simulação de phishing iniciada com a equipa.',30,8,NOW(),0);
+-- 2. Criação de Tags (Categorização visual)
+INSERT INTO tags (id, name, color) VALUES 
+(1, 'Urgente', 'Red'), 
+(2, 'Backend', 'Green'), 
+(3, 'Frontend', 'Blue'), 
+(4, 'Bug', 'Orange'), 
+(5, 'Revisão', 'Purple'),
+(6, 'Infra', 'Grey');
 
-/* 7. Notifications */
-INSERT INTO notification (user_id, title, message, is_read) VALUES
-(1,'Tarefa','Tarefa 1: Notas',0),
-(4,'Tarefa','Tarefa 2: Mapas',0),
-(5,'Tarefa','Tarefa 3: Checkout',0),
-(6,'Tarefa','Tarefa 4: Catálogo',0),
-(9,'Tarefa','Tarefa 5: ONGs',0),
-(3,'Tarefa','Tarefa 6: Perfil',1),
-(7,'Tarefa','Tarefa 7: IoT',1),
-(8,'Tarefa','Tarefa 8: Gráficos',0),
-(10,'Tarefa','Tarefa 9: Tabelas',0),
-(1,'Tarefa','Tarefa 10: Limpeza',0),
-(2,'Tarefa','Tarefa 11: CSS',1),
-(7,'Tarefa','Tarefa 12: Logs',0),
-(8,'Tarefa','Tarefa 13: SSL',0),
-(7,'Tarefa','Tarefa 14: IPs',1),
-(8,'Tarefa','Tarefa 15: Pentest',0),
-(11,'Tarefa','Tarefa 16: Menu',0),
-(12,'Tarefa','Tarefa 17: SVGs',0),
-(3,'Tarefa','Tarefa 18: Login',1),
-(5,'Tarefa','Tarefa 19: API',0),
-(6,'Tarefa','Tarefa 20: Index',0),
-(5,'Tarefa','Tarefa 21: Stripe',0),
-(10,'Tarefa','Tarefa 22: Manual',0),
-(9,'Tarefa','Tarefa 23: Custos',0),
-(2,'Tarefa','Tarefa 24: Sprint',1),
-(11,'Tarefa','Tarefa 25: Logo',0),
-(12,'Tarefa','Tarefa 26: DarkMode',0),
-(7,'Tarefa','Tarefa 27: Stress',0),
-(8,'Tarefa','Tarefa 28: Kernel',1),
-(7,'Tarefa','Tarefa 29: Firewall',0),
-(8,'Tarefa','Tarefa 30: Invasão',0);
-
-
-/* Equipa */
-INSERT INTO teams (id, name, description, created_at) VALUES 
-(1, 'Frontend Devs', 'UI/UX', NOW()), 
-(2, 'Backend Ops', 'API/DB', NOW()), 
-(3, 'QA & Testes', 'Qualidade', NOW()), 
-(4, 'Design Criativo', 'Visual', NOW()), 
-(5, 'Gestão', 'Requisitos', NOW());
-
-/* Membros de equipa */
-INSERT INTO team_members (team_id, user_id, role) VALUES
-(1,1,'admin'),
-(1,2,'member'),
-(1,3,'member'),
-(1,11,'member'),
-(1,12,'member'),
-(2,4,'admin'),
-(2,5,'member'),
-(2,6,'member'),
-(3,7,'admin'),
-(3,8,'member'),
-(4,9,'admin'),
-(5,10,'admin');
-
-/* 2. Permissões de Projeto */
-INSERT INTO project_permissions (project_id, user_id, can_edit, can_delete) VALUES 
-(1, 1, 1, 1), 
-(1, 2, 1, 0), 
-(2, 4, 1, 1),
- (2, 5, 1, 0),
-(3, 10, 1, 1);
-
-/* 3. Votos em Tarefas */
-INSERT INTO task_votes (task_id, user_id, voted_at) VALUES 
-(1, 1, NOW()), (1, 2, NOW()), (1, 3, NOW()), -- Tarefa 1 com 3 votos
-(10, 10, NOW()), (10, 9, NOW()),             -- Tarefa 10 com 2 votos
-(5, 5, NOW()), (5, 6, NOW()),                -- Tarefa 5 com 2 votos
-(14, 4, NOW()),                              -- Tarefa 14 com 1 voto
-(2, 2, NOW()),                               -- Tarefa 2 com 1 voto
-(15, 8, NOW());                              -- Tarefa 15 com 1 voto
-
-/* 4. Tarefas Favoritas */
-INSERT INTO favorite_tasks (user_id, task_id, marked_at) VALUES 
-(1, 1, '2026-02-02 10:00:00'), 
-(1, 5, '2026-02-06 11:00:00'),
-(2, 10, '2026-02-13 15:00:00');
-
-/* 5. Dependências entre Tarefas */
-INSERT INTO task_dependencies (task_id, dependent_task_id, type) VALUES 
-(1, 2, 'blocks'),      -- Tarefa 1 bloqueia a 2
-(3, 1, 'depends_on'),  -- Tarefa 3 depende da 1
-(6, 7, 'blocks');      -- Tarefa 6 bloqueia a 7
-
-/* 6. Sprints e Sprint Tasks */
-/* Criar Sprints */
-INSERT INTO sprints (project_id, name, description, status_id, start_date, end_date) VALUES 
-(1, 'Sprint 1', 'Setup inicial', 2, '2026-01-15', '2026-01-30'), 
-(1, 'Sprint 2', 'Módulos principais', 2, '2026-02-01', '2026-02-15'), 
-(1, 'Sprint 3', 'Integrações', 2, '2026-02-16', '2026-03-01'), 
-(1, 'Sprint 4', 'Testes finais', 1, '2026-03-02', '2026-03-20'), 
-(2, 'Sprint 1', 'Base app', 2, '2026-02-01', '2026-02-10'), 
-(2, 'Sprint 2', 'Pedidos', 2, '2026-02-11', '2026-02-25'), 
-(2, 'Sprint 3', 'Tracking', 2, '2026-02-26', '2026-03-10'), 
-(3, 'Sprint 1', 'Catálogo', 2, '2026-03-01', '2026-03-15'), 
-(3, 'Sprint 2', 'Checkout', 2, '2026-03-16', '2026-03-30');
-
-
-INSERT INTO sprint_tasks (sprint_id, task_id) VALUES
- (1,1),(1,16),(1,18), 
- (2,1),(2,16),(3,18),
- (3,1), (4,1),(5,2),
- (5,19),(6,2),(6,19),
- (6,20),(7,19),(8,3),(8,4),
- (9,3),(9,20),(9,21);
-
-
-/* 7. Histórico de Estados (Task Status History) */
-INSERT INTO task_status_history (task_id, previous_status_id, new_status_id, changed_at) VALUES 
-(1, 1, 2, '2026-02-02 09:00:00'),
-(5, 2, 3, '2026-02-06 10:00:00'),
-(10, 3, 5, '2026-02-13 16:00:00');
-
-/* 8. Registo de Tempo (Time Logs) */
-INSERT INTO time_logs (task_id, user_id, hours, description, logged_at) VALUES
-(1,1,4.5,'Implementação inicial','2026-02-02 10:00:00'),
-(1,1,3.0,'Correções','2026-02-03 14:00:00'),
-(3,4,5.0,'Integração API mapas','2026-02-04 11:00:00'),
-(4,5,6.5,'Checkout backend','2026-02-05 15:00:00'),
-(16,11,2.0,'UI responsiva','2026-03-01 10:00:00'),
-(18,3,1.5,'Fix login bug','2026-02-25 16:00:00'),
-(20,6,3.5,'Indexação DB','2026-04-15 11:00:00'),
-(1,2,6.0,'Feature extra','2026-02-06'),
-(16,11,5.5,'UI melhorias','2026-03-02'),
-(18,3,4.0,'Bug fixing','2026-03-03'),
-(3,4,2.5,'Refactor API','2026-02-07'),
-(19,5,3.0,'Nova rota','2026-02-08'),
-(4,5,8.0,'Checkout upgrade','2026-02-10'),
-(5,6,7.5,'Catálogo expansão','2026-02-11'),
-(20,6,6.0,'DB tuning','2026-02-12'),
-(6,9,1.5,'Filtro básico','2026-02-13'),
-(9,9,2.0,'UI simples','2026-02-14'),
-(10,7,4.0,'Infra setup','2026-02-15'),
-(11,8,3.5,'Monitor config','2026-02-16'),
-(12,10,2.5,'Migração análise','2026-02-17');
+-- 3. Associação Tags -> Task (N:M)
+-- Sincronizado com as 15 tarefas anteriores
+INSERT INTO tags_task (task_id, tag_id) VALUES 
+(1, 1), (1, 3), -- Task 1: Urgente + Frontend
+(2, 2),         -- Task 2: Backend
+(3, 3),         -- Task 3: Frontend
+(4, 2), (4, 6), -- Task 4: Backend + Infra
+(5, 4), (5, 1), -- Task 5: Bug + Urgente
+(6, 3), (6, 1), -- Task 6: Frontend + Urgente
+(7, 2),         -- Task 7: Backend
+(8, 3),         -- Task 8: Frontend
+(9, 2), (9, 5), -- Task 9: Backend + Revisão
+(10, 4),        -- Task 10: Bug
+(11, 6),        -- Task 11: Infra
+(12, 6), (12, 5),-- Task 12: Infra + Revisão
+(13, 6),        -- Task 13: Infra
+(14, 6),        -- Task 14: Infra
+(15, 2);        -- Task 15: Backend

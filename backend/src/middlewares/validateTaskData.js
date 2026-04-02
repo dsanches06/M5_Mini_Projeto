@@ -2,7 +2,8 @@
   const {
     title,
     description,
-    task_status_id,
+    types_id,
+    status_id,
     priority_id,
     category_id,
     project_id,
@@ -17,9 +18,10 @@
     
     if (title !== undefined) fieldsToUpdate.push("title");
     if (description !== undefined) fieldsToUpdate.push("description");
-    if (task_status_id !== undefined) fieldsToUpdate.push("task_status_id");
+    if (status_id !== undefined) fieldsToUpdate.push("status_id");
     if (priority_id !== undefined) fieldsToUpdate.push("priority_id");
     if (category_id !== undefined) fieldsToUpdate.push("category_id");
+    if (types_id !== undefined) fieldsToUpdate.push("types_id");
     if (project_id !== undefined) fieldsToUpdate.push("project_id");
     if (estimated_hours !== undefined) fieldsToUpdate.push("estimated_hours");
 
@@ -37,8 +39,8 @@
     }
 
     if (
-      task_status_id !== undefined &&
-      (task_status_id === null || task_status_id.toString().trim().length === 0)
+      status_id !== undefined &&
+      (status_id === null || status_id.toString().trim().length === 0)
     ) {
       return res.status(400).json({ error: "Task status ID must be valid" });
     }
@@ -56,7 +58,12 @@
     ) {
       return res.status(400).json({ error: "Category ID must be valid" });
     }
-
+    if (
+      types_id !== undefined &&
+      (types_id === null || types_id.toString().trim().length === 0)
+    ) {
+      return res.status(400).json({ error: "Task type ID must be valid" });
+    }
     if (
       project_id !== undefined &&
       (project_id === null || project_id.toString().trim().length === 0)
@@ -81,9 +88,9 @@
     }
 
     if (
-      task_status_id === undefined ||
-      task_status_id === null ||
-      task_status_id.toString().trim().length === 0
+      status_id === undefined ||
+      status_id === null ||
+      status_id.toString().trim().length === 0
     ) {
       return res.status(400).json({ error: "Task status ID is required" });
     }
@@ -102,6 +109,14 @@
       category_id.toString().trim().length === 0
     ) {
       return res.status(400).json({ error: "Category ID is required" });
+    }
+
+    if (
+      types_id === undefined ||
+      types_id === null ||
+      types_id.toString().trim().length === 0
+    ) {
+      return res.status(400).json({ error: "Task type ID is required" });
     }
 
     if (

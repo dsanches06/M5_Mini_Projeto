@@ -1,10 +1,13 @@
 import { UserClass } from "../../models/index.js";
 
+/* */ 
 export function showUserDetails(user: UserClass) {
   const modal = document.createElement("section") as HTMLElement;
   modal.id = "modalUserDetails";
   modal.className = "modal";
   modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center"
 
   const modalContent = document.createElement("section") as HTMLElement;
   modalContent.className = "modal-content";
@@ -47,7 +50,7 @@ function modalUserDetail(user: UserClass): HTMLElement {
   const detailStatus = document.createElement("p") as HTMLParagraphElement;
   detailStatus.id = "detailStatus";
   detailStatus.innerHTML = `<strong>Status:</strong>
-   <span style="color: ${user.isActive() ? "green" : "red"}">${
+   <span>${
      user.isActive() ? "Activo" : "Inactivo"
    }</span>`;
 

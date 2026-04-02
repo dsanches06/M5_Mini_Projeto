@@ -1,4 +1,5 @@
 import { TeamService } from "../../services/index.js";
+import { TeamStatsDTORequest } from "../../api/dto/index.js";
 
 export interface TeamStatsResponse {
   totalTeams: number;
@@ -9,7 +10,7 @@ export async function showTeamsCounters(
   teams?: any[],
 ): Promise<void> {
   if (type === "filtradas" && teams) {
-    countAllTeams("#allTeamsCounter", teams.length);
+    await countAllTeams("#allTeamsCounter", teams.length);
     countFilterTeams("#filterTeamsCounter", type!, teams.length);
   } else {
     await countAllTeams("#allTeamsCounter");
@@ -29,9 +30,9 @@ async function countAllTeams(
     }
     return;
   }
-  const teams = await TeamService.getTeams();
+  const stats: TeamStatsDTORequest = (await TeamService.getTeamsStats())!;
   if (section) {
-    section.textContent = `${teams.length}`;
+    section.textContent = `${stats.totalTeams}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }

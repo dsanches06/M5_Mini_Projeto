@@ -1,12 +1,10 @@
-import { get, getById, create, put, patch, remove } from "./index.js";
-import { ITask } from "../tasks/index.js";
-import { BASE_URL } from "./utils/index.js";
+import { get, getById, create, put, patch, remove, request } from "./index.js";
 import {
-  TaskAPIRequest,
-  TaskCommentAPIRequest,
-  TagAPIRequest,
-  TaskStatsAPIRequest,
-  TagTaskAPIRequest,
+  TaskDTORequest,
+  TaskCommentDTORequest,
+  TagDTORequest,
+  TaskStatsDTORequest,
+  TagTaskDTORequest,
 } from "./dto/index.js";
 
 const ENDPOINT = "tasks";
@@ -17,8 +15,8 @@ const ENDPOINT = "tasks";
 export async function getTasks(
   sort?: string,
   search?: string,
-): Promise<TaskAPIRequest[]> {
-  return get<TaskAPIRequest>(ENDPOINT, sort, search);
+): Promise<TaskDTORequest[]> {
+  return get<TaskDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter tarefas de um projeto específico */
@@ -26,205 +24,124 @@ export async function getTasksByProject(
   projectId: number,
   sort?: string,
   search?: string,
-): Promise<TaskAPIRequest[]> {
-  try {
-    let url = `${BASE_URL}${ENDPOINT}/project/${projectId}`;
-    if (sort || search) {
-      const params = new URLSearchParams();
-      if (sort) params.append("sort", sort);
-      if (search) params.append("search", search);
-      url += `?${params.toString()}`;
-    }
-    const res = await fetch(url);
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: Não foi possível obter tarefas do projeto`);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("❌ Erro ao obter tarefas do projeto:", error);
-    throw error;
-  }
+): Promise<TaskDTORequest[]> {
+  return get<TaskDTORequest>(`${ENDPOINT}/project/${projectId}`, sort, search);
 }
 
 /* Função para obter uma tarefa por ID */
-export async function getTaskById(taskId: number): Promise<TaskAPIRequest | null> {
-  return getById<TaskAPIRequest>(ENDPOINT, taskId);
+export async function getTaskById(taskId: number): Promise<TaskDTORequest | null> {
+  return getById<TaskDTORequest>(ENDPOINT, taskId);
 }
 
 /* Função para obter estatísticas de tarefas */
-export async function getTaskStats(): Promise<TaskStatsAPIRequest | null> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/stats`);
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível obter estatísticas " + res.status,
-      );
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao obter estatísticas:", error);
-    return null;
-  }
+export async function getTaskStats(): Promise<TaskStatsDTORequest | null> {
+  const stats = await get<TaskStatsDTORequest>(`${ENDPOINT}/stats`);
+  return stats ? stats[0] || null : null;
 }
 
 /* Função para obter tags de uma tarefa */
-export async function getTaskTags(taskId: number): Promise<TagAPIRequest[]> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/tags`);
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter tags " + res.status);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao obter tags:", error);
-    return [];
-  }
+export async function getTaskTags(taskId: number): Promise<TagDTORequest[]> {
+  const data = await request<TagDTORequest[]>(`${ENDPOINT}/${taskId}/tags`);
+  return data ?? [];
 }
 
 /* Função para obter comentários de uma tarefa */
 export async function getTaskComments(
   taskId: number,
-): Promise<TaskCommentAPIRequest[]> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/comments`);
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível obter comentários " + res.status);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao obter comentários:", error);
-    return [];
-  }
+): Promise<TaskCommentDTORequest[]> {
+  const data = await request<TaskCommentDTORequest[]>(`${ENDPOINT}/${taskId}/comments`);
+  return data ?? [];
 }
 
 /* Função para criar uma nova tarefa */
 export async function createTask(
-  taskData: Partial<ITask>,
-): Promise<ITask | null> {
-  return create<ITask>(ENDPOINT, taskData);
+  taskData: Partial<TaskDTORequest>,
+): Promise<TaskDTORequest | null> {
+  return create<TaskDTORequest>(ENDPOINT, taskData);
 }
 
 /* Função para adicionar uma tag a uma tarefa */
-export async function addTagToTask(taskId: number, tagData: Partial<TagTaskAPIRequest>): Promise<TagTaskAPIRequest | null> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/tags`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tagData),
-    });
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível adicionar tag " + res.status);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao adicionar tag:", error);
-    return null;
-  }
+export async function addTagToTask(taskId: number, tagData: Partial<TagTaskDTORequest>): Promise<TagTaskDTORequest | null> {
+  return request<TagTaskDTORequest>(`${ENDPOINT}/${taskId}/tags`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(tagData),
+  });
 }
 
 /* Função para criar um comentário em uma tarefa */
 export async function createTaskComment(
   taskId: number,
-  commentData: Partial<TaskCommentAPIRequest>,
-): Promise<TaskCommentAPIRequest | null> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/comments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(commentData),
-    });
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível criar comentário " + res.status);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao criar comentário:", error);
-    return null;
-  }
+  commentData: Partial<TaskCommentDTORequest>,
+): Promise<TaskCommentDTORequest | null> {
+  return request<TaskCommentDTORequest>(`${ENDPOINT}/${taskId}/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(commentData),
+  });
 }
 
 /* Função para atualizar uma tarefa */
 export async function updateTask(
   taskId: number,
-  taskData: Partial<ITask>,
-): Promise<ITask | null> {
-  return put<ITask>(ENDPOINT, taskId, taskData);
+  taskData: Partial<TaskDTORequest>,
+): Promise<TaskDTORequest | null> {
+  return put<TaskDTORequest>(ENDPOINT, taskId, taskData);
+}
+
+/* Função para atualizar parcialmente uma tarefa (datas, descrição, etc) */
+export async function partialUpdateTask(
+  taskId: number,
+  updates: Partial<TaskDTORequest>,
+): Promise<boolean> {
+  const result = await patch<TaskDTORequest>(ENDPOINT, taskId, updates);
+  return result !== null;
 }
 
 /* Função para atualizar um comentário */
 export async function updateTaskComment(
   taskId: number,
   commentId: number,
-  commentData: Partial<TaskCommentAPIRequest>,
-): Promise<TaskCommentAPIRequest | null> {
-  try {
-    const res = await fetch(
-      `${BASE_URL}${ENDPOINT}/${taskId}/comments/${commentId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commentData),
-      },
-    );
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível atualizar comentário " + res.status,
-      );
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao atualizar comentário:", error);
-    return null;
-  }
+  commentData: Partial<TaskCommentDTORequest>,
+): Promise<TaskCommentDTORequest | null> {
+  return request<TaskCommentDTORequest>(`${ENDPOINT}/${taskId}/comments/${commentId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(commentData),
+  });
 }
 
 /* Função para atualizar o status de uma tarefa */
 export async function changeTaskStatus(
   taskId: number,
   statusId: number,
-): Promise<TaskAPIRequest | null> {
-  return patch<TaskAPIRequest>(ENDPOINT, taskId, { status_id: statusId });
+): Promise<TaskDTORequest | null> {
+  return request<TaskDTORequest>(`${ENDPOINT}/${taskId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ task_status_id: statusId }),
+  });
 }
 
 /* Função para resolver um comentário */
 export async function resolveTaskComment(
   taskId: number,
   commentId: number,
-): Promise<TaskCommentAPIRequest | null> {
-  try {
-    const res = await fetch(
-      `${BASE_URL}${ENDPOINT}/${taskId}/comments/${commentId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível resolver comentário " + res.status,
-      );
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao resolver comentário:", error);
-    return null;
-  }
+): Promise<TaskCommentDTORequest | null> {
+  return request<TaskCommentDTORequest>(`${ENDPOINT}/${taskId}/comments/${commentId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
 
 /* Função para deletar uma tarefa */
@@ -237,18 +154,10 @@ export async function removeTagFromTask(
   taskId: number,
   tagId: number,
 ): Promise<boolean> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${taskId}/tags/${tagId}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) {
-      throw new Error("ERRO: Não foi possível remover tag " + res.status);
-    }
-    return true;
-  } catch (error) {
-    console.error("Erro ao remover tag:", error);
-    return false;
-  }
+  const result = await request(`${ENDPOINT}/${taskId}/tags/${tagId}`, {
+    method: "DELETE",
+  });
+  return result !== null;
 }
 
 /* Função para deletar um comentário */
@@ -256,21 +165,9 @@ export async function deleteTaskComment(
   taskId: number,
   commentId: number,
 ): Promise<boolean> {
-  try {
-    const res = await fetch(
-      `${BASE_URL}${ENDPOINT}/${taskId}/comments/${commentId}`,
-      {
-        method: "DELETE",
-      },
-    );
-    if (!res.ok) {
-      throw new Error(
-        "ERRO: Não foi possível deletar comentário " + res.status,
-      );
-    }
-    return true;
-  } catch (error) {
-    console.error("Erro ao deletar comentário:", error);
-    return false;
-  }
+  const result = await request(`${ENDPOINT}/${taskId}/comments/${commentId}`, {
+    method: "DELETE",
+  });
+  return result !== null;
 }
+

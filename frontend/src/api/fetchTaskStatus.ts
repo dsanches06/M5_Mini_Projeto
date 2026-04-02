@@ -1,5 +1,5 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { TaskStatusAPIRequest } from "./dto/index.js";
+import { TaskStatusDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "task_status";
 
@@ -7,33 +7,34 @@ const ENDPOINT = "task_status";
 export async function getTaskStatuses(
   sort?: string,
   search?: string,
-): Promise<TaskStatusAPIRequest[]> {
-  return get<TaskStatusAPIRequest>(ENDPOINT, sort, search);
+): Promise<TaskStatusDTORequest[]> {
+  return get<TaskStatusDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter um status de tarefa por ID */
 export async function getTaskStatusById(
   id: number,
-): Promise<TaskStatusAPIRequest | null> {
-  return getById<TaskStatusAPIRequest>(ENDPOINT, id);
+): Promise<TaskStatusDTORequest | null> {
+  return getById<TaskStatusDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar um novo status de tarefa */
 export async function createTaskStatus(
-  status: Partial<TaskStatusAPIRequest>,
-): Promise<TaskStatusAPIRequest | null> {
-  return create<TaskStatusAPIRequest>(ENDPOINT, status);
+  status: Partial<TaskStatusDTORequest>,
+): Promise<TaskStatusDTORequest | null> {
+  return create<TaskStatusDTORequest>(ENDPOINT, status);
 }
 
 /* Função para atualizar um status de tarefa */
 export async function updateTaskStatus(
   id: number,
-  status: Partial<TaskStatusAPIRequest>,
-): Promise<TaskStatusAPIRequest | null> {
-  return put<TaskStatusAPIRequest>(ENDPOINT, id, status);
+  status: Partial<TaskStatusDTORequest>,
+): Promise<TaskStatusDTORequest | null> {
+  return put<TaskStatusDTORequest>(ENDPOINT, id, status);
 }
 
 /* Função para deletar um status de tarefa */
 export async function deleteTaskStatus(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+

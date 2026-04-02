@@ -1,9 +1,9 @@
-import { addElementInContainer } from "../dom/index.js";
 import {
   TaskService,
   UserService,
   SprintService,
   SprintTaskService,
+  ProjectStatusService,
 } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
 import { renderSprintModal } from "../modal/index.js";
@@ -12,47 +12,28 @@ import {
   showConfirmDialog,
   showInfoBanner,
 } from "../../helpers/index.js";
+import { SprintDTORequest } from "../../api/dto/typesDTO.js";
+import { loadSprintsPage } from "./SprintsPageUI.js";
 
 /* Renderiza os sprints em cards na Grid principal */
 export async function renderSprintsCards(
-  sprints: any[],
-  targetContainer?: HTMLElement,
-): Promise<void> {
-  let gridContainer: HTMLElement | null = null;
-
-  if (targetContainer) {
-    gridContainer = targetContainer.querySelector("#sprintsGridContainer");
-  }
-
-  if (!gridContainer) {
-    gridContainer = document.querySelector(
-      "#sprintsGridContainer",
-    ) as HTMLElement;
-  }
-
-  if (!gridContainer) {
-    gridContainer = document.createElement("div");
-    gridContainer.id = "sprintsGridContainer";
-    gridContainer.className = "sprints-grid-container";
-
-    if (targetContainer) {
-      targetContainer.appendChild(gridContainer);
-    } else {
-      addElementInContainer("#containerSection", gridContainer);
-    }
-  }
-
-  gridContainer.innerHTML = "";
+  sprints: SprintDTORequest[],
+): Promise<HTMLElement> {
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "sprintsGridContainer";
+  gridContainer.classList.add("grid-card-container");
 
   for (const sprint of sprints) {
     const card = await createSprintCard(sprint);
-    card.style.cursor = "pointer";
     gridContainer.appendChild(card);
   }
+  return gridContainer;
 }
 
 /* Cria a estrutura individual de cada card de sprint */
-async function createSprintCard(sprint: any): Promise<HTMLElement> {
+async function createSprintCard(
+  sprint: SprintDTORequest,
+): Promise<HTMLElement> {
   const card = document.createElement("div");
   card.className = "sprint-card";
 
@@ -68,6 +49,10 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
 
   const actions = document.createElement("div");
   actions.className = "sprint-card-actions";
+  actions.style.display = "flex";
+  actions.style.flexDirection = "column";
+  actions.style.gap = "0.5rem";
+  actions.style.alignItems = "flex-end";
 
   const allTasks = await TaskService.getTasks();
   const sprintTaskRelations = await SprintTaskService.getSprintTasks();
@@ -79,7 +64,7 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
     sprintRelations.map((relation: any) => relation.task_id),
   );
 
-  const projectId = sprint.projectId || sprint.project_id || sprint.project?.id;
+  const projectId = sprint.project_id;
   const availableTasks = allTasks.filter((task: any) => {
     const taskId = task.getId?.() ?? task.id;
     const taskProjectId = task.projectId || task.project_id || task.project?.id;
@@ -122,8 +107,24 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
           `Sprint "${sprint.name}" removido com sucesso.`,
           "success-banner",
         );
+
+        // Verificar se estamos no dashboard do projeto
+        const dashboardElement = document.querySelector("#dashboardProject");
+        if (dashboardElement) {
+          // Estamos no dashboard do projeto, recarregar o dashboard inteiro
+          const projectId = sprint.project_id;
+          if (projectId) {
+            const { renderProjectDashboard } =
+              await import("../projects/ProjectDashboardUI.js");
+            const projectDashboard = await renderProjectDashboard(projectId);
+            dashboardElement.replaceWith(projectDashboard);
+            return;
+          }
+        }
+
+        // Caso contrário, recarregar a página geral de sprints
         const currentSprints = await SprintService.getSprints();
-        await renderSprintsCards(currentSprints);
+        await loadSprintsPage(currentSprints);
       } catch (error) {
         showInfoBanner(`Erro ao excluir sprint: ${error}`, "error-banner");
       }
@@ -140,7 +141,7 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
     e.stopPropagation();
     await handleSprintTaskLink(sprint);
   });
-  linkSprintBtn.style.display = availableTasks.length > 0 ? "" : "none";
+  linkSprintBtn.style.display = availableTasks.length > 0 ? "inline-flex" : "none";
 
   const unlinkSprintBtn = document.createElement("button");
   unlinkSprintBtn.className = "icon-button";
@@ -152,7 +153,7 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
     e.stopPropagation();
     await handleSprintTaskUnlink(sprint);
   });
-  unlinkSprintBtn.style.display = sprintRelations.length > 0 ? "" : "none";
+  unlinkSprintBtn.style.display = sprintRelations.length > 0 ? "inline-flex" : "none";
 
   actions.appendChild(editBtn);
   actions.appendChild(deleteBtn);
@@ -162,7 +163,11 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
 
   // STATUS (Badge)
   const status = document.createElement("span");
-  const statusText = sprint.getStatus?.() || sprint.status || "Ativo";
+  let statusText = "Ativo";
+  if (sprint.status_id) {
+    const statusObj = await ProjectStatusService.getProjectStatusById(sprint.status_id);
+    statusText = statusObj ? statusObj.name : `Status ${sprint.status_id}`;
+  }
   status.className = `sprint-status status-${statusText.toLowerCase().replace(" ", "-")}`;
   status.textContent = statusText;
 
@@ -177,16 +182,21 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
 
   const startDate = document.createElement("span");
   startDate.className = "start-date";
-  const startDateValue = sprint.startDate || sprint.start_date || new Date();
+  const startDateValue = sprint.start_date || new Date();
   startDate.textContent = `Início: ${new Date(startDateValue).toLocaleDateString("pt-BR")}`;
 
   const endDate = document.createElement("span");
   endDate.className = "end-date";
-  const endDateValue = sprint.endDate || sprint.end_date || new Date();
+  const endDateValue = sprint.end_date || new Date();
   endDate.textContent = `Fim: ${new Date(endDateValue).toLocaleDateString("pt-BR")}`;
+
+  const taskCount = document.createElement("span");
+  taskCount.className = "task-count";
+  taskCount.textContent = `Tarefas: 0`;
 
   infoContainer.appendChild(startDate);
   infoContainer.appendChild(endDate);
+  infoContainer.appendChild(taskCount);
 
   const footer = document.createElement("div");
   footer.className = "sprint-card-footer";
@@ -205,6 +215,9 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
           (task.getId?.() ?? task.id) === relation.task_id,
       ),
     );
+
+    // Atualizar contador de tarefas
+    taskCount.textContent = `Tarefas: ${sprintTasks.length}`;
 
     // Extrair todos os user_ids únicos dos assignees
     const userIdsSet = new Set<number>();
@@ -260,6 +273,7 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
       avatarStack.appendChild(more);
     }
   } catch (error) {
+    showInfoBanner("Erro ao carregar membros do sprint", "error-banner");
     console.error("Erro ao carregar membros do sprint:", error);
   }
 
@@ -278,7 +292,8 @@ async function createSprintCard(sprint: any): Promise<HTMLElement> {
 
 async function handleSprintTaskLink(sprint: any): Promise<void> {
   try {
-    const projectId = sprint.projectId || sprint.project_id || sprint.project?.id;
+    const projectId =
+      sprint.projectId || sprint.project_id || sprint.project?.id;
     const allTasks = await TaskService.getTasks();
     const sprintTaskRelations = await SprintTaskService.getSprintTasks();
 
@@ -290,7 +305,8 @@ async function handleSprintTaskLink(sprint: any): Promise<void> {
 
     const availableTasks = allTasks.filter((task: any) => {
       const taskId = task.getId?.() ?? task.id;
-      const taskProjectId = task.projectId || task.project_id || task.project?.id;
+      const taskProjectId =
+        task.projectId || task.project_id || task.project?.id;
       const belongsToProject = projectId ? taskProjectId === projectId : true;
       return belongsToProject && !linkedTaskIds.has(taskId);
     });
@@ -298,19 +314,18 @@ async function handleSprintTaskLink(sprint: any): Promise<void> {
     if (availableTasks.length === 0) {
       showInfoBanner(
         "Não há tarefas disponíveis sem vínculo ao sprint.",
-        "warning",
+        "warning-banner",
       );
       return;
     }
 
-    await renderSprintTaskSelectionModal(
-      sprint,
-      availableTasks,
-      "link",
-    );
+    await renderSprintTaskSelectionModal(sprint, availableTasks, "link");
   } catch (error) {
     console.error("Erro ao carregar tarefas para associar ao sprint:", error);
-    showInfoBanner("Erro ao carregar tarefas para associar ao sprint.", "error");
+    showInfoBanner(
+      "Erro ao carregar tarefas para associar ao sprint.",
+      "error-banner",
+    );
   }
 }
 
@@ -325,7 +340,7 @@ async function handleSprintTaskUnlink(sprint: any): Promise<void> {
     if (sprintRelations.length === 0) {
       showInfoBanner(
         "Este sprint não tem tarefas associadas.",
-        "warning",
+        "warning-banner",
       );
       return;
     }
@@ -342,19 +357,21 @@ async function handleSprintTaskUnlink(sprint: any): Promise<void> {
     if (associatedTasks.length === 0) {
       showInfoBanner(
         "Não foi possível encontrar tarefas associadas a este sprint.",
-        "warning",
+        "warning-banner",
       );
       return;
     }
 
-    await renderSprintTaskSelectionModal(
-      sprint,
-      associatedTasks,
-      "unlink",
-    );
+    await renderSprintTaskSelectionModal(sprint, associatedTasks, "unlink");
   } catch (error) {
-    console.error("Erro ao carregar tarefas para desassociar do sprint:", error);
-    showInfoBanner("Erro ao carregar tarefas para desassociar do sprint.", "error");
+    console.error(
+      "Erro ao carregar tarefas para desassociar do sprint:",
+      error,
+    );
+    showInfoBanner(
+      "Erro ao carregar tarefas para desassociar do sprint.",
+      "error-banner",
+    );
   }
 }
 
@@ -379,9 +396,8 @@ async function renderSprintTaskSelectionModal(
 
   const content = document.createElement("div");
   content.className = "modal-content";
-  content.style.maxWidth = "1040px";
-  content.style.width = "95%";
-  content.style.padding = "42px";
+  content.style.maxWidth = "600px";
+  content.style.width = "100%";
 
   const title = document.createElement("h2");
   title.textContent =
@@ -391,10 +407,9 @@ async function renderSprintTaskSelectionModal(
 
   const list = document.createElement("div");
   list.className = "sprint-task-selection-list";
-  list.style.display = "grid";
-  list.style.gridTemplateColumns = "repeat(3, minmax(260px, 1fr))";
-  list.style.gap = "1rem";
-  list.style.marginTop = "1rem";
+  list.style.display = "flex";
+  list.style.flexDirection = "column";
+  list.style.gap = "0.5rem";
 
   items.forEach((item: any) => {
     const task = mode === "unlink" ? item.task : item;
@@ -402,18 +417,15 @@ async function renderSprintTaskSelectionModal(
     const row = document.createElement("div");
     row.className = "sprint-task-selection-row";
     row.style.display = "flex";
-    row.style.justifyContent = "space-between";
+    row.style.gap = "0.5rem";
     row.style.alignItems = "center";
-    row.style.padding = "0.8rem 1rem";
-    row.style.background = "#f7f7f7";
-    row.style.border = "1px solid rgba(0,0,0,0.08)";
-    row.style.borderRadius = "8px";
+    row.style.padding = "0.5rem";
+    row.style.borderBottom = "1px solid #e0e0e0";
 
     const label = document.createElement("span");
     label.textContent = getTaskLabel(task);
-    label.style.fontSize = "0.95rem";
-    label.style.color = "#1f2937";
     label.style.flex = "1";
+    label.style.fontSize = "0.95rem";
 
     const button = document.createElement("button");
     button.className = "btn primary";
@@ -426,48 +438,59 @@ async function renderSprintTaskSelectionModal(
       "aria-label",
       mode === "link" ? "Associar tarefa" : "Desassociar tarefa",
     );
-    button.style.marginLeft = "0";
-    button.style.padding = "0";
-    button.style.width = "34px";
-    button.style.height = "34px";
-    button.style.display = "inline-flex";
-    button.style.alignItems = "center";
-    button.style.justifyContent = "center";
-    button.style.fontSize = "1rem";
-    button.style.minWidth = "auto";
+    button.style.whiteSpace = "nowrap";
     button.addEventListener("click", async (e) => {
       e.stopPropagation();
       try {
         if (mode === "link") {
-          await SprintTaskService.createSprintTask({
-            sprint_id: sprint.id,
-            task_id: task.getId?.() ?? task.id,
-          });
+          await SprintTaskService.createSprintTask(
+            sprint.id,
+            {
+              sprint_id: sprint.id,
+              task_id: task.getId?.() ?? task.id,
+            }
+          );
           showInfoBanner(
-            `Tarefa "${getTaskLabel(task)}" associada ao sprint.`,
-            "success",
+            `Tarefa "${getTaskLabel(task)}" associada ao sprint "${sprint.name}" com sucesso.`,
+            "success-banner",
           );
         } else {
-          await SprintTaskService.deleteSprintTask(relation.id);
+          await SprintTaskService.deleteSprintTask(relation.sprint_id, relation.task_id);
           showInfoBanner(
-            `Tarefa "${getTaskLabel(task)}" desassociada do sprint.`,
-            "success",
+            `Tarefa "${getTaskLabel(task)}" desassociada do sprint "${sprint.name}" com sucesso.`,
+            "success-banner",
           );
         }
 
         modal.remove();
-        const cardsContainer = document.querySelector(
-          "#projectSprintsContainer",
-        ) as HTMLElement;
-        if (cardsContainer) {
-          const currentSprints = await SprintService.getSprints();
-          await renderSprintsCards(currentSprints, cardsContainer);
+
+        // Aguardar um pouco para garantir que o backend processou a mudança
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // Verificar se estamos no dashboard do projeto
+        const dashboardElement = document.querySelector("#dashboardProject");
+        if (dashboardElement) {
+          // Estamos no dashboard do projeto, recarregar apenas a seção de sprints
+          const projectId = sprint.project_id;
+          const sprintsSection =
+            dashboardElement.querySelector(".sprints-section");
+          if (sprintsSection && projectId) {
+            // Recarregar apenas a seção de sprints do projeto
+            const { createSprintsSection } =
+              await import("../projects/index.js");
+            const newSprintsSection = await createSprintsSection(projectId);
+            sprintsSection.replaceWith(newSprintsSection);
+            return;
+          }
         }
+
+        const currentSprints = await SprintService.getSprints();
+        await loadSprintsPage(currentSprints);
       } catch (error) {
         console.error(error);
         showInfoBanner(
           "Erro ao atualizar a associação da tarefa.",
-          "error",
+          "error-banner",
         );
       }
     });
@@ -479,7 +502,9 @@ async function renderSprintTaskSelectionModal(
   content.append(title, list);
   modal.appendChild(content);
   document.body.appendChild(modal);
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 
   modal.addEventListener("click", (event) => {
     if (event.target === modal) {

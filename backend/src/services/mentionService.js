@@ -1,30 +1,32 @@
 import { db } from "../db.js";
-import { mapMentionAPIResponse } from "../dto/mapDTO.js";
+import { mapMentionDTOResponse } from "../dto/mapDTO.js";
 
 export const getAllMentions = async () => {
-  const [mentions] = await db.query("SELECT * FROM mention");
-  return mentions.map(mapMentionAPIResponse);
+  const [mentions] = await db.query("SELECT * FROM mentions");
+  return mentions.map(mapMentionDTOResponse);
 };
 
 export const getMentionById = async (mentionId) => {
-  const [mentions] = await db.query("SELECT * FROM mention WHERE id = ?", [mentionId]);
-  return mentions.length > 0 ? mapMentionAPIResponse(mentions[0]) : null;
+  const [mentions] = await db.query("SELECT * FROM mentions WHERE id = ?", [mentionId]);
+  return mentions.length > 0 ? mapMentionDTOResponse(mentions[0]) : null;
 };
 
 export const createMention = async (data) => {
   const [result] = await db.query(
-    "INSERT INTO mention (task_id, user_id, mentioned_at) VALUES (?, ?, ?)",
-    [data.task_id, data.user_id, new Date()]
+    "INSERT INTO mentions (comment_id, mentioned_user_id) VALUES (?, ?)",
+    [data.comment_id, data.mentioned_user_id]
   );
-  return mapMentionAPIResponse({ id: result.insertId, ...data });
+  return mapMentionDTOResponse({ id: result.insertId, ...data });
 };
 
 export const updateMention = async (id, data) => {
-  const [result] = await db.query("UPDATE mention SET ? WHERE id = ?", [data, id]);
+  const [result] = await db.query("UPDATE mentions SET ? WHERE id = ?", [data, id]);
   return result.affectedRows;
 };
 
 export const deleteMention = async (id) => {
-  const [result] = await db.query("DELETE FROM mention WHERE id = ?", [id]);
+  const [result] = await db.query("DELETE FROM mentions WHERE id = ?", [id]);
   return result.affectedRows;
 };
+
+

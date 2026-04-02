@@ -1,5 +1,5 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { CategoryAPIRequest } from "./dto/index.js";
+import { CategoryDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "categories";
 
@@ -7,26 +7,30 @@ const ENDPOINT = "categories";
 export async function getCategories(
   sort?: string,
   search?: string,
-): Promise<CategoryAPIRequest[]> {
-  return get<CategoryAPIRequest>(ENDPOINT, sort, search);
+): Promise<CategoryDTORequest[]> {
+  return get<CategoryDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma categoria específica por ID */
-export async function getCategoryById(id: number): Promise<CategoryAPIRequest | null> {
-  return getById<CategoryAPIRequest>(ENDPOINT, id);
+export async function getCategoryById(
+  id: number,
+): Promise<CategoryDTORequest | null> {
+  return getById<CategoryDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar uma nova categoria */
-export async function createCategory(category: Partial<CategoryAPIRequest>): Promise<CategoryAPIRequest | null> {
-  return create<CategoryAPIRequest>(ENDPOINT, category);
+export async function createCategory(
+  category: Partial<CategoryDTORequest>,
+): Promise<CategoryDTORequest | null> {
+  return create<CategoryDTORequest>(ENDPOINT, category);
 }
 
 /* Função para atualizar uma categoria existente */
 export async function updateCategory(
   id: number,
-  category: Partial<CategoryAPIRequest>,
-): Promise<CategoryAPIRequest | null> {
-  return put<CategoryAPIRequest>(ENDPOINT, id, category);
+  category: Partial<CategoryDTORequest>,
+): Promise<CategoryDTORequest | null> {
+  return put<CategoryDTORequest>(ENDPOINT, id, category);
 }
 
 /* Função para excluir uma categoria por ID */

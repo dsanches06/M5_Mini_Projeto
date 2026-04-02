@@ -930,8 +930,8 @@ export class StatisticPageUI {
     canvas.height = 300;
 
     // Responsivo
-    canvas.style.maxWidth = "100%";
-    canvas.style.height = "auto";
+    canvas
+    canvas
 
     return canvas;
   }

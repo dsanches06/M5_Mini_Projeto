@@ -1,6 +1,6 @@
 import { TeamService } from "../../services/index.js";
 import { GlobalValidators } from "../../utils/index.js";
-import { loadTeamsPage } from "../teams/TeamsPageUI.js";
+import { loadTeamsPage } from "../teams/index.js";
 
 import {
   createButton,
@@ -53,9 +53,10 @@ function setupTeamFormLogic(
     if (isValid) {
       // Criar objeto da equipe (ID 0 será gerado pela base de dados)
       const teamData = {
-        id: teamToEdit?.id || 0, // ID existente ou placeholder para novo
+        id: teamToEdit?.id || 0,
         name: name.trim(),
         description: description || "",
+        created_at: teamToEdit?.created_at || new Date().toISOString(),
       };
 
       try {
@@ -76,6 +77,10 @@ function setupTeamFormLogic(
 
         // Obter todas as equipes e renderizar
         const teams = await TeamService.getTeams();
+        
+        // Aguardar um pouco para garantir que o backend processou a mudança
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         loadTeamsPage(teams);
 
         modal.remove();
@@ -174,6 +179,9 @@ export async function renderTeamModal(teamToEdit?: any): Promise<void> {
   content.append(closeBtn, titleHeading, form);
   modal.append(content);
   document.body.appendChild(modal);
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 
   // Ligar a lógica ao formulário
   setupTeamFormLogic(
@@ -195,5 +203,7 @@ export async function renderTeamModal(teamToEdit?: any): Promise<void> {
     if (e.target === modal) modal.remove();
   };
 
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 }

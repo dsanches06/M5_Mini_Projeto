@@ -1,29 +1,30 @@
 import { get } from "./index.js";
 import {
-  RankingAboveAverageAPIRequest,
-  RankingIncreaseHoursAPIRequest,
-  RankingMoreHoursAPIRequest,
+  RankingAboveAverageDTORequest,
+  RankingIncreaseHoursDTORequest,
+  RankingMoreHoursDTORequest,
 } from "./dto/index.js";
 
 const ENDPOINT = "statistics/ranking";
 
 /* Função para obter ranking com mais horas */
 export async function getRankingMoreHours(): Promise<
-  RankingMoreHoursAPIRequest[]
+  RankingMoreHoursDTORequest[]
 > {
-  return get<RankingMoreHoursAPIRequest>(`${ENDPOINT}/morehours`);
+  return get<RankingMoreHoursDTORequest>(`${ENDPOINT}/morehours`);
 }
 
 /* Função para obter ranking com horas aumentadas */
 export async function getRankingIncreasedHours(): Promise<
-  RankingIncreaseHoursAPIRequest[]
+  RankingIncreaseHoursDTORequest[]
 > {
-  return get<RankingIncreaseHoursAPIRequest>(`${ENDPOINT}/increasedhours`);
+  return get<RankingIncreaseHoursDTORequest>(`${ENDPOINT}/increasedhours`);
 }
 
 /* Função para obter ranking acima da média */
 export async function getRankingAboveAverage(): Promise<
-  RankingAboveAverageAPIRequest[]
+  RankingAboveAverageDTORequest[]
 > {
-  return get<RankingAboveAverageAPIRequest>(`${ENDPOINT}/aboveaverage`);
+  return get<RankingAboveAverageDTORequest>(`${ENDPOINT}/aboveaverage`);
 }
+

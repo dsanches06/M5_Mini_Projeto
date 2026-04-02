@@ -54,8 +54,8 @@ export const updateTeamMember = async (req, res) => {
 /* Função para deletar team member */
 export const deleteTeamMember = async (req, res) => {
   try {
-    const { id } = req.params;
-    const affectedRows = await teamMemberService.deleteTeamMember(id);
+    const { team_id, user_id } = req.params;
+    const affectedRows = await teamMemberService.deleteTeamMember(Number(team_id), Number(user_id));
     if (affectedRows === 0) {
       return res.status(404).json({ error: "Team member not found" });
     }

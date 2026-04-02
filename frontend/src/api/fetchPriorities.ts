@@ -1,5 +1,5 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { PriorityAPIRequest } from "./dto/index.js";
+import { PriorityDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "priorities";
 
@@ -7,33 +7,34 @@ const ENDPOINT = "priorities";
 export async function getPriorities(
   sort?: string,
   search?: string,
-): Promise<PriorityAPIRequest[]> {
-  return get<PriorityAPIRequest>(ENDPOINT, sort, search);
+): Promise<PriorityDTORequest[]> {
+  return get<PriorityDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma prioridade pelo id */
 export async function getPriorityById(
   id: number,
-): Promise<PriorityAPIRequest | null> {
-  return getById<PriorityAPIRequest>(ENDPOINT, id);
+): Promise<PriorityDTORequest | null> {
+  return getById<PriorityDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar uma nova prioridade  */
 export async function createPriority(
-  priority: Partial<PriorityAPIRequest>,
-): Promise<PriorityAPIRequest | null> {
-  return create<PriorityAPIRequest>(ENDPOINT, priority);
+  priority: Partial<PriorityDTORequest>,
+): Promise<PriorityDTORequest | null> {
+  return create<PriorityDTORequest>(ENDPOINT, priority);
 }
 
 /* Função para editar ou atualizar os dados de uma prioridade  */
 export async function updatePriority(
   id: number,
-  priority: Partial<PriorityAPIRequest>,
-): Promise<PriorityAPIRequest | null> {
-  return put<PriorityAPIRequest>(ENDPOINT, id, priority);
+  priority: Partial<PriorityDTORequest>,
+): Promise<PriorityDTORequest | null> {
+  return put<PriorityDTORequest>(ENDPOINT, id, priority);
 }
 
 /* Função para deletar uma prioridade */
 export async function deletePriority(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+

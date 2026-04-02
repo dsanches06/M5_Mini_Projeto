@@ -1,5 +1,6 @@
 import { ProjectService } from "../../services/index.js";
 import { IProject } from "../../projects/index.js";
+import { ProjectStatsDTORequest } from "../../api/dto/index.js";
 
 export interface ProjectStatsResponse {
   totalProjects: number;
@@ -15,27 +16,10 @@ export async function showProjectsCounters(
   projects?: IProject[],
 ): Promise<void> {
   if ((type === "filtrados" || type === "ativos" || type === "concluidos") && projects) {
-    countAllProjects("#allProjectsCounter", projects.length);
-
-    if (type === "ativos") {
-      const activeCount = projects.filter(
-        (p) => p.getStatus() === "Ativo",
-      ).length;
-      countActiveProjects("#activeProjectsCounter", activeCount);
-      countFinishedProjects("#finishedProjectsCounter", 0);
-      countInDevelopmentProjects("#inDevelopmentProjectsCounter", 0);
-    } else if (type === "concluidos") {
-      const finishedCount = projects.filter(
-        (p) => p.getStatus() === "Terminado",
-      ).length;
-      countFinishedProjects("#finishedProjectsCounter", finishedCount);
-      countActiveProjects("#activeProjectsCounter", 0);
-      countInDevelopmentProjects("#inDevelopmentProjectsCounter", 0);
-    } else {
-      countActiveProjects("#activeProjectsCounter", projects.length);
-      countFinishedProjects("#finishedProjectsCounter", projects.length);
-      countInDevelopmentProjects("#inDevelopmentProjectsCounter", projects.length);
-    }
+    await countAllProjects("#allProjectsCounter", projects.length);
+    await countActiveProjects("#activeProjectsCounter");
+    await countFinishedProjects("#finishedProjectsCounter");
+    await countInDevelopmentProjects("#inDevelopmentProjectsCounter");
 
     countFilterProjects("#filterProjectsCounter", type!, projects.length);
     await countActivePercentage("#activeProjectsPercentageCounter", type!);
@@ -61,10 +45,9 @@ async function countActiveProjects(
     }
     return;
   }
-  const projects = await ProjectService.getProjects();
-  const activeCount = projects.filter((p) => p.getStatus() === "Ativo").length;
+  const stats: ProjectStatsDTORequest = (await ProjectService.getProjectsStats())!;
   if (section) {
-    section.textContent = `${activeCount}`;
+    section.textContent = `${stats.activeProjects}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
@@ -82,12 +65,9 @@ async function countFinishedProjects(
     }
     return;
   }
-  const projects = await ProjectService.getProjects();
-  const finishedCount = projects.filter(
-    (p) => p.getStatus() === "Terminado",
-  ).length;
+  const stats: ProjectStatsDTORequest = (await ProjectService.getProjectsStats())!;
   if (section) {
-    section.textContent = `${finishedCount}`;
+    section.textContent = `${stats.finishedProjects}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
@@ -105,12 +85,9 @@ async function countInDevelopmentProjects(
     }
     return;
   }
-  const projects = await ProjectService.getProjects();
-  const inDevCount = projects.filter(
-    (p) => p.getStatus() === "Em Desenvolvimento",
-  ).length;
+  const stats: ProjectStatsDTORequest = (await ProjectService.getProjectsStats())!;
   if (section) {
-    section.textContent = `${inDevCount}`;
+    section.textContent = `${stats.inDevelopmentProjects}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
@@ -144,9 +121,9 @@ async function countAllProjects(
     }
     return;
   }
-  const projects = await ProjectService.getProjects();
+  const stats: ProjectStatsDTORequest = (await ProjectService.getProjectsStats())!;
   if (section) {
-    section.textContent = `${projects.length}`;
+    section.textContent = `${stats.totalProjects}`;
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }
@@ -158,26 +135,15 @@ async function countActivePercentage(
   type: string,
 ): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  const projects = await ProjectService.getProjects();
-  const total = projects.length;
+  const stats: ProjectStatsDTORequest = (await ProjectService.getProjectsStats())!;
 
-  if (section && total > 0) {
-    let percentage = 0;
+  if (section) {
     if (type === "concluidos") {
-      const finishedCount = projects.filter(
-        (p) => p.getStatus() === "Terminado",
-      ).length;
-      percentage = Math.round((finishedCount / total) * 100);
+      section.textContent = `${stats.finishedPercentage}`;
     } else {
-      const activeCount = projects.filter(
-        (p) => p.getStatus() === "Ativo",
-      ).length;
-      percentage = Math.round((activeCount / total) * 100);
+      section.textContent = `${stats.activePercentage}`;
     }
-    section.textContent = `${percentage}%`;
     changeImageAndFigCaption(type!);
-  } else if (section) {
-    section.textContent = "0%";
   } else {
     console.warn(`Elemento ${id} não foi encontrado no DOM.`);
   }

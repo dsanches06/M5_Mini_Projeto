@@ -52,6 +52,37 @@ export const createSprint = async (req, res) => {
   }
 };
 
+/* Função para atualizar parcialmente sprint (PATCH) - para datas, descrição, etc */
+export const partialUpdateSprint = async (req, res) => {
+  try {
+    const { name, description, start_date, end_date, status_id } = req.body;
+
+    // Validar nome se fornecido
+    if (name !== undefined && name.trim().length === 0) {
+      return res.status(400).json({ error: "O nome da sprint não pode ser vazio" });
+    }
+
+    if (name !== undefined && name.length < 3) {
+      return res.status(400).json({ error: "O nome da sprint deve ter pelo menos 3 caracteres" });
+    }
+
+    const affectedRows = await sprintService.updateSprint(Number(req.params.id), {
+      name,
+      description,
+      start_date,
+      end_date,
+      status_id,
+    });
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: "Sprint não encontrada" });
+    }
+    res.json({ message: "Sprint atualizada com sucesso" });
+  } catch (error) {
+    res.status(400).json({ error: "Erro ao atualizar sprint" });
+  }
+};
+
 /* Função para atualizar sprint */
 export const updateSprint = async (req, res) => {
   try {
@@ -85,6 +116,27 @@ export const deleteSprint = async (req, res) => {
     res.status(200).json({ message: "Sprint deletada com sucesso" });
   } catch (error) {
     res.status(404).json({ error: "Erro ao deletar sprint" });
+  }
+};
+
+/* Função para obter estatísticas globais de sprints */
+export const getSprintsStats = async (req, res) => {
+  try {
+    const stats = await sprintService.getSprintsStats();
+    res.json([stats]);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar estatísticas de sprints" });
+  }
+};
+
+/* Função para obter estatísticas de sprints */
+export const getSprintStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stats = await sprintService.getSprintStats(Number(id));
+    res.json([stats]);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar estatísticas de sprints" });
   }
 };
 

@@ -59,6 +59,36 @@ export const deleteTag = async (req, res) => {
   }
 };
 
+/* Função para atualizar etiqueta */
+export const updateTag = async (req, res) => {
+  try {
+    const tagId = Number(req.params.id);
+    const { name } = req.body;
+
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ message: "O nome da etiqueta não pode ser vazio" });
+    }
+
+    if (name.trim().length < 2) {
+      return res.status(400).json({ message: "O nome da etiqueta deve ter pelo menos 2 caracteres" });
+    }
+
+    const tagExists = await tagService.tagNameExists(name.trim(), tagId);
+    if (tagExists) {
+      return res.status(400).json({ message: "Já existe uma etiqueta com este nome" });
+    }
+
+    const tag = await tagService.updateTag(tagId, req.body);
+    if (!tag) {
+      return res.status(404).json({ message: "Etiqueta não encontrada" });
+    }
+
+    res.status(200).json(tag);
+  } catch (error) {
+    res.status(400).json({ message: "Erro ao atualizar etiqueta" });
+  }
+};
+
 /* Função para buscar tarefas da etiqueta */
 export const getTagTasks = async (req, res) => {
   try {

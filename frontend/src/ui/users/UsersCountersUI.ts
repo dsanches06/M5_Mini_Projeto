@@ -1,6 +1,6 @@
 import { UserService } from "../../services/index.js";
 import { IUser } from "../../models/index.js";
-import { UserStatsAPIRequest } from "../../api/dto/index.js";
+import { UserStatsDTORequest } from "../../api/dto/index.js";
 
 export async function showUsersCounters(
   type?: string,
@@ -46,7 +46,7 @@ async function countAtiveUsers(
     }
     return;
   }
-  const stats: UserStatsAPIRequest = (await UserService.getUserStats())!;
+  const stats: UserStatsDTORequest = (await UserService.getUserStats())!;
   if (section) {
     section.textContent = `${stats.activeUsers}`;
   } else {
@@ -66,7 +66,7 @@ async function countUnableUsers(
     }
     return;
   }
-  const stats: UserStatsAPIRequest = (await UserService.getUserStats())!;
+  const stats: UserStatsDTORequest = (await UserService.getUserStats())!;
   if (section) {
     section.textContent = `${stats.inactiveUsers}`;
   } else {
@@ -102,7 +102,7 @@ async function countAllUsers(
     }
     return;
   }
-  const stats: UserStatsAPIRequest = (await UserService.getUserStats())!;
+  const stats: UserStatsDTORequest = (await UserService.getUserStats())!;
   if (section) {
     section.textContent = `${stats.totalUsers}`;
   } else {
@@ -116,7 +116,7 @@ async function countAtiveInativePercentage(
   type: string,
 ): Promise<void> {
   const section = document.querySelector(`${id}`) as HTMLElement;
-  const stats: UserStatsAPIRequest = (await UserService.getUserStats())!;
+  const stats: UserStatsDTORequest = (await UserService.getUserStats())!;
   if (section) {
     if (type === "inactivos") {
       section.textContent = `${stats.inactivePercentage}`;

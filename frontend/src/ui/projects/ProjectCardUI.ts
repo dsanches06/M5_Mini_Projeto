@@ -1,13 +1,14 @@
 import { IProject, Project } from "../../projects/index.js";
 import { addElementInContainer, clearContainer } from "../dom/index.js";
 import { renderProjectDashboard, renderProjectGantt } from "./index.js";
+import { loadProjectsPage } from "./ProjectPageUI.js";
 import { renderProjectModal } from "../modal/index.js";
 import {
-  ProjectPermissionService,
   ProjectService,
   UserService,
   TaskService,
   TimeLogService,
+  SprintService,
 } from "../../services/index.js";
 import { getAvatarPath, showConfirmDialog, showInfoBanner } from "../../helpers/index.js";
 import { IUser } from "../../models/index.js";
@@ -30,7 +31,7 @@ export async function renderProjectsCards(projects: IProject[]): Promise<void> {
 
   for (const p of projects) {
     const card = await createProjectCard(p as Project);
-    card.style.cursor = "pointer";
+    card.classList.add("grid-card-container");
 
     card.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -48,13 +49,19 @@ export async function renderProjectsCards(projects: IProject[]): Promise<void> {
 async function createProjectCard(project: Project): Promise<HTMLElement> {
   const card = document.createElement("div");
   card.className = "project-card";
+  card.style.display = "flex";
+  card.style.gap = "1rem";
+  card.style.alignItems = "flex-start";
+
+  const contentWrapper = document.createElement("div");
+  contentWrapper.className = "project-card-content";
+  contentWrapper.style.flex = "1";
 
   // HEADER (Título e Botões de Opções se existirem)
   const header = document.createElement("div");
   header.className = "card-header";
-  header.style.display = "flex";
-  header.style.alignItems = "center";
-  header.style.justifyContent = "space-between";
+  header.style.padding = "1rem";
+  header.style.borderBottom = "1px solid #ddd";
 
   const title = document.createElement("h3");
   title.textContent = project.getName();
@@ -62,19 +69,19 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
   const actionButtons = document.createElement("div");
   actionButtons.style.display = "flex";
   actionButtons.style.flexDirection = "column";
+  actionButtons.style.gap = "0.5rem";
   actionButtons.style.alignItems = "flex-end";
-  actionButtons.style.justifyContent = "flex-end";
-  actionButtons.style.gap = "0.4rem";
+  actionButtons.style.flexShrink = "0";
 
   const ganttBtn = document.createElement("button");
   ganttBtn.className = "icon-button";
   ganttBtn.innerHTML = `<i class="fa-solid fa-chart-gantt"></i>`;
   ganttBtn.title = "Ver Gantt";
   ganttBtn.setAttribute("aria-label", "Ver Gantt");
-  ganttBtn.style.backgroundColor = "#4CAF50";
-  ganttBtn.style.color = "white";
+  ganttBtn.style.padding = "0.5rem";
+  ganttBtn.style.cursor = "pointer";
   ganttBtn.style.border = "none";
-  ganttBtn.style.fontSize = "0.9rem";
+  ganttBtn.style.background = "transparent";
   ganttBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     // Limpar a seção principal e criar uma nova página para o Gantt
@@ -84,7 +91,7 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
     // Título
     const ganttTitle = document.createElement("h2");
     ganttTitle.textContent = `Gráfico de Gantt do Projeto: ${project.getName()}`;
-    ganttTitle.style.marginBottom = "1.5rem";
+    ganttTitle.style.marginBottom = "1rem";
     ganttPage.appendChild(ganttTitle);
     // Gantt chart
     const gantt = await renderProjectGantt(project.getId());
@@ -97,13 +104,9 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
   editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
   editBtn.title = "Editar projeto";
   editBtn.setAttribute("aria-label", "Editar projeto");
-  editBtn.style.backgroundColor = "#2196F3";
-  editBtn.style.color = "white";
-  editBtn.style.border = "none";
-  editBtn.style.fontSize = "0.9rem";
   editBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
-    await renderProjectModal(project);
+    await handleProjectEdit(project);
   });
 
   const deleteBtn = document.createElement("button");
@@ -111,11 +114,6 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
   deleteBtn.innerHTML = `<i class="fas fa-trash"></i>`;
   deleteBtn.title = "Apagar projeto";
   deleteBtn.setAttribute("aria-label", "Apagar projeto");
-  deleteBtn.style.backgroundColor = "#f44336";
-  deleteBtn.style.color = "white";
-  deleteBtn.style.border = "none";
-  deleteBtn.style.fontSize = "0.9rem";
-
   deleteBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     if (!await showConfirmDialog(`Tem a certeza que deseja apagar o projeto "${project.getName()}"?`)) {
@@ -124,16 +122,17 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
     try {
       await ProjectService.deleteProject(project.getId());
       showInfoBanner(`Projeto "${project.getName()}" apagado com sucesso.`, "success-banner");
-      card.remove();
+      const currentProjects = await ProjectService.getProjects();
+      await loadProjectsPage(currentProjects);
     } catch (error) {
-      showInfoBanner(`Erro ao apagar projeto: ${error}`, "error-banner");
+      showInfoBanner(`Erro ao excluir projeto: ${error}`, "error-banner");
     }
   });
 
   actionButtons.appendChild(ganttBtn);
   actionButtons.appendChild(editBtn);
   actionButtons.appendChild(deleteBtn);
-  header.append(title, actionButtons);
+  header.appendChild(title);
 
   // STATUS (Badge)
   const status = document.createElement("span");
@@ -231,6 +230,38 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
 
   footer.appendChild(avatarStack);
 
+  // SPRINT INFO
+  const sprintInfo = document.createElement("div");
+  sprintInfo.style.display = "flex";
+  sprintInfo.style.gap = "0.5rem";
+  sprintInfo.style.alignItems = "center";
+
+  try {
+    // Carregar sprints e filtrar por projeto
+    const allSprints = await SprintService.getSprints();
+    const projectSprints = allSprints.filter(
+      (sprint: any) => sprint.project_id === project.getId()
+    );
+
+    const sprintCount = projectSprints.length;
+    const sprintIcon = document.createElement("i");
+    sprintIcon.className = "fa-solid fa-list-check";
+    sprintIcon.style.fontSize = "1rem";
+
+    const sprintText = document.createElement("span");
+    sprintText.style.fontSize = "0.95rem";
+    sprintText.style.fontWeight = "500";
+    sprintText.style.color = "#555";
+    sprintText.textContent = `${sprintCount} Sprint${sprintCount !== 1 ? "s" : ""}`;
+
+    sprintInfo.appendChild(sprintIcon);
+    sprintInfo.appendChild(sprintText);
+  } catch (error) {
+    console.error("Erro ao carregar sprints do projeto:", error);
+  }
+
+  footer.appendChild(sprintInfo);
+
   // PROGRESS BAR
   const progressWrapper = document.createElement("div");
   progressWrapper.className = "project-progress-wrapper";
@@ -249,17 +280,33 @@ async function createProjectCard(project: Project): Promise<HTMLElement> {
   progressWrapper.appendChild(progressBar);
 
   // Adicionar ao card na ordem correta
-  card.appendChild(header);
-  card.appendChild(status);
-  card.appendChild(desc);
-  card.appendChild(datesContainer);
-  card.appendChild(progressWrapper); // <-- Barra entra aqui
-  card.appendChild(footer);
+  contentWrapper.appendChild(header);
+  contentWrapper.appendChild(status);
+  contentWrapper.appendChild(desc);
+  contentWrapper.appendChild(datesContainer);
+  contentWrapper.appendChild(progressWrapper);
+  contentWrapper.appendChild(footer);
+  card.append(contentWrapper, actionButtons);
 
   return card;
 }
 
 /* Calcula o progresso do projeto baseado nas horas de time logs */
+async function handleProjectEdit(project: Project): Promise<void> {
+  try {
+    await renderProjectModal({
+      id: project.getId(),
+      name: project.getName(),
+      description: project.getDescription(),
+      start_date: project.getStartDate(),
+      end_date_expected: project.getEndDateExpected(),
+    });
+  } catch (error) {
+    showInfoBanner("Erro ao abrir formulário de edição.", "error-banner");
+    console.error(error);
+  }
+}
+
 async function calculateProgressFromTimeLogs(
   project: Project,
   tasks: any[],

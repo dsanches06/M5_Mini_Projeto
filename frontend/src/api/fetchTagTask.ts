@@ -1,29 +1,30 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { TagTaskAPIRequest } from "./dto/index.js";
+import { TagTaskDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "tags_task";
 
 /* Função para obter a lista de relações de tags em tarefas */
-export async function getTagTasks(sort?: string, search?: string): Promise<TagTaskAPIRequest[]> {
-  return get<TagTaskAPIRequest>(ENDPOINT, sort, search);
+export async function getTagTasks(sort?: string, search?: string): Promise<TagTaskDTORequest[]> {
+  return get<TagTaskDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma relação de tag em tarefa por ID */
-export async function getTagTaskById(id: number): Promise<TagTaskAPIRequest | null> {
-  return getById<TagTaskAPIRequest>(ENDPOINT, id);
+export async function getTagTaskById(id: number): Promise<TagTaskDTORequest | null> {
+  return getById<TagTaskDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar uma nova relação de tag em tarefa */
-export async function createTagTask(tagTask: Partial<TagTaskAPIRequest>): Promise<TagTaskAPIRequest | null> {
-  return create<TagTaskAPIRequest>(ENDPOINT, tagTask);
+export async function createTagTask(tagTask: Partial<TagTaskDTORequest>): Promise<TagTaskDTORequest | null> {
+  return create<TagTaskDTORequest>(ENDPOINT, tagTask);
 }
 
 /* Função para atualizar uma relação de tag em tarefa */
-export async function updateTagTask(id: number, tagTask: Partial<TagTaskAPIRequest>): Promise<TagTaskAPIRequest | null> {
-  return put<TagTaskAPIRequest>(ENDPOINT, id, tagTask);
+export async function updateTagTask(id: number, tagTask: Partial<TagTaskDTORequest>): Promise<TagTaskDTORequest | null> {
+  return put<TagTaskDTORequest>(ENDPOINT, id, tagTask);
 }
 
 /* Função para deletar uma relação de tag em tarefa */
 export async function deleteTagTask(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+

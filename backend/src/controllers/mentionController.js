@@ -29,9 +29,9 @@ export const getMentionById = async (req, res) => {
 /* Função para criar menção */
 export const createMention = async (req, res) => {
   try {
-    const { task_id, user_id } = req.body;
-    if (!task_id || !user_id) {
-      return res.status(400).json({ error: "task_id e user_id são obrigatórios" });
+    const { comment_id, mentioned_user_id } = req.body;
+    if (!comment_id || !mentioned_user_id) {
+      return res.status(400).json({ error: "comment_id e mentioned_user_id são obrigatórios" });
     }
     const mention = await mentionService.createMention(req.body);
     res.status(201).json(mention);

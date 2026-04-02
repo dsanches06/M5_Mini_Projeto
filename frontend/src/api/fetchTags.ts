@@ -1,6 +1,5 @@
-import { get, getById, create, put, remove } from "./index.js";
-import { BASE_URL } from "./utils/index.js";
-import { TaskAPIRequest, TagAPIRequest } from "./dto/index.js";
+import { get, getById, create, put, remove, request } from "./index.js";
+import { TaskDTORequest, TagDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "tags";
 
@@ -8,28 +7,28 @@ const ENDPOINT = "tags";
 export async function getTags(
   sort?: string,
   search?: string,
-): Promise<TagAPIRequest[]> {
-  return get<TagAPIRequest>(ENDPOINT, sort, search);
+): Promise<TagDTORequest[]> {
+  return get<TagDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma tag por ID */
-export async function getTagById(id: number): Promise<TagAPIRequest | null> {
-  return getById<TagAPIRequest>(ENDPOINT, id);
+export async function getTagById(id: number): Promise<TagDTORequest | null> {
+  return getById<TagDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar uma nova tag */
 export async function createTag(
-  tag: Partial<TagAPIRequest>,
-): Promise<TagAPIRequest | null> {
-  return create<TagAPIRequest>(ENDPOINT, tag);
+  tag: Partial<TagDTORequest>,
+): Promise<TagDTORequest | null> {
+  return create<TagDTORequest>(ENDPOINT, tag);
 }
 
 /* Função para atualizar uma tag */
 export async function updateTag(
   id: number,
-  tag: Partial<TagAPIRequest>,
-): Promise<TagAPIRequest | null> {
-  return put<TagAPIRequest>(ENDPOINT, id, tag);
+  tag: Partial<TagDTORequest>,
+): Promise<TagDTORequest | null> {
+  return put<TagDTORequest>(ENDPOINT, id, tag);
 }
 
 /* Função para deletar uma tag */
@@ -37,16 +36,8 @@ export async function deleteTag(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
 
-export async function getTasksByTag(tagId: number): Promise<TaskAPIRequest[]> {
-  try {
-    const res = await fetch(`${BASE_URL}${ENDPOINT}/${tagId}/tasks`);
-    if (!res.ok) {
-      throw new Error(`ERRO: Não foi possível obter tarefas da tag ${tagId} - ${res.status}`);
-    }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao obter tarefas da tag:", error);
-    return [];
-  }
+export async function getTasksByTag(tagId: number): Promise<TaskDTORequest[]> {
+  const data = await request<TaskDTORequest[]>(`${ENDPOINT}/${tagId}/tasks`);
+  return data ?? [];
 }
+

@@ -14,41 +14,41 @@ export function showConfirmDialog(
     closeBtn.className = "close";
     closeBtn.innerHTML = "&times;";
     closeBtn.style.cursor = "pointer";
+    closeBtn.style.fontSize = "1.5rem";
     closeBtn.addEventListener("click", () => closeDialog(false));
 
     const heading = document.createElement("h2") as HTMLHeadingElement;
     heading.textContent = title;
-    heading.style.marginBottom = "1rem";
+    heading.style.marginTop = "0"
 
     const messageElement = document.createElement("p") as HTMLElement;
     messageElement.textContent = message;
-    messageElement.style.marginBottom = "1.75rem";
-    messageElement.style.lineHeight = "1.5";
+    messageElement.style.marginBottom = "1.5rem";
+    messageElement.style.color = "#333"
 
     const buttonGroup = document.createElement("div") as HTMLElement;
     buttonGroup.style.display = "flex";
-    buttonGroup.style.justifyContent = "flex-end";
-    buttonGroup.style.gap = "0.75rem";
+    buttonGroup.style.gap = "1rem";
+    buttonGroup.style.justifyContent = "flex-end"
 
     const cancelButton = document.createElement("button") as HTMLButtonElement;
     cancelButton.type = "button";
     cancelButton.textContent = "Cancelar";
-    cancelButton.style.backgroundColor = "#ccc";
-    cancelButton.style.color = "#333";
-    cancelButton.style.border = "none";
-    cancelButton.style.borderRadius = "6px";
-    cancelButton.style.padding = "0.6rem 1rem";
+    cancelButton.style.padding = "0.5rem 1rem";
+    cancelButton.style.borderRadius = "4px";
+    cancelButton.style.border = "1px solid #ccc";
+    cancelButton.style.backgroundColor = "#f0f0f0";
     cancelButton.style.cursor = "pointer";
     cancelButton.addEventListener("click", () => closeDialog(false));
 
     const confirmButton = document.createElement("button") as HTMLButtonElement;
     confirmButton.type = "button";
     confirmButton.textContent = "Confirmar";
-    confirmButton.style.backgroundColor = "#f44336";
-    confirmButton.style.color = "#fff";
+    confirmButton.style.padding = "0.5rem 1rem";
+    confirmButton.style.borderRadius = "4px";
     confirmButton.style.border = "none";
-    confirmButton.style.borderRadius = "6px";
-    confirmButton.style.padding = "0.6rem 1rem";
+    confirmButton.style.backgroundColor = "#007bff";
+    confirmButton.style.color = "white";
     confirmButton.style.cursor = "pointer";
     confirmButton.addEventListener("click", () => closeDialog(true));
 
@@ -56,7 +56,9 @@ export function showConfirmDialog(
     content.append(closeBtn, heading, messageElement, buttonGroup);
     modal.append(content);
     document.body.appendChild(modal);
-    modal.style.display = "block";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center"
 
     const handleOverlayClick = (event: MouseEvent) => {
       if (event.target === modal) {

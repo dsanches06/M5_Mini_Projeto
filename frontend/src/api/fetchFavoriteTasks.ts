@@ -1,5 +1,5 @@
 import { get, getById, create, put, remove } from "./index.js";
-import { FavoriteTaskAPIRequest } from "./dto/index.js";
+import { FavoriteTaskDTORequest } from "./dto/index.js";
 
 const ENDPOINT = "favorite_tasks";
 
@@ -7,33 +7,34 @@ const ENDPOINT = "favorite_tasks";
 export async function getFavoriteTasks(
   sort?: string,
   search?: string,
-): Promise<FavoriteTaskAPIRequest[]> {
-  return get<FavoriteTaskAPIRequest>(ENDPOINT, sort, search);
+): Promise<FavoriteTaskDTORequest[]> {
+  return get<FavoriteTaskDTORequest>(ENDPOINT, sort, search);
 }
 
 /* Função para obter uma tarefa favorita por ID */
 export async function getFavoriteTaskById(
   id: number,
-): Promise<FavoriteTaskAPIRequest | null> {
-  return getById<FavoriteTaskAPIRequest>(ENDPOINT, id);
+): Promise<FavoriteTaskDTORequest | null> {
+  return getById<FavoriteTaskDTORequest>(ENDPOINT, id);
 }
 
 /* Função para criar uma nova tarefa favorita */
 export async function createFavoriteTask(
-  favoriteTask: Partial<FavoriteTaskAPIRequest>,
-): Promise<FavoriteTaskAPIRequest | null> {
-  return create<FavoriteTaskAPIRequest>(ENDPOINT, favoriteTask);
+  favoriteTask: Partial<FavoriteTaskDTORequest>,
+): Promise<FavoriteTaskDTORequest | null> {
+  return create<FavoriteTaskDTORequest>(ENDPOINT, favoriteTask);
 }
 
 /* Função para atualizar uma tarefa favorita */
 export async function updateFavoriteTask(
   id: number,
-  favoriteTask: Partial<FavoriteTaskAPIRequest>,
-): Promise<FavoriteTaskAPIRequest | null> {
-  return put<FavoriteTaskAPIRequest>(ENDPOINT, id, favoriteTask);
+  favoriteTask: Partial<FavoriteTaskDTORequest>,
+): Promise<FavoriteTaskDTORequest | null> {
+  return put<FavoriteTaskDTORequest>(ENDPOINT, id, favoriteTask);
 }
 
 /* Função para deletar uma tarefa favorita */
 export async function deleteFavoriteTask(id: number): Promise<boolean> {
   return remove(ENDPOINT, id);
 }
+
